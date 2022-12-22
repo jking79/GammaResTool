@@ -19,7 +19,7 @@
 //----------------------------------------  cc file   --------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------
 
-#include "LLPGamma/LLPgammaAnalyzer/plugins/gammaResTool.hh"
+#include "GammaResTool/gammaResTool/plugins/gammaResTool.hh"
 using namespace std;
 
 //#define DEBUG true
@@ -33,7 +33,7 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 // -- declare tags ----------------------------------------------------------
 
 	// flags
-	hasGenInfo (iConfig.existsAs<bool>("hasGenInfo")  ? iConfig.getParameter<bool>("hasGenInfo")  : false),
+	//hasGenInfo (iConfig.existsAs<bool>("hasGenInfo")  ? iConfig.getParameter<bool>("hasGenInfo")  : false),
 
 	// tracks
 	tracksTag(iConfig.getParameter<edm::InputTag>("tracks")),
@@ -48,11 +48,22 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 	recHitsEBTag(iConfig.getParameter<edm::InputTag>("recHitsEB")),  
 	recHitsEETag(iConfig.getParameter<edm::InputTag>("recHitsEE")),
 
+    kuCCStcRecHitsEBTag(iConfig.getParameter<edm::InputTag>("kuCCStcRecHitsEB")),
+    kuCCStcRecHitsEETag(iConfig.getParameter<edm::InputTag>("kuCCStcRecHitsEE")),
+
 	// gedphotons
 	gedPhotonsTag(iConfig.getParameter<edm::InputTag>("gedPhotons")),
 
 	// ootPhotons
-	ootPhotonsTag(iConfig.getParameter<edm::InputTag>("ootPhotons"))
+	ootPhotonsTag(iConfig.getParameter<edm::InputTag>("ootPhotons")),
+
+	// ECAL RECORDS 
+    caloGeometryToken_(esConsumes()),
+    ecalLaserDbServiceToken_(esConsumes()),
+    ecalIntercalibConstantsToken_(esConsumes()),
+    ecalADCToGeVConstantToken_(esConsumes()),
+    EcalPedestalsToken_(esConsumes())
+
 
 // -- end of tag declarations ---------------------------------------
 { //<<<< GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
@@ -64,23 +75,27 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 	if( DEBUG ) std::cout << "In constructor for GammaResTool - tag and tokens" << std::endl;
 
 	// tracks 
-	tracksToken_				= consumes<std::vector<reco::Track>>(tracksTag);
+	tracksToken_ = consumes<std::vector<reco::Track>>(tracksTag);
 
 	// vertices
-	verticesToken_				= consumes<std::vector<reco::Vertex>>(verticesTag);
+	verticesToken_ = consumes<std::vector<reco::Vertex>>(verticesTag);
 
 	// leptons
-	electronsToken_				= consumes<std::vector<pat::Electron>>(electronsTag);
+	electronsToken_	= consumes<std::vector<pat::Electron>>(electronsTag);
 
 	// rechits
-	recHitsEBToken_				= consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(recHitsEBTag);
-	recHitsEEToken_				= consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(recHitsEETag);
+	recHitsEBToken_	= consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(recHitsEBTag);
+	recHitsEEToken_	= consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(recHitsEETag);
+
+    kuCCStcRecHitsEBToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEBTag);
+    kuCCStcRecHitsEEToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEETag);
 
 	// photons
-	gedPhotonsToken_ 			= consumes<std::vector<pat::Photon>>(gedPhotonsTag);
-	ootPhotonsToken_ 			= consumes<std::vector<pat::Photon>>(ootPhotonsTag);
+	gedPhotonsToken_ = consumes<std::vector<pat::Photon>>(gedPhotonsTag);
+	ootPhotonsToken_ = consumes<std::vector<pat::Photon>>(ootPhotonsTag);
 
 // ---------------------------------------------------------------------------------
+
 }//>>>>GammaResTool::GammaResTool(const edm::ParameterSet& iConfig)
 
 
@@ -96,145 +111,7 @@ GammaResTool::~GammaResTool(){
 // member functions
 //
 
-/*
-void GetGEDPhoVID(const pat::Photon & photon, std::vector<pat::Photon::IdPair> & idpairs){
-    
-    // This is where I think the error is coming from
-    
-    //std::cout << "Test bool: " << !photon.isPhotonIDAvailable(Config::GEDPhotonTightVID) << std::endl;
-    
-    if ( !photon.isPhotonIDAvailable(Config::GEDPhotonTightVID) ) return; // My fix
-    
-    idpairs[2].second = photon.photonID(Config::GEDPhotonTightVID);
-    idpairs[1].second = photon.photonID(Config::GEDPhotonMediumVID);
-    idpairs[0].second = photon.photonID(Config::GEDPhotonLooseVID);
-
-}//<<>>void GetGEDPhoVID(const pat::Photon & photon, std::vector<pat::Photon::IdPair> & idpairs)
-
-int GetGEDPhoVIDByHand(const pat::Photon & photon ){
-
-    // needed for cuts
-    const auto eta = std::abs(photon.superCluster()->eta());
-    const auto pt  = photon.pt();
-
-    // cut variables
-    const auto HoverE = photon.hadTowOverEm();
-    const auto Sieie  = photon.full5x5_sigmaIetaIeta();
-    // Isolations are currently wrong! need to recompute them apparently : 
-    // https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedPhotonIdentificationRun2#Selection_implementation_details
-    // https://twiki.cern.ch/twiki/bin/view/CMS/EgammaPFBasedIsolationRun2#Recipe_for_accessing_PF_isol_AN1
-    // https://github.com/cms-sw/cmssw/blob/master/RecoEgamma/PhotonIdentification/plugins/PhotonIDValueMapProducer.cc#L338-L395
-    const auto ChgHadIso = std::max(photon.chargedHadronIso() - (rho * oot::GetChargedHadronEA(eta))                                         ,0.f);
-    const auto NeuHadIso = std::max(photon.neutralHadronIso() - (rho * oot::GetNeutralHadronEA(eta)) - (oot::GetNeutralHadronPtScale(eta,pt)),0.f);
-    const auto PhoIso    = std::max(photon.photonIso()        - (rho * oot::GetGammaEA        (eta)) - (oot::GetGammaPtScale        (eta,pt)),0.f);
-
-    if (eta < Config::etaEBcutoff){ 
-      if((HoverE < 0.020) && (Sieie < 0.0103) && (ChgHadIso < 1.158) && (NeuHadIso < 1.267) && (PhoIso < 2.065)){
-    	idpairs[2].second = true;
-    	idpairs[1].second = true;
-    	idpairs[0].second = true;
-      } else if ((HoverE < 0.035) && (Sieie < 0.0103) && (ChgHadIso < 1.416) && (NeuHadIso < 2.491) && (PhoIso < 2.952)){
-    	idpairs[2].second = false;
-    	idpairs[1].second = true;
-    	idpairs[0].second = true;
-      } else if ((HoverE < 0.105) && (Sieie < 0.0103) && (ChgHadIso < 2.839) && (NeuHadIso < 9.188) && (PhoIso < 2.956)){
-    	idpairs[2].second = false;
-    	idpairs[1].second = false;
-   	 	idpairs[0].second = true;
-      }//<<>>if((HoverE < 0.020) && (Sieie < 0.0103) && (ChgHadIso < 1.158) && (NeuHadIso < 1.267) && (PhoIso < 2.065))
-    } else if(eta >= Config::etaEBcutoff && eta < Config::etaEEmax){
-      if((HoverE < 0.025) && (Sieie < 0.0271) && (ChgHadIso < 0.575) && (NeuHadIso < 8.916) && (PhoIso < 3.272)){
-    	idpairs[2].second = true;
-    	idpairs[1].second = true;
-    	idpairs[0].second = true;
-      } else if ((HoverE < 0.027) && (Sieie < 0.0271) && (ChgHadIso < 1.012) && (NeuHadIso < 9.131) && (PhoIso < 4.095)){
-    	idpairs[2].second = false;
-    	idpairs[1].second = true;
-    	idpairs[0].second = true;
-      } else if ((HoverE < 0.029) && (Sieie < 0.0276) && (ChgHadIso < 2.150) && (NeuHadIso < 10.471) && (PhoIso < 4.895)){
-    	idpairs[2].second = false;
-    	idpairs[1].second = false;
-    	idpairs[0].second = true;
-      }//<<>>if((HoverE < 0.025) && (Sieie < 0.0271) && (ChgHadIso < 0.575) && (NeuHadIso < 8.916) && (PhoIso < 3.272))
-    }//<<>>else if(eta >= Config::etaEBcutoff && eta < Config::etaEEmax)	
-
-}//<<>>int GetGEDPhoVIDByHand(const pat::Photon & photon )
-
-void GetOOTPhoVID(const pat::Photon & photon, std::vector<pat::Photon::IdPair> & idpairs){
-
-    if ( !photon.isPhotonIDAvailable(Config::OOTPhotonTightVID) ) return; // My fix
-
-    idpairs[4].second = photon.photonID(Config::OOTPhotonTightVID);
-    idpairs[3].second = photon.photonID(Config::OOTPhotonLooseVID);
-
-}//<<>>void GetOOTPhoVID(const pat::Photon & photon, std::vector<pat::Photon::IdPair> & idpairs)
-
-void GetOOTPhoVIDByHand(const pat::Photon & photon, std::vector<pat::Photon::IdPair> & idpairs, const float rho){
-
-    // needed for cuts
-    const auto eta = std::abs(photon.superCluster()->eta());
-    const auto pt  = photon.pt();
-
-    // cut variables
-    const auto HoverE = photon.hadTowOverEm();
-    const auto Sieie  = photon.full5x5_sigmaIetaIeta();
-    const auto EcalPFClIso = std::max(photon.ecalPFClusterIso() - (rho * oot::GetEcalPFClEA(eta)) - (oot::GetEcalPFClPtScale(eta,pt)),0.f);
-    const auto HcalPFClIso = std::max(photon.hcalPFClusterIso() - (rho * oot::GetHcalPFClEA(eta)) - (oot::GetHcalPFClPtScale(eta,pt)),0.f);
-    const auto TrkIso      = std::max(photon.trackIso()         - (rho * oot::GetTrackEA   (eta)) - (oot::GetTrackPtScale   (eta,pt)),0.f);
-
-    if((HoverE < 0.0165) && (Sieie < 0.011) && (EcalPFClIso < 5.f) && (HcalPFClIso < 10.f) && (TrkIso < 5.5f)){
-      idpairs[4].second = true;
-      idpairs[3].second = true;
-    } else if ((HoverE < 0.185) && (Sieie < 0.0125) && (EcalPFClIso < 8.f) && (HcalPFClIso < 12.f) && (TrkIso < 8.5f)){
-      idpairs[4].second = false;
-      idpairs[3].second = true;
-    } if((HoverE < 0.0165) && (Sieie < 0.011) && (EcalPFClIso < 5.f) && (HcalPFClIso < 10.f) && (TrkIso < 5.5f))
-
-}//<<>>void GetOOTPhoVIDByHand(const pat::Photon & photon, std::vector<pat::Photon::IdPair> & idpairs, const float rho)
-*/
-
-
-detIdMap GammaResTool::SetupDetIDs(){
-
-	detIdMap DetIDMap;
-	std::string detIDConfig(ecal_config_path);
-	uInt  cmsswId, dbID;
-	int hashedId, iphi, ieta, absieta, Fed, SM, TT25, iTT, strip, Xtal, phiSM, etaSM;
-	int side, ix, iy, SC, iSC, TTCCU, quadrant;
-	TString pos;
-	auto detIDConfigEB = detIDConfig + "fullinfo_detids_EB.txt";
-	std::ifstream infileEB( detIDConfigEB, std::ios::in);
-	if( DEBUG ) std::cout << "Setting up EB DetIDs with " << &infileEB << std::endl;
-	while( infileEB >> cmsswId >> dbID >> hashedId >> iphi >> ieta >> absieta >> pos >> Fed >> SM >> TT25 >> iTT >> strip >> Xtal >> phiSM >> etaSM )
-    	{ DetIDMap[cmsswId] = {iphi,ieta,TT25,ECAL::EB};}
-	auto detIDConfigEE = detIDConfig + "fullinfo_detids_EE.txt";
-	std::ifstream infileEE( detIDConfigEE, std::ios::in);
-	if( DEBUG ) std::cout << "Setting up EE DetIDs with " << &infileEE << std::endl;
-	while( infileEE >> cmsswId >> dbID >> hashedId >> side >> ix >> iy >> SC >> iSC >> Fed >> pos >> TTCCU >> strip >> Xtal >> quadrant )
-    	{ DetIDMap[cmsswId] = {ix,iy,TTCCU,((side>0) ? ECAL::EP : ECAL::EM )};}
-
-	return DetIDMap;
-
-}//>>>>detIdMap GammaResTool::SetupDetIDs()
-
-/*
-float GammaResTool::getLeadTofTime( rhGroup recHits, double vtxX, double vtxY, double vtxZ ){
-
-    auto lrh = getLeadRh(recHits);
-    const auto recHitId(lrh.detid());
-    const auto recHitPos = barrelGeometry->getGeometry(recHitId)->getPosition();
-    const auto rhPosX = recHitPos.x();
-    const auto rhPosY = recHitPos.y();
-    const auto rhPosZ = recHitPos.z();
-    const auto d_rh = hypo(rhPosX,rhPosY,rhPosZ);
-    const auto d_pv = hypo(rhPosX-vtxX,rhPosY-vtxY,rhPosZ-vtxZ);
-    const auto tof = (d_rh-d_pv)/SOL;
-    return lrh.time()-tof;
-
-}//>>>>float  GammaResTool::getSeedTofTime( rhGroup recHits, double vtxX, double vtxY, double vtxZ )
-*/
-
-float GammaResTool::getPhotonSeedTime( pat::Photon ){
+float GammaResTool::getPhotonSeedTime( pat::Photon photon ){
 
 	const auto & phosc = photon.superCluster().isNonnull() ? photon.superCluster() : photon.parentSuperCluster();
 	const auto & seedDetId = phosc->seed()->seed(); // get seed detid
@@ -245,10 +122,11 @@ float GammaResTool::getPhotonSeedTime( pat::Photon ){
 
 }//<<>>float GammaResTool::getPhotonSeedTime( pat::Photon )
 
-int GammaResTool::getRhIdx( uInt rhDetID ){
+int GammaResTool::getRhIdx( uInt rhDetID, std::vector<uInt> rhID ){
 
     //b_rhID->GetEntry(entry);
-    for( int idx = 0; idx < rhID->size(); idx++ ){ if( rhDetID == (*rhID)[idx] ) return idx; }
+	int nRhIds = rhID.size();
+    for( int idx = 0; idx < nRhIds; idx++ ){ if( rhDetID == rhID[idx] ) return idx; }
     //std::cout << " -- !! no rhDetID to (*rhID)[idx] match !! ---------------------- " << std::endl;
     return -1;
 
@@ -282,10 +160,30 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	iEvent.getByToken(recHitsEBToken_, recHitsEB_);
 	iEvent.getByToken(recHitsEEToken_, recHitsEE_);
 
+    iEvent.getByToken(kuCCStcRecHitsEBToken_, kuCCStcRecHitsEB_);
+    iEvent.getByToken(kuCCStcRecHitsEEToken_, kuCCStcRecHitsEE_);
+
 	// GEOMETRY : https://gitlab.cern.ch/shervin/ECALELF
-	iSetup.get<CaloGeometryRecord>().get(caloGeo_); 
+	caloGeo_ = iSetup.getHandle(caloGeometryToken_); 
 	barrelGeometry = caloGeo_->getSubdetectorGeometry(DetId::Ecal, EcalSubdetector::EcalBarrel);
 	endcapGeometry = caloGeo_->getSubdetectorGeometry(DetId::Ecal, EcalSubdetector::EcalEndcap); 
+
+    // Laser constants : http://cmslxr.fnal.gov/source/RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h
+    laser_ = iSetup.getHandle(ecalLaserDbServiceToken_);
+    evTime = iEvent.time();
+
+	// Intercalibration constants : http://cmslxr.fnal.gov/source/RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h
+  	interCalib_ = iSetup.getHandle(ecalIntercalibConstantsToken_);
+	interCalibMap = &interCalib_->getMap();
+
+	// ADCToGeV : http://cmslxr.fnal.gov/source/RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h
+  	adcToGeV_ = iSetup.getHandle(ecalADCToGeVConstantToken_);
+  	adcToGeVEB = adcToGeV_->getEBValue();
+  	adcToGeVEE = adcToGeV_->getEEValue();
+
+	// Pedestals : https://github.com/ferriff/usercode/blob/master/DBDump/plugins/DBDump.cc
+  	pedestals_ = iSetup.getHandle(EcalPedestalsToken_);
+
 
 // -- Process Objects ------------------------------------------
 
@@ -304,20 +202,30 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	auto vtxY = primevtx.position().y();
 	auto vtxZ = primevtx.position().z();
 
-    std::vector<EcalRecHit>         frechits;
+    std::vector<EcalRecHit>         frtrechits;
+    std::vector<EcalRecHit>         fccrechits;
     std::vector<pat::Photon>        fphotons;
-	std::vector<bool>				phoOOT;
     std::vector<pat::Electron>  	felectrons;
 	
 	if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
-	for (const auto recHit : *recHitsEB_ ){ if( recHit.energy > 1.0 ) frechits.push_back(recHit); }
-    for (const auto recHit : *recHitsEE_ ){ if( recHit.energy > 1.0 ) frechits.push_back(recHit); }
+	for (const auto recHit : *recHitsEB_ ){ if( recHit.energy() > 1.0 ) frtrechits.push_back(recHit); }
+    for (const auto recHit : *recHitsEE_ ){ if( recHit.energy() > 1.0 ) frtrechits.push_back(recHit); }
+    for (const auto recHit : *kuCCStcRecHitsEB_ ){ if( recHit.energy() > 1.0 ) fccrechits.push_back(recHit); }
+    for (const auto recHit : *kuCCStcRecHitsEE_ ){ if( recHit.energy() > 1.0 ) fccrechits.push_back(recHit); }
 
     if( DEBUG ) std::cout << "Processing gedPhotons" << std::endl;
+    string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80'");
     for( const auto photon : *gedPhotons_ ){
-		if( getPhotonSeedTime(photon) > -25.0 ){ fphotons.push_back(photon); phoOOT.push_back(false); }
+
+		//auto passIdCut = photon.photonID(phoMvaWp80);
+		auto passIdCut = true;
+		auto timecut = getPhotonSeedTime(photon) > -25.0;
+        if( passIdCut && timecut ){ fphotons.push_back(photon); }
+		//if( classcut && timecut ){ fphotons.push_back(photon); phoOOT.push_back(false); }
+
     }//<<>>for( const auto photon : *gedPhotons_ )
 
+/*
     if( DEBUG ) std::cout << "Processing ootPhotons" << std::endl;
     for( const auto ootphoton : *ootPhotons_ ){
         if( getPhotonSeedTime(ootphoton) > -25.0 ){ fphotons.push_back(photon); phoOOT.push_back(true); }
@@ -346,6 +254,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             else phoExcluded[io] = true;
         }//<<>>if( dRmatch < 0.3 )
     }//<<>>for( int io = 0; io < nOotPhotons; io++ )
+*/
 
     if( DEBUG ) std::cout << "Processing Electrons" << std::endl;
 	for( const auto electron : *electrons_ ){
@@ -355,66 +264,41 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     //------------------------------------------------------------------------------------
     if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
 
-    auto nRecHitCnt(0);
-    nRecHits = 0;
-    rhPosX.clear();
-    rhPosY.clear();
-    rhPosZ.clear();
-    rhPosEta.clear();
-    rhPosPhi.clear();
-    rhID.clear();
-    rhXtalI1.clear();
-    rhXtalI2.clear();
-    rhSubdet.clear();
-    rhEnergy.clear();
-    rhTime.clear();
-    rhTimeErr.clear();
-    rhTOF.clear();
-    rhisOOT.clear();
-    rhisGS6.clear();
-    rhisGS1.clear();
-    rhisWeird.clear();
-    rhisDiWeird.clear();
-    rhadcToGeV.clear();
-    rhSwCross.clear();
-    rhped12.clear();
-    rhped6.clear();
-    rhped1.clear();
-    rhpedrms12.clear();
-    rhpedrms6.clear();
-    rhpedrms1.clear();
+    rhCaliID.clear();
+	rhCaliRtTime.clear();
+	rhCaliCCTime.clear();
 
+    std::vector<float> rhEnergy, rhAmp;
+    std::vector<float> rhRtTime, rhCCTime, rhTOF;
+    std::vector<uInt>  rhID;
 
     if( DEBUG ) std::cout << " - enetering RecHit loop" << std::endl;
-    for (const auto recHit : frechits ){
+    for (const auto recHit : frtrechits ){
 
         if( DEBUG ) std::cout << " -- proccesing ID info" << std::endl;
         // something in this section is seg faluting after several rechits for crab jobs
         const auto recHitID = getRawID(recHit);
-        auto isEB = getIsEB(recHit); // which subdet
-        const auto & idinfo = DetIDMap[recHitID];
-        if( DEBUG ) std::cout << " -- proccesing EBEE info" << std::endl;
-        if( DEBUG ) std::cout << " -- proccesing GEO info" << std::endl;
-        //const auto geometry( isEB ? barrelGeometry : endcapGeometry );
-        const auto geometry( ( idinfo.ecal == ECAL::EB ) ? barrelGeometry : endcapGeometry );
-        auto recHitPos = geometry->getGeometry(recHit.detid())->getPosition();
-        if( DEBUG ) std::cout << " -- proccesing POSITION info" << std::endl;
+        const auto isEB = getIsEB(recHit);
+        //if( DEBUG ) std::cout << " -- proccesing EBEE info" << std::endl;
+        //if( DEBUG ) std::cout << " -- proccesing GEO info" << std::endl;
+        const auto geometry( isEB ? barrelGeometry : endcapGeometry );
+        //if( DEBUG ) std::cout << " -- proccesing POSITION info" << std::endl;
+		const auto recHitPos = geometry->getGeometry(recHitID)->getPosition();	
         const auto rhX = recHitPos.x();
         const auto rhY = recHitPos.y();
         const auto rhZ = recHitPos.z();
-		const auto rhTrigTow = idinfo.TT;
         if( DEBUG ) std::cout << " -- proccesing TOF info" << std::endl;
         const auto d_rh = hypo(rhX,rhY,rhZ);
         const auto d_pv = hypo(rhX-vtxX,rhY-vtxY,rhZ-vtxZ);
         const auto tof = (d_rh-d_pv)/SOL;
-        if( DEBUG ) std::cout << " -- proccesing SWISSCROSS info" << std::endl;
-        float swisscross(0.0);
-        if( isEB ) swisscross = EcalTools::swissCross(recHitID, *recHitsEB_, 0.0, true);
-        else swisscross = EcalTools::swissCross(recHitID, *recHitsEE_, 0.0, true);
+        //if( DEBUG ) std::cout << " -- proccesing SWISSCROSS info" << std::endl;
+        //float swisscross(0.0);
+        //if( isEB ) swisscross = EcalTools::swissCross(recHitID, *recHitsEB_, 0.0, true);
+        //else swisscross = EcalTools::swissCross(recHitID, *recHitsEE_, 0.0, true);
 
         if( DEBUG ) std::cout << " -- proccesing LASER info" << std::endl;
         // adcToGeVInfo : http://cmslxr.fnal.gov/source/RecoEcal/EgammaCoreTools/src/EcalClusterLazyTools.cc#0204
-        const auto laser = laserH->getLaserCorrection(recHitID,evTime);
+        const auto laser = laser_->getLaserCorrection(recHitID,evTime);
         const auto interCalibIter = interCalibMap->find(recHitID);
         const auto interCalib = ((interCalibIter != interCalibMap->end()) ? (*interCalibIter) : - 1.f);
         if( DEBUG ) std::cout << " -- proccesing ADC info" << std::endl;
@@ -422,57 +306,173 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         const float adcToGeV( isEB ? adcToGeVEB : adcToGeVEE );
         if( DEBUG ) std::cout << " -- proccesing PED info" << std::endl;
         // pedestal info
-        const auto & pediter = pedestalsH->find(recHitID);
+        const auto & pediter = pedestals_->find(recHitID);
+		const auto pedrms12 = (pediter != pedestals_->end()) ? pediter->rms(1) : 0.0;
+		const auto rhadcToGeV = laser*interCalib*adcToGeV;
+		const auto amplitude = ( pedrms12 != 0 && rhadcToGeV != 0 ) ? (recHit.energy()/rhadcToGeV)/pedrms12 : 0;
+
+		auto cctime = -99.0;
+		for (const auto ccRecHit : fccrechits ){ if( getRawID(ccRecHit) == recHitID ){ cctime = ccRecHit.time(); break; } }
 
         if( DEBUG ) std::cout << " -- storing values BASE" << std::endl;
         rhID.push_back(recHitID);
-        rhPosX.push_back(rhX);
-        rhPosY.push_back(rhY);
-        rhPosZ.push_back(rhZ);
+        //rhPosX.push_back(rhX);
+        //rhPosY.push_back(rhY);
+        //rhPosZ.push_back(rhZ);
         rhTOF.push_back(tof);
-		rhTT.push_back(rhTrigTow);
-        rhPosEta.push_back(recHitPos.eta());
-        rhPosPhi.push_back(recHitPos.phi());
-        rhTime.push_back(recHit.time());
-        rhTimeErr.push_back(recHit.timeError());
+        //rhPosEta.push_back(recHitPos.eta());
+        //rhPosPhi.push_back(recHitPos.phi());
+        rhRtTime.push_back(recHit.time());
+        rhCCTime.push_back(cctime);
         if( DEBUG ) std::cout << " -- storing values FLAGS" << std::endl;
-        rhSubdet.push_back( isEB ? 0 : ( ( idinfo.ecal == ECAL::EP ) ? 1 : 2 ) );
-        rhXtalI1.push_back(idinfo.i1);
-        rhXtalI2.push_back(idinfo.i2);
-        rhisOOT.push_back(recHit.checkFlag(EcalRecHit::kOutOfTime));
+        //rhisOOT.push_back(recHit.checkFlag(EcalRecHit::kOutOfTime));
         rhEnergy.push_back(recHit.energy());
+		rhAmp.push_back(amplitude);
         //energyError()
-        rhSwCross.push_back(swisscross);
-        rhisWeird.push_back(recHit.checkFlag(EcalRecHit::kWeird));
-        rhisDiWeird.push_back(recHit.checkFlag(EcalRecHit::kDiWeird));
-        rhisGS6.push_back(recHit.checkFlag(EcalRecHit::kHasSwitchToGain6));
-        rhisGS1.push_back(recHit.checkFlag(EcalRecHit::kHasSwitchToGain1));
+        //rhSwCross.push_back(swisscross);
+        //rhisWeird.push_back(recHit.checkFlag(EcalRecHit::kWeird));
+        //rhisDiWeird.push_back(recHit.checkFlag(EcalRecHit::kDiWeird));
+        //rhisGS6.push_back(recHit.checkFlag(EcalRecHit::kHasSwitchToGain6));
+        //rhisGS1.push_back(recHit.checkFlag(EcalRecHit::kHasSwitchToGain1));
         //if ((laser > 0.f) && (interCalib > 0.f) && (adcToGeV > 0.f)) 
-        if( DEBUG ) std::cout << " -- storing values PED" << std::endl;
-        rhadcToGeV.push_back(laser*interCalib*adcToGeV);
-        //else rhadcToGeV.push_back(0.0);
-        if (pediter != pedestalsH->end()){
-            const auto & ped = (*pediter);
-            rhped12.push_back(ped.mean(1));
-            rhped6.push_back(ped.mean(2));
-            rhped1.push_back(ped.mean(3));
-            rhpedrms12.push_back(ped.rms(1));
-            rhpedrms6.push_back(ped.rms(2));
-            rhpedrms1.push_back(ped.rms(3));
-        } else {
-            rhped12.push_back(0.0);
-            rhped6.push_back(0.0);
-            rhped1.push_back(0.0);
-            rhpedrms12.push_back(0.0);
-            rhpedrms6.push_back(0.0);
-            rhpedrms1.push_back(0.0);
-        }//<<>>if (pediter != pedestalsH->end())
-        nRecHitCnt++;
+        //if( DEBUG ) std::cout << " -- storing values PED" << std::endl;
+        //rhadcToGeV.push_back(laser*interCalib*adcToGeV);
         if( DEBUG ) std::cout << " -- next rechit" << std::endl;
 
-    }//<<>>for (const auto recHit : *recHitsEB_ )   
-    nRecHits = nRecHitCnt;
+		if( recHit.energy() > 5.0 ){
+			rhCaliID.push_back(recHitID);
+			rhCaliRtTime.push_back(recHit.time());
+			rhCaliCCTime.push_back(cctime);
+		}//<<>>if( recHit.energy() > 5.0 )
 
+    }//<<>>for (const auto recHit : *recHitsEB_ )   
+
+    if( DEBUG ) std::cout << " - enetering Photon loop" << std::endl;
+
+    std::vector<uInt> locRHCands;
+	std::vector<pat::Photon> gloPhotons;
+    std::vector<uInt> locSeedRHs{0,0};
+    std::vector<uInt> gloSeedRHs{0,0};
+	vector<vector<int>> offsets{{1,0},{-1,0},{0,1},{0,-1}};
+    for (const auto photon : fphotons ){
+
+		//auto passIdCut = photon.photonID(phomMvaWp80);
+		//if( not passIdCut ) continue;
+		const auto &phosc = photon.superCluster().isNonnull() ? photon.superCluster() : photon.parentSuperCluster();
+		const auto scptr = phosc.get();
+		scGroup phoSCGroup{*scptr};
+		const auto seedDetId = scptr->seed()->seed(); // seed detid
+		const auto isEB = (seedDetId.subdetId() == EcalSubdetector::EcalBarrel); // which subdet
+		const auto phoRecHits = (isEB ? *recHitsEB_ : *recHitsEE_ );
+
+		// select global photons
+		if ( photon.hasPixelSeed() ){ 
+			float bestmatch(0.1);
+			float elTrackZ(1000.0);
+    		for (const auto electron : felectrons){
+				auto match = reco::deltaR(electron,photon);
+          		if ( match < bestmatch ){ elTrackZ = electron.trackPositionAtVtx().Z(); bestmatch = match; }
+    		}//<<>>for (const auto electron : felectrons){
+			auto eleMatch = elTrackZ < 1000.0;
+			auto trackMatch = abs( elTrackZ - vtxZ ) < 1.0;
+			if( eleMatch && trackMatch ) gloPhotons.push_back(photon); 
+		}//<<>>if (not inpho.hasPixSeed)
+
+		// select local photons rechit+neighbor crystals 
+
+      	const auto & ph2ndMoments = noZS::EcalClusterTools::cluster2ndMoments( *scptr, phoRecHits);
+    	const auto smaj  = ph2ndMoments.sMaj;
+    	const auto smin  = ph2ndMoments.sMin;
+        if ( smin < 0.3 && smaj < 0.5){
+			auto phoRhGroup = getRHGroup( phoSCGroup, 1.0 );	
+			for( auto rechit : phoRhGroup ){
+				const auto rhDetId = rechit.detid();
+				const auto rhEnergy = recHitE( rhDetId, phoRecHits );
+				for( auto offset : offsets ){ 
+					const auto nbDetId = ( isEB ) ? EBDetId::offsetBy( rhDetId, offset[0], offset[1] ) : EEDetId::offsetBy( rhDetId, offset[0], offset[1] );
+					auto neighborEnergy = recHitE( nbDetId, phoRecHits );
+					auto ordered = rhEnergy > neighborEnergy;
+					auto close = rhEnergy < 1.20*neighborEnergy;
+					if( ordered && close ){  // need to be within 20% of energy
+						locRHCands.push_back( rhDetId.rawId() ); 
+						locRHCands.push_back( nbDetId.rawId() );
+					}//<<>>if( high < 1.20*low )
+				}//<<>>for( auto offset : offsets )
+			}//<<>>for( rechit : phoRhGroup )
+		}//<<>>if ( smin < 0.3 && smaj < 0.5)
+
+	}//<<>>for (const auto photon : fphotons )
+
+	// select rhs for global
+	int nGloPhos = gloPhotons.size();
+	if( nGloPhos > 1 ){
+		float zMassMatch(35.00);
+		float zMass(91.1876);
+		vector<int> phoIndx{0,0};
+		for( int first(0); first < nGloPhos; first++ ){
+            auto pho1Eta = gloPhotons[first].eta();
+            auto pho1Phi = gloPhotons[first].phi();
+            auto pho1Pt = gloPhotons[first].pt();
+            auto pho1E = gloPhotons[first].energy();
+			TLorentzVector pho1vec;
+			pho1vec.SetPtEtaPhiE(pho1Pt, pho1Eta, pho1Phi, pho1E);
+			for( int second(first+1); second < nGloPhos; second++ ){
+				auto pho2Eta = gloPhotons[second].eta();
+				auto pho2Phi = gloPhotons[second].phi();
+                auto pho2Pt = gloPhotons[second].pt();
+                auto pho2E = gloPhotons[second].energy();
+				TLorentzVector pho2vec; 
+				pho2vec.SetPtEtaPhiE(pho2Pt, pho2Eta, pho2Phi, pho2E);
+				//const auto dr12 = pho1vec.DeltaR(pho2vec);
+				pho1vec += pho2vec;
+				auto pairMass = pho1vec.M();
+				if( pairMass > 60.0 && pairMass < 120.0 ){ 
+					auto zMassDiff = abs(pairMass-zMass); 
+					if( zMassDiff < zMassMatch ){ phoIndx[0] = first; phoIndx[1] = second; zMassMatch = zMassDiff; }
+				}//<<>>if( pairMass > 60.0 && pairMass < 120.0 )
+			}//<<>>for( int second(first+1); second < nGloPhos; second++ )
+		}//<<>>for( int first(0); first < nGloPhos; first++ )
+		if( zMassMatch < 35.00 ){
+			auto pho0 = gloPhotons[phoIndx[0]];
+			auto pho1 = gloPhotons[phoIndx[1]];
+        	const auto &phosc0 = pho0.superCluster().isNonnull() ? pho0.superCluster() : pho0.parentSuperCluster();
+            const auto &phosc1 = pho1.superCluster().isNonnull() ? pho1.superCluster() : pho1.parentSuperCluster();
+			gloSeedRHs[0] = ((phosc0.get())->seed()->seed()).rawId();
+			gloSeedRHs[1] = ((phosc1.get())->seed()->seed()).rawId();
+		}//<<>>if( zMassMatch < 35.00 )
+	}//<<>>if( gloPhotons.size() > 1 )i
+
+	int nLocRHCands = locRHCands.size();
+	if( nLocRHCands > 1 ){
+		int lead(0);
+		for( int next(2); next+1 < nLocRHCands; next+=2 ){
+			auto leadE = rhEnergy[getRhIdx(locRHCands[lead],rhID)];
+			auto nextRhE = rhEnergy[getRhIdx(locRHCands[next],rhID)];
+			if( nextRhE > leadE ) lead = next;
+		}//<<>>for( int it(0); it+1 < nLocRHCands; it += 2; )
+		locSeedRHs[0] = locRHCands[lead];
+		locSeedRHs[1] = locRHCands[lead+1];
+	}//<<>>if( nLocRHCands > 1 )
+
+	resRhID.clear();
+	resAmp.clear();
+	resE.clear();
+	resRtTime.clear();
+	resCCTime.clear();
+	resTOF.clear();
+
+	std::vector<uInt> lgRhIds{locSeedRHs[0],locSeedRHs[1],gloSeedRHs[0],gloSeedRHs[1]};
+	for( auto lgRhId : lgRhIds ){
+			
+		auto idx = ( lgRhId > 0 ) ? getRhIdx(lgRhId,rhID) : 0; 
+		resRhID.push_back( ( lgRhId > 0 ) ? lgRhId : 0 );
+		resAmp.push_back( ( lgRhId > 0 ) ? rhAmp[idx] : 0 );
+        resE.push_back( ( lgRhId > 0 ) ? rhEnergy[idx] : 0 );
+        resRtTime.push_back( ( lgRhId > 0 ) ? rhRtTime[idx] : 0 );
+        resCCTime.push_back( ( lgRhId > 0 ) ? rhCCTime[idx] : 0 );
+		resTOF.push_back( ( lgRhId > 0 ) ? rhTOF[idx] : 0 );
+
+	}//<<>>for( auto lgRhId : lgRhIds )
 
 	// -- Fill output trees ------------------------------------------
 	if( DEBUG ) std::cout << "---------- Next Event -----" << std::endl;
@@ -488,9 +488,6 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 // ------------ method called once each job just before starting event loop	------------
 void GammaResTool::beginJob(){
-
-   	// Set up DetIdMap
-   	DetIDMap = SetupDetIDs();
 
 	// Book output files and trees
 	edm::Service<TFileService> fs;
@@ -509,8 +506,18 @@ void GammaResTool::beginJob(){
 	// Run, Lumi, Event info
 	outTree->Branch("run", &run);
 	outTree->Branch("lumi", &lumi);
-	outTree->Branch("event", &event, "event/l");
+	//outTree->Branch("event", &event, "event/l");
 
+    outTree->Branch("rhCaliID", &rhCaliID);
+    outTree->Branch("rhCaliRtTime", &rhCaliRtTime);
+    outTree->Branch("rhCaliCCTime", &rhCaliCCTime);
+
+    outTree->Branch("resRhID", &resRhID);
+    outTree->Branch("resAmp", &resAmp);
+    outTree->Branch("resE", &resE);
+    outTree->Branch("resRtTime", &resRtTime);
+    outTree->Branch("resCCTime", &resCCTime);
+    outTree->Branch("resTOF", &resTOF);	
 
 }//>>>>void GammaResTool::beginJob()
 

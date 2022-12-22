@@ -151,7 +151,10 @@
 #include "TFormula.h"
 #include "TF1.h"
 #include "TTree.h"
+#include "TMath.h"
+#include <TLorentzVector.h>
 #include "Math/PositionVector3D.h"
+//#include "Math/LorentzVector.h"
 #include "TMatrixD.h"
 #include "TVectorD.h"
 #include "TMatrixDSymEigen.h"
@@ -207,7 +210,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       	static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 		float getPhotonSeedTime( pat::Photon );
-		int getRhIdx( uInt rhDetID );
+		int getRhIdx( uInt rhDetID, std::vector<uInt> rhID );
 
 	private:
 
@@ -247,26 +250,29 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       	const edm::InputTag electronsTag;
       	edm::EDGetTokenT<std::vector<pat::Electron> > electronsToken_;
       	edm::Handle<std::vector<pat::Electron> > electrons_;
-      	std::vector<pat::Electron> electrons;
+      	//std::vector<pat::Electron> * electrons;
       
       	// RecHits
       	const edm::InputTag recHitsEBTag;
       	edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEBToken_;
       	edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEB_;
-      	const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * recHitsEB;
+      	//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * recHitsEB;
 
       	const edm::InputTag recHitsEETag;
       	edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEEToken_;
       	edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEE_;
-      	const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * recHitsEE;
+      	//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * recHitsEE;
 
-      	std::vector<float> rhX, rhY, rhZ, rhE, rhtime, rhtimeErr, rhTOF;
-      	std::vector<uInt>  rhID;
-        std::vector<int>   rhTT;
-      	std::vector<bool>  rhisOOT, rhisGS6, rhisGS1;
-      	std::vector<float> rhadcToGeV;
-      	std::vector<float> rhped12, rhped6, rhped1;
-      	std::vector<float> rhpedrms12, rhpedrms6, rhpedrms1;
+  		// KUCCStc RecHits
+  		const edm::InputTag kuCCStcRecHitsEBTag;
+  		edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEBToken_;
+  		edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEB_;
+  		//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * kuCCStcRecHitsEB;
+
+  		const edm::InputTag kuCCStcRecHitsEETag;
+  		edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEEToken_;
+  		edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEE_;
+  		//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * kuCCStcRecHitsEE;
 
       	// gedPhotons
       	const edm::InputTag gedPhotonsTag;
@@ -279,307 +285,383 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       	edm::Handle<std::vector<pat::Photon> > ootPhotons_;
      
       	// geometry CaloSubdetectorGeometry
-      	edm::ESHandle<CaloGeometry> caloGeo_;
+		edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
+        edm::ESHandle<CaloGeometry> caloGeo_;
       	const CaloSubdetectorGeometry * barrelGeometry;
       	const CaloSubdetectorGeometry * endcapGeometry;  
 
-		// skimmer output ::
+  		// lasers
+  		edm::ESGetToken<EcalLaserDbService, EcalLaserDbRecord> ecalLaserDbServiceToken_;
+  		edm::ESHandle<EcalLaserDbService> laser_;
+  		edm::Timestamp evTime;
 
-         UInt_t          run;
-         UInt_t          lumi;
-         vector<uInt>    *rhCaliID;
-         vector<float>   *rhCaliRtTime;
-         vector<float>   *rhCaliCCTime;
-         vector<uInt>    *resResVecRhID;
-         vector<float>   *resAmp;
-         vector<float>   *resE;
-         vector<float>   *resRtTime;
-         vector<float>   *resCCtime;
-         vector<float>   *resTOF;
+  		// inter calibration
+  		edm::ESGetToken<EcalIntercalibConstants, EcalIntercalibConstantsRcd> ecalIntercalibConstantsToken_;
+  		edm::ESHandle<EcalIntercalibConstants> interCalib_;
+  		const EcalIntercalibConstantMap * interCalibMap;
+
+  		// ADCToGeV
+  		edm::ESGetToken<EcalADCToGeVConstant, EcalADCToGeVConstantRcd> ecalADCToGeVConstantToken_;
+  		edm::ESHandle<EcalADCToGeVConstant> adcToGeV_;
+  		float adcToGeVEB;
+  		float adcToGeVEE;
+
+  		// pedestals
+  		edm::ESGetToken<EcalPedestals, EcalPedestalsRcd> EcalPedestalsToken_;
+  		edm::ESHandle<EcalPedestals> pedestals_;
+
+      	//cali output  rhE > 5 GeV 
+	 	std::vector<float> rhCaliRtTime, rhCaliCCTime;
+        std::vector<uInt>  rhCaliID;
+
+        // skimmer output ::
+        // Local : 0,1 ; Z->ee : 2,3
+        std::vector<uint>  resRhID;
+        std::vector<float> resAmp, resE, resRtTime, resCCTime, resTOF;
 
 
-//};//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+	//};//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
-//
-// Helper functions ( single line function defs, mostly )
-//
+	//
+	// Helper functions ( single line function defs, mostly )
+	//
 
-// #include "TMath.h"
-#include <cmath>
+	float recHitE( const DetId id, const EcalRecHitCollection & recHits, int di, int dj ){
 
-void fillTH1( float val, TH1F* hist ){
+		// in the barrel:   di = dEta   dj = dPhi
+	  	// in the endcap:   di = dX     dj = dY	  
+	   	DetId nid;
+	   	if( id.subdetId() == EcalBarrel) nid = EBDetId::offsetBy( id, di, dj );
+	   	else if( id.subdetId() == EcalEndcap) nid = EEDetId::offsetBy( id, di, dj );
+	  	return ( nid == DetId(0) ? 0 : recHitE( nid, recHits ) );
 
-   	auto nBins = hist->GetNbinsX();
-   	auto low = hist->GetBinCenter(1);
-   	auto high = hist->GetBinCenter(nBins);
-   	if( val < low ) hist->Fill( low );
-   	else if ( val > high ) hist->Fill( high );
-   	else hist->Fill( val );
-
-}//<<>>void fillTH1( float val, TH1F* hist )
-
-void fillTH1( float val, TH1D* hist ){
-
-   	auto nBins = hist->GetNbinsX();
-   	auto low = hist->GetBinCenter(1);
-   	auto high = hist->GetBinCenter(nBins);
-   	if( val < low ) hist->Fill( low );
-   	else if ( val > high ) hist->Fill( high );
-   	else hist->Fill( val );
-
-}//<<>>void fillTH1( float val, TH1D* hist )
-
-void normTH2D(TH2D* hist){
-
-    std::cout << "Normilizing " << " hist: " << hist->GetName() << std::endl;
-
-	const auto nXbins = hist->GetNbinsX();
-    const auto nYbins = hist->GetNbinsY();
-
-    for (auto ibinX = 1; ibinX <= nXbins; ibinX++){
-
-        const auto norm = hist->Integral(ibinX,ibinX,1,nYbins);
-        if( norm == 0.0 ) continue;
-        for (auto ibinY = 1; ibinY <= nYbins; ibinY++){
-
-            // get content/error
-            auto content = hist->GetBinContent(ibinX,ibinY);
-            auto error   = hist->GetBinError  (ibinX,ibinY);
-            // set new contents
-            content /= norm;
-            error /= norm;
-            hist->SetBinContent(ibinX,ibinY,content);
-            hist->SetBinError  (ibinX,ibinY,error);
-
-        }//<<>>for (auto ibinY = 1; ibinY <= nXbins; ibinY++){
-	}//<<>>for (auto ibinX = 1; ibinX <+ nYbins; ibinX++){
-
-}//<<>>void NormTH2D(TH2D* hist){
-
-void normTH1D(TH1D* hist){
-
-    std::cout << "Normilizing " << " hist: " << hist->GetName() << std::endl;
-
-    const auto nBins = hist->GetNbinsX();
-    const auto norm = hist->Integral();
-    for (auto ibinX = 1; ibinX <= nBins; ibinX++){
-
-        if( norm == 0.0 ) continue;
-		// get content/error
-		auto content = hist->GetBinContent(ibinX);
-		auto error   = hist->GetBinError(ibinX);
-		// set new contents
-        content /= norm;
-		error /= norm;
-		hist->SetBinContent(ibinX,content);
-		hist->SetBinError  (ibinX,error);
-
-	}//<<>>for (auto ibinX = 1; ibinX <= nBins; ibinX++)
-
-}//<<>>void NormTH1D(TH1D* hist)
-
-void profileTH2D(TH2D* nhist, TH1D* prof, TH1D* fithist){
-
-    std::cout << "Profile " << " hist: " << nhist->GetName() << std::endl;
-
-    const auto nXBins = nhist->GetNbinsX();
-    //const auto nYBins = nhist->GetNbinsY();
-    for (auto ibinX = 1; ibinX <= nXBins; ibinX++){
-
-		auto phist = (TH1F*)nhist->ProjectionY("temp",ibinX,ibinX);
-		//double error;
-        //auto content = hist->IntegralAndError(ibinX,ibinX,1,nYBins,error);
-
-        auto mean = phist->GetMean();
-        //auto mean = 0.f;
-        auto stdv = phist->GetStdDev();
-		//auto error = phist->GetMeanError();
-		auto norm = phist->GetBinContent(phist->GetMaximumBin());
-		auto high = mean + 0.2*stdv;
-        //auto high = 0.2;
-        auto low = mean - 0.2*stdv;
-        //auto low = -0.2;
-		//std::cout << " - Profile: m " << mean << " s " << stdv << " h " << high << " l " << low << " n " << norm << std::endl;
-		if( abs(stdv) > 0.01 && abs(norm) > 1 ){
-			auto tmp_form = new TFormula("tmp_formula","[0]*exp(-0.5*((x-[1])/[2])**2)");
-			auto tmp_fit  = new TF1("tmp_fit",tmp_form->GetName(),low,high);
-            //auto tmp_fit  = new TF1("tmp_fit","crystalball",low,high);
-			//auto tmp_fit = new TF1("crystalball", twosided_crystalball_function, low, high, 7);
-            //auto tmp_fit  = new TF1("tmp_fit","gaus",high,low);
-    		tmp_fit->SetParameter(0,norm); //tmp_fit->SetParLimits(0,norm/2,norm*2);
-    		tmp_fit->SetParameter(1,mean); //tmp_fit->SetParLimits(1,-2,2);
-    		tmp_fit->SetParameter(2,stdv); //tmp_fit->SetParLimits(2,0,10);
-            //tmp_fit->SetParameter(3,0.25);
-            //tmp_fit->SetParameter(4,0.25);
-            //tmp_fit->SetParameter(5,1);
-            //tmp_fit->SetParameter(6,1);
-			phist->Fit(tmp_fit->GetName(),"RBQ0");
-            //phist->Fit(tmp_fit->GetName(),"R");
-			//auto fnorm = tmp_fit->GetParameter(0);
-			auto fmean = tmp_fit->GetParameter(1);
-            //auto fstd = tmp_fit->GetParameter(2);
-			auto error = tmp_fit->GetParError(1);
-            //auto fChi2 = tmp_fit->GetChisquare();
-            auto fNdf = tmp_fit->GetNDF();
-            auto fProb = tmp_fit->GetProb();
-			//auto error = fstd/std::sqrt(fnorm);
-			//std::cout << " - Profile: fm " << fmean << " fChi2 " << fProb  << " e " << error << " fNdf " << fNdf << std::endl;
+	 }//<<>>float EcalTools::recHitE( const DetId id, const EcalRecHitCollection & recHits, int di, int dj )
 	
-        	// set new contents
-        	if( fNdf > 0 && fProb > 0.05 && error < 1.0 ){
-				//auto fChi2Ndf = fChi2/fNdf;
-				fithist->SetBinContent( ibinX, fProb );
-                fithist->SetBinError( ibinX, 0 );
-				prof->SetBinContent( ibinX, fmean );
-        		prof->SetBinError( ibinX, error );
-			}//<<>>if( fmean < 1 && error < 0.1 )
+	 float recHitE( const DetId id, const EcalRecHitCollection &recHits ){
 
-			//delete tmp_form;
-        	delete tmp_fit;
-		}//<<>>if( stdv > 0.01 )
+	  	if ( id == DetId(0) ){	
+			return 0;
+	   	} else {
+	    	EcalRecHitCollection::const_iterator it = recHits.find( id );
+	    	if ( it != recHits.end() ) return (*it).energy();
+	  	}//<<>>if ( id == DetId(0) )
+	  	return 0;
 
-    }//<<>>for (auto ibinX = 1; ibinX <= nBins; ibinX++)
+	}//<<>>float EcalTools::recHitE( const DetId id, const EcalRecHitCollection &recHits )
 
-}//<<>>void profileTH2D(TH2D* hist, TH1D* prof)
+    const auto getRawID( const EcalRecHit recHit ){ auto recHitId = recHit.detid(); return recHitId.rawId();}
+    const auto getIsEB( const EcalRecHit recHit ){ auto recHitId = recHit.detid(); return (recHitId.subdetId() == EcalBarrel)?1:0;}
+    const auto getSubDetID( const EcalRecHit recHit ){ auto recHitId = recHit.detid(); return recHitId.subdetId();}
 
-void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
+    rhGroup getRHGroup( const scGroup superClusterGroup, float minenr ){
+    
+        rhGroup result;
+        vector<uInt> rawIds;
+        for ( const auto superCluster : superClusterGroup ){
+            auto & hitsAndFractions = superCluster.hitsAndFractions();
+            const auto nHAF = hitsAndFractions.size();
+            for( uInt iHAF = 0; iHAF < nHAF; iHAF++ ){
+                const auto detId = hitsAndFractions[iHAF].first;
+                const auto rawId = detId.rawId();
+                if( std::find( rawIds.begin(), rawIds.end(), rawId ) == rawIds.end() ) rawIds.push_back(rawId);
+            }//<<>>for( uInt iHAF = 0; iHAF < nHAF; iHAF++ )
+        }//<<>>for ( const auto superCluster : superClusterGroup )  
+        for (const auto recHit : *recHitsEB_ ){
+            auto enr = recHit.energy();
+            if( enr <= minenr ) continue;
+            const auto recHitId = recHit.detid();
+            const auto rawId = recHitId.rawId();
+            if( std::find( rawIds.begin(), rawIds.end(), rawId ) != rawIds.end() ) result.push_back(recHit);
+        }//<<>>for (const auto recHit : *recHitsEB_ )
+        for (const auto recHit : *recHitsEE_ ){
+            auto enr = recHit.energy();
+            if( enr <= minenr ) continue;
+            const auto recHitId = recHit.detid();
+            const auto rawId = recHitId.rawId();
+            if( std::find( rawIds.begin(), rawIds.end(), rawId ) != rawIds.end() ) result.push_back(recHit);
+        }//<<>>for (const auto recHit : *recHitsEE_ )
+    
+        return result;
+    
+    }//>>>>rhGroup LLPgammaAnalyzer_AOD::getRHGroup( const scGroup superClusterGroup, float minenr = 0.0 )
 
-    std::cout << "Threshold Division - " << " hist: " << numi->GetName() << std::endl;
 
-    const auto nXbins = numi->GetNbinsX();
-    const auto nYbins = numi->GetNbinsY();
+	// #include "TMath.h"
+	#include <cmath>
 
-    for (auto ibinX = 1; ibinX <= nXbins; ibinX++){
-        for (auto ibinY = 1; ibinY <= nYbins; ibinY++){
- 
-            // get content/error
-            auto ncontent = numi->GetBinContent(ibinX,ibinY);
-            auto nerror   = numi->GetBinError  (ibinX,ibinY);
-            auto dcontent = denom->GetBinContent(ibinX,ibinY);
-            auto derror   = denom->GetBinError  (ibinX,ibinY);
-            // set new contents
-            auto content(0.0);
-            auto error(0.0);
-			if( dcontent > thres ){ content = ncontent/dcontent; error = nerror/derror; } 
-            numi->SetBinContent(ibinX,ibinY,content);
-            numi->SetBinError  (ibinX,ibinY,error);
- 
-        }//<<>>for (auto ibinY = 1; ibinY <= nXbins; ibinY++){
-    }//<<>>for (auto ibinX = 1; ibinX <+ nYbins; ibinX++){
- 
-}//<<>>void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
+	void fillTH1( float val, TH1F* hist ){
 
-const float getATan2 ( const float x, const float y){
+   		auto nBins = hist->GetNbinsX();
+   		auto low = hist->GetBinCenter(1);
+   		auto high = hist->GetBinCenter(nBins);
+   		if( val < low ) hist->Fill( low );
+   		else if ( val > high ) hist->Fill( high );
+   		else hist->Fill( val );
 
-    if( x == 0 && y == 0) return 6.39;
-    else return std::atan2(y,x);
+	}//<<>>void fillTH1( float val, TH1F* hist )
 
-}//<<>> const float getAngle (CFlt x, CFlt y) with atan2
+	void fillTH1( float val, TH1D* hist ){
+	
+	   	auto nBins = hist->GetNbinsX();
+	   	auto low = hist->GetBinCenter(1);
+	   	auto high = hist->GetBinCenter(nBins);
+	   	if( val < low ) hist->Fill( low );
+	   	else if ( val > high ) hist->Fill( high );
+	   	else hist->Fill( val );
+	
+	}//<<>>void fillTH1( float val, TH1D* hist )
+	
+	void normTH2D(TH2D* hist){
+	
+	    std::cout << "Normilizing " << " hist: " << hist->GetName() << std::endl;
+	
+		const auto nXbins = hist->GetNbinsX();
+	    const auto nYbins = hist->GetNbinsY();
+	
+	    for (auto ibinX = 1; ibinX <= nXbins; ibinX++){
+	
+	        const auto norm = hist->Integral(ibinX,ibinX,1,nYbins);
+	        if( norm == 0.0 ) continue;
+	        for (auto ibinY = 1; ibinY <= nYbins; ibinY++){
+	
+	            // get content/error
+	            auto content = hist->GetBinContent(ibinX,ibinY);
+	            auto error   = hist->GetBinError  (ibinX,ibinY);
+	            // set new contents
+	            content /= norm;
+	            error /= norm;
+	            hist->SetBinContent(ibinX,ibinY,content);
+	            hist->SetBinError  (ibinX,ibinY,error);
+	
+	        }//<<>>for (auto ibinY = 1; ibinY <= nXbins; ibinY++){
+		}//<<>>for (auto ibinX = 1; ibinX <+ nYbins; ibinX++){
+	
+	}//<<>>void NormTH2D(TH2D* hist){
+	
+	void normTH1D(TH1D* hist){
+	
+	    std::cout << "Normilizing " << " hist: " << hist->GetName() << std::endl;
+	
+	    const auto nBins = hist->GetNbinsX();
+	    const auto norm = hist->Integral();
+	    for (auto ibinX = 1; ibinX <= nBins; ibinX++){
+	
+	        if( norm == 0.0 ) continue;
+			// get content/error
+			auto content = hist->GetBinContent(ibinX);
+			auto error   = hist->GetBinError(ibinX);
+			// set new contents
+	        content /= norm;
+			error /= norm;
+			hist->SetBinContent(ibinX,content);
+			hist->SetBinError  (ibinX,error);
+	
+		}//<<>>for (auto ibinX = 1; ibinX <= nBins; ibinX++)
+	
+	}//<<>>void NormTH1D(TH1D* hist)
+	
+	void profileTH2D(TH2D* nhist, TH1D* prof, TH1D* fithist){
+	
+	    std::cout << "Profile " << " hist: " << nhist->GetName() << std::endl;
+	
+	    const auto nXBins = nhist->GetNbinsX();
+	    //const auto nYBins = nhist->GetNbinsY();
+	    for (auto ibinX = 1; ibinX <= nXBins; ibinX++){
+	
+			auto phist = (TH1F*)nhist->ProjectionY("temp",ibinX,ibinX);
+			//double error;
+	        //auto content = hist->IntegralAndError(ibinX,ibinX,1,nYBins,error);
+	
+	        auto mean = phist->GetMean();
+	        //auto mean = 0.f;
+	        auto stdv = phist->GetStdDev();
+			//auto error = phist->GetMeanError();
+			auto norm = phist->GetBinContent(phist->GetMaximumBin());
+			auto high = mean + 0.2*stdv;
+	        //auto high = 0.2;
+	        auto low = mean - 0.2*stdv;
+	        //auto low = -0.2;
+			//std::cout << " - Profile: m " << mean << " s " << stdv << " h " << high << " l " << low << " n " << norm << std::endl;
+			if( abs(stdv) > 0.01 && abs(norm) > 1 ){
+				auto tmp_form = new TFormula("tmp_formula","[0]*exp(-0.5*((x-[1])/[2])**2)");
+				auto tmp_fit  = new TF1("tmp_fit",tmp_form->GetName(),low,high);
+	            //auto tmp_fit  = new TF1("tmp_fit","crystalball",low,high);
+				//auto tmp_fit = new TF1("crystalball", twosided_crystalball_function, low, high, 7);
+	            //auto tmp_fit  = new TF1("tmp_fit","gaus",high,low);
+	    		tmp_fit->SetParameter(0,norm); //tmp_fit->SetParLimits(0,norm/2,norm*2);
+	    		tmp_fit->SetParameter(1,mean); //tmp_fit->SetParLimits(1,-2,2);
+	    		tmp_fit->SetParameter(2,stdv); //tmp_fit->SetParLimits(2,0,10);
+	            //tmp_fit->SetParameter(3,0.25);
+	            //tmp_fit->SetParameter(4,0.25);
+	            //tmp_fit->SetParameter(5,1);
+	            //tmp_fit->SetParameter(6,1);
+				phist->Fit(tmp_fit->GetName(),"RBQ0");
+	            //phist->Fit(tmp_fit->GetName(),"R");
+				//auto fnorm = tmp_fit->GetParameter(0);
+				auto fmean = tmp_fit->GetParameter(1);
+	            //auto fstd = tmp_fit->GetParameter(2);
+				auto error = tmp_fit->GetParError(1);
+	            //auto fChi2 = tmp_fit->GetChisquare();
+	            auto fNdf = tmp_fit->GetNDF();
+	            auto fProb = tmp_fit->GetProb();
+				//auto error = fstd/std::sqrt(fnorm);
+				//std::cout << " - Profile: fm " << fmean << " fChi2 " << fProb  << " e " << error << " fNdf " << fNdf << std::endl;
+		
+	        	// set new contents
+	        	if( fNdf > 0 && fProb > 0.05 && error < 1.0 ){
+					//auto fChi2Ndf = fChi2/fNdf;
+					fithist->SetBinContent( ibinX, fProb );
+	                fithist->SetBinError( ibinX, 0 );
+					prof->SetBinContent( ibinX, fmean );
+	        		prof->SetBinError( ibinX, error );
+				}//<<>>if( fmean < 1 && error < 0.1 )
+	
+				//delete tmp_form;
+	        	delete tmp_fit;
+			}//<<>>if( stdv > 0.01 )
+	
+	    }//<<>>for (auto ibinX = 1; ibinX <= nBins; ibinX++)
+	
+	}//<<>>void profileTH2D(TH2D* hist, TH1D* prof)
+	
+	void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
+	
+	    std::cout << "Threshold Division - " << " hist: " << numi->GetName() << std::endl;
+	
+	    const auto nXbins = numi->GetNbinsX();
+	    const auto nYbins = numi->GetNbinsY();
+	
+	    for (auto ibinX = 1; ibinX <= nXbins; ibinX++){
+	        for (auto ibinY = 1; ibinY <= nYbins; ibinY++){
+	 
+	            // get content/error
+	            auto ncontent = numi->GetBinContent(ibinX,ibinY);
+	            auto nerror   = numi->GetBinError  (ibinX,ibinY);
+	            auto dcontent = denom->GetBinContent(ibinX,ibinY);
+	            auto derror   = denom->GetBinError  (ibinX,ibinY);
+	            // set new contents
+	            auto content(0.0);
+	            auto error(0.0);
+				if( dcontent > thres ){ content = ncontent/dcontent; error = nerror/derror; } 
+	            numi->SetBinContent(ibinX,ibinY,content);
+	            numi->SetBinError  (ibinX,ibinY,error);
+	 
+	        }//<<>>for (auto ibinY = 1; ibinY <= nXbins; ibinY++){
+	    }//<<>>for (auto ibinX = 1; ibinX <+ nYbins; ibinX++){
+	 
+	}//<<>>void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
+	
+	const float getATan2 ( const float x, const float y){
+	
+	    if( x == 0 && y == 0) return 6.39;
+	    else return std::atan2(y,x);
+	
+	}//<<>> const float getAngle (CFlt x, CFlt y) with atan2
+	
+	//  --------------------------------------------------------------------------
+	//  ---------   move all chase functions into class   !!!!!!!!!!!!!!!!!!!!!!!!
+	//  --------------------------------------------------------------------------
 
-//  --------------------------------------------------------------------------
-//  ---------   move all chase functions into class   !!!!!!!!!!!!!!!!!!!!!!!!
-//  --------------------------------------------------------------------------
+	// sort functions
+	
+	//#define CAuto const auto
+	#define CFlt  const float
+	#define CDbl  const double
+	#define CVFlt const vector<float>
+	#define CVDbl const vector<double>
 
-// sort functions
+ 	//auto sortByPt = [](auto & obj1, auto & obj2) {return obj1.pt() > obj2.pt();};
 
-#define CAuto const auto
-#define CFlt  const float
-#define CDbl  const double
-#define CVFlt const vector<float>
-#define CVDbl const vector<double>
+	// math functions
+ 	auto sq2( CFlt x ){ return x*x;}
+ 	auto sq2( CDbl x ){ return x*x;}
+ 	auto rad2( CFlt x, CFlt y, CFlt z = 0.f ){ return x*x+y*y+z*z;}
+ 	auto hypo( CFlt x, CFlt y, CFlt z = 0.f ){ return std::sqrt(rad2(x,y,z));}
+ 	auto phi( CFlt x, CFlt y ){ return std::atan2(y,x);}
+ 	auto theta( CFlt r, CFlt z ){ return std::atan2(r,z);}
+ 	auto eta( CFlt x, CFlt y, CFlt z ){ return -1.0f*std::log(std::tan(theta(hypo(x,y),z)/2.f));}
+ 	auto effMean( CFlt x, CFlt y ){ return (x*y)/sqrt(x*x+y*y);}
+ 	auto dPhi( CFlt x, CFlt y ){ auto dp(x-y); if( dp > 180 ){dp-=360.0;} else if( dp < -180 ){ dp+=360.0;} return dp;}
+ 	auto vfsum( CVFlt x ){ return std::accumulate(x.begin(),x.end(),0.0f);}
+ 	auto max( CVFlt x ){ float m(x[0]); for(auto ix : x ){ if( ix > m ) m = ix; } return m;}
 
-CAuto sortByPt = [](CAuto & obj1, CAuto & obj2) {return obj1.pt() > obj2.pt();};
+	// stats functions
+ 	auto mean( CVFlt x){ return std::accumulate(x.begin(),x.end(),0.0f)/x.size();}
+ 	auto mean( CVFlt x, CFlt w){ return std::accumulate(x.begin(),x.end(),0.0f)/w;}
+ 	auto mean( CVFlt x, CVFlt wv){ float sum(0.0), wt(0.0); int it(0); for( auto ix : x ){ sum+=ix*wv[it]; wt+=wv[it]; it++; } return sum/wt;}
+ 	auto wnum( CFlt it, CFlt w){ return (((it-1)*w)/it);}
+ 	auto stdev( CVFlt x, CFlt m){ float sum(0.0); for( auto ix : x ){ sum += sq2(ix-m); } return std::sqrt(sum/(x.size()-1));}	
+ 	auto var( CVFlt x, CFlt m){ float sum(0.0); for( auto ix : x ){ sum += sq2(ix-m); } return sum/(x.size()-1);}
 
-// math functions
-CAuto sq2			(CFlt x){return x*x;}
-CAuto sq2           (CDbl x){return x*x;}
-CAuto rad2  		(CFlt x, CFlt y, CFlt z = 0.f){return x*x+y*y+z*z;}
-CAuto hypo  		(CFlt x, CFlt y, CFlt z = 0.f){return std::sqrt(rad2(x,y,z));}
-CAuto phi   		(CFlt x, CFlt y){return std::atan2(y,x);}
-CAuto theta 		(CFlt r, CFlt z){return std::atan2(r,z);}
-CAuto eta   		(CFlt x, CFlt y, CFlt z){return -1.0f*std::log(std::tan(theta(hypo(x,y),z)/2.f));}
-CAuto effMean   	(CFlt x, CFlt y){return (x*y)/sqrt(x*x+y*y);}
-CAuto dPhi			(CFlt x, CFlt y){auto dp(x-y); if( dp > 180 ){dp-=360.0;} else if( dp < -180 ){ dp+=360.0;} return dp;}
-CAuto vfsum         (CVFlt x){return std::accumulate(x.begin(),x.end(),0.0f);}
-CAuto max           (CVFlt x){float m(x[0]); for(auto ix : x ){ if( ix > m ) m = ix; } return m;}
+ 	auto stdev( CVFlt x, CFlt m, CVFlt wv, CFlt w){
+		float sum(0.0); int it(0); 
+		for(auto ix : x ){ sum += wv[it]*sq2(ix-m); it++; } 
+		return std::sqrt(sum/wnum(it,w));
+	}//auto stdev
 
-// stats functions
-CAuto mean			(CVFlt x){return std::accumulate(x.begin(),x.end(),0.0f)/x.size();}
-CAuto mean  		(CVFlt x, CFlt w){return std::accumulate(x.begin(),x.end(),0.0f)/w;}
-CAuto mean			(CVFlt x, CVFlt wv){float sum(0.0), wt(0.0); int it(0); for( auto ix : x ){ sum+=ix*wv[it]; wt+=wv[it]; it++; } return sum/wt;}
-CAuto wnum			(CFlt it, CFlt w){return (((it-1)*w)/it);}
-CAuto stdev			(CVFlt x, CFlt m){float sum(0.0); for( auto ix : x ){ sum += sq2(ix-m); } return std::sqrt(sum/(x.size()-1));}	
-CAuto var           (CVFlt x, CFlt m){float sum(0.0); for( auto ix : x ){ sum += sq2(ix-m); } return sum/(x.size()-1);}
+ 	auto var( CVFlt x, CFlt m, CVFlt wv, CFlt w){ float sum(0.0); int it(0); for(auto ix : x ){ sum += wv[it]*sq2(ix-m); it++; } return sum/wnum(it,w);}
+ 	auto var( CVFlt x, CFlt m, CVFlt wv){ float sum(0.0); int it(0); for(auto ix : x ){ sum += wv[it]*sq2(ix-m); it++; } return sum/wnum(it,vfsum(wv));}
 
-CAuto stdev			(CVFlt x, CFlt m, CVFlt wv, CFlt w){
-						float sum(0.0); int it(0); 
-						for(auto ix : x ){ sum += wv[it]*sq2(ix-m); it++; } 
-						return std::sqrt(sum/wnum(it,w));
-					}//CAuto stdev
+ 	auto cvar( CVFlt x, CFlt mx, CVFlt y, CFlt my, CVFlt wv, CFlt w){
+		float sum(0.0); int it(0); 
+		for(auto ix : x ){ sum += wv[it]*(ix-mx)*(y[it]-my); it++; } 
+		return sum/wnum(it,w);
+	}//<<>> auto cvar(CVFlt x, CFlt mx, CVFlt y, CFlt my, CVFlt wv, CFlt w)
 
-CAuto var           (CVFlt x, CFlt m, CVFlt wv, CFlt w){float sum(0.0); int it(0); for(auto ix : x ){ sum += wv[it]*sq2(ix-m); it++; } return sum/wnum(it,w);}
-CAuto var           (CVFlt x, CFlt m, CVFlt wv){float sum(0.0); int it(0); for(auto ix : x ){ sum += wv[it]*sq2(ix-m); it++; } return sum/wnum(it,vfsum(wv));}
+ 	auto cvar( CVFlt x, CFlt mx, CVFlt y, CFlt my){
+		float sum(0.0); int it(0); 
+		for( auto ix : x ){ sum += (ix-mx)*(y[it]-my); it++; } 
+		return sum/(x.size()-1);
+	}//auto cvar
 
-CAuto cvar          (CVFlt x, CFlt mx, CVFlt y, CFlt my, CVFlt wv, CFlt w){
-						float sum(0.0); int it(0); 
-						for(auto ix : x ){ sum += wv[it]*(ix-mx)*(y[it]-my); it++; } 
-						return sum/wnum(it,w);
-					}//<<>> CAuto cvar(CVFlt x, CFlt mx, CVFlt y, CFlt my, CVFlt wv, CFlt w)
+ 	auto rms( CVFlt x){ float sum(0.0); for(auto ix : x ){ sum += sq2(ix); } return std::sqrt(sum/x.size());}
+ 	auto chisq( CVFlt x, CFlt m, CFlt v){ float chi(0); for(auto ix : x ){ chi += sq2(ix-m)/v; } return chi; }
 
-CAuto cvar          (CVFlt x, CFlt mx, CVFlt y, CFlt my){
-						float sum(0.0); int it(0); 
-						for( auto ix : x ){ sum += (ix-mx)*(y[it]-my); it++; } 
-						return sum/(x.size()-1);
-					}//CAuto cvar
+ 	auto meanPhi( CVFlt x){
+		float sum(0.0);
+        auto maxphi = max(x); 
+		for(auto ix : x ){ if( (maxphi-ix) > 180 ) sum+=(ix+360); else sum+=ix; } 
+		auto rslt = sum/x.size(); 
+		if( rslt > 360 ) rslt-=360; 
+		return rslt;
+	}//<<>> auto meanPhi(CVFlt x)
 
-CAuto rms			(CVFlt x){float sum(0.0); for(auto ix : x ){ sum += sq2(ix); } return std::sqrt(sum/x.size());}
-CAuto chisq			(CVFlt x, CFlt m, CFlt v){ float chi(0); for(auto ix : x ){ chi += sq2(ix-m)/v; } return chi; }
+ 	auto meanPhi( CVFlt x, CVFlt wv){
+		float wt(0.0), sum(0.0); int it(0); 
+		auto maxphi = max(x); 
+		for(auto ix : x ){ if( (maxphi-ix) > 180 ) sum+=(ix+360)*wv[it]; else sum+=ix*wv[it]; wt+=wv[it]; it++; }
+        auto rslt = sum/wt; 
+		if( rslt > 360 ) rslt-=360; 
+		return rslt;
+	}//<<>> auto meanPhi(CVFlt x, CVFlt wv)
 
-CAuto meanPhi		(CVFlt x){
-						float sum(0.0);
-                        auto maxphi = max(x); 
-						for(auto ix : x ){ if( (maxphi-ix) > 180 ) sum+=(ix+360); else sum+=ix; } 
-						auto rslt = sum/x.size(); 
-						if( rslt > 360 ) rslt-=360; 
-						return rslt;
-					}//<<>> CAuto meanPhi(CVFlt x)
+ 	auto wsin2( CVFlt x, CVFlt wv){
+		double sum(0.0), wt(0.0); int it(0); 
+		for(auto ix : x ){ 
+			sum += wv[it]*sq2(sin(ix)); 
+			wt += wv[it];
+			//std::cout << " ---- wsin2 : " << it << " x: " << ix << " sin^2: " << sq2(sin(ix)) << " sum: " << sum << " wt: " << wt << std::endl;
+			it++;
+		}//for(auto ix : x )
+		return sum/wt;
+	}//auto wsin2(CVFlt x, CVFlt wv)
 
-CAuto meanPhi       (CVFlt x, CVFlt wv){
-						float wt(0.0), sum(0.0); int it(0); 
-						auto maxphi = max(x); 
-						for(auto ix : x ){ if( (maxphi-ix) > 180 ) sum+=(ix+360)*wv[it]; else sum+=ix*wv[it]; wt+=wv[it]; it++; }
-                        auto rslt = sum/wt; 
-						if( rslt > 360 ) rslt-=360; 
-						return rslt;
-					 }//<<>> CAuto meanPhi(CVFlt x, CVFlt wv)
+ 	auto wcos2( CVFlt x, CVFlt wv ){
+		double sum(0.0), wt(0.0); int it(0); 
+		for(auto ix : x ){ sum += wv[it]*sq2(cos(ix)); wt += wv[it]; it++;} 
+		return sum/wt;
+	}//auto wcos2
 
-CAuto wsin2         (CVFlt x, CVFlt wv){
-						double sum(0.0), wt(0.0); int it(0); 
-						for(auto ix : x ){ 
-							sum += wv[it]*sq2(sin(ix)); 
-							wt += wv[it];
-							//std::cout << " ---- wsin2 : " << it << " x: " << ix << " sin^2: " << sq2(sin(ix)) << " sum: " << sum << " wt: " << wt << std::endl;
-							it++;
-						}//for(auto ix : x )
-						return sum/wt;
-					}//CAuto wsin2(CVFlt x, CVFlt wv)
+ 	auto wsincos( CVFlt x, CVFlt wv ){
+		double sum(0.0), wt(0.0); int it(0); 
+		for(auto ix : x ){ sum += wv[it]*sin(ix)*cos(ix); wt += wv[it]; it++;} 
+		return sum/wt;
+	}//auto wsincos
 
-CAuto wcos2         (CVFlt x, CVFlt wv){
-						double sum(0.0), wt(0.0); int it(0); 
-						for(auto ix : x ){ sum += wv[it]*sq2(cos(ix)); wt += wv[it]; it++;} 
-						return sum/wt;
-					}//CAuto wcos2
-
-CAuto wsincos       (CVFlt x, CVFlt wv){
-						double sum(0.0), wt(0.0); int it(0); 
-						for(auto ix : x ){ sum += wv[it]*sin(ix)*cos(ix); wt += wv[it]; it++;} 
-						return sum/wt;
-					}//CAuto wsincos
-
-//
-// static data member definitions
-//
-
+	//
+	// static data member definitions
+	//
+	
 };//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
 //-------------------------------------------------------------------------------------------------------------------
