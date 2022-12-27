@@ -189,9 +189,9 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 // -- event information 
 
-   	const auto run   = iEvent.id().run();
-   	const auto lumi  = iEvent.luminosityBlock();
-   	const auto event = iEvent.id().event();
+   	run   = iEvent.id().run();
+   	lumi  = iEvent.luminosityBlock();
+   	event = iEvent.id().event();
     if( DEBUG ) std::cout << "******************************************************************************************************" << std::endl;
 	if( DEBUG ) std::cout << "Processing event: " << event << " in run: " << run << " and lumiblock: " << lumi << std::endl;
 
