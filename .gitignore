@@ -7,7 +7,8 @@ test/oldWorkingArea/
 test/GJetWorkSpace/
 test/GMSBWorkSpace/
 test/oldworkingArea/
-/test/myWorkSpace/
+test/myWorkingArea/
+test/myWorkSpace/
 *.root
 *.pyc
 *.log

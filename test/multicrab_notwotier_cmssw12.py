@@ -73,7 +73,7 @@ def subcrab( runs, events, reqmem ):
         #config.General.requestName = None
 
         config.JobType.pluginName  = 'Analysis'
-        config.JobType.psetName    = 'gammares_raw_twotier_multi.py'
+        config.JobType.psetName    = 'gammares_notwotier_multi.py'
         #config.JobType.numCores    = 8
         #config.JobType.maxMemoryMB = 2250 #reqmem
         #config.JobType.maxJobRuntimeMin = 1500
@@ -81,7 +81,7 @@ def subcrab( runs, events, reqmem ):
         #config.JobType.inputFiles  = [ inputDir+inputPaths , inputDir+inputFilters , inputDir+inputFlags ]
 
         config.Data.inputDataset = None
-        config.Data.useParent      = True
+        #config.Data.useParent      = True
 	    #config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
         #config.Data.lumiMask     = inputDir+inputJSON
@@ -90,7 +90,7 @@ def subcrab( runs, events, reqmem ):
         #config.Data.splitting    = 'Automatic'
         #config.Data.unitsPerJob  =  300 # for auto job splitting
         config.Data.runRange  = runs #'321122-321128'
-        config.Data.unitsPerJob  =  125000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
+        config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
 
 
         #config.Data.outputDatasetTag = 'reducedRAW_EGamma_ntuple'
@@ -98,45 +98,42 @@ def subcrab( runs, events, reqmem ):
         config.JobType.allowUndistributedCMSSW = True
         config.Data.publication      = False
         config.Site.storageSite      = 'T3_US_FNALLPC'
-        #config.Data.outLFNDirBase    = '/store/user/jaking/ecalTiming/'
+        config.Data.outLFNDirBase    = '/store/user/jaking/ecalTiming/'
         #--------------------------------------------------------
 
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
+            ['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
 
-             #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1  352499 - 355062    
-             #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'],	#											 		355094 - 355769								
-             #['/EGamma/Run2022C-PromptReco-v1/MINIAOD'],	#											 		355809 - 357482
-             #['/EGamma/Run2022D-PromptReco-v1/MINIAOD'],	#											 		357538 - 357733
-             #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'],	#											 		357734 - 357902
-             #['/EGamma/Run2022D-PromptReco-v3/MINIAOD'],	#											 		358381
-
-             #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v8	 		359090 - 360327
-             #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #											 		360389 - 362167
-
-             ['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
+            #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1  352499 - 355062    
+            #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'],	#											 		355094 - 355769											 
+            #['/EGamma/Run2022C-PromptReco-v1/MINIAOD'],	#											 		355809 - 357482
+            #['/EGamma/Run2022D-PromptReco-v1/MINIAOD'],	#											 		357538 - 357733
+            #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'],	#											 		357734 - 357902
+            #['/EGamma/Run2022D-PromptReco-v3/MINIAOD'],	#											 		358381
+            #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v8	 		359090 - 360327
+            #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #											 		360389 - 362167
+            #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
 
 	    ]
  
         for inDO in inputDataAndOpts:
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
-            #print( inDO[0] )
+	         #print( inDO[0] )
             primaryDataset = inDO[0].split('/')[1]
             runEra         = inDO[0].split('/')[2]
             dataset	   = inDO[0].split('/')[3]
-            trial          = 'gammares_tt_kucc_126_v2b'
+            trial          = 'gammares_ratio_126_v2'
 
-            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset+"_dispho"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
 
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
-            ##config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2',#'nThreads='+str(config.JobType.numCores),
+            config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root']  # 2018A tested
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root'] # EF
-            config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # G
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # G
 
             config.Data.inputDataset     = inDO[0]
             # Submit.
@@ -174,9 +171,10 @@ def submit_run():
 
 		#subcrab( "352400-358400","",2500)# Run3 ABCD
         #subcrab( "359000-362200","",2500)# Run3 EF
-        subcrab( "362300-362800","",2500)# Run3 G
+        #subcrab( "362300-362800","",2500)# Run3 G
 
         #subcrab( "316241-316245","",2500) # very small test batch 18A
+        subcrab( "316000-316499","",2500) # 18A	
         #subcrab( "357101-357268","",2500)#22C?
 		#subcrab( "360395-360415","",2500)#22F?
 

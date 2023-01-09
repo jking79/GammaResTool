@@ -228,7 +228,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       	TH2D *hist2d[nHists];
 
 		// Flags
-		//const bool hasGenInfo;
+		const bool doTwoTier;
 
       	// Event
       	unsigned long int event; // technically unsigned long long in Event.h...
@@ -318,7 +318,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         // Local : 0,1 ; Z->ee : 2,3
         std::vector<uint>  resRhID;
         std::vector<float> resAmp, resE, resRtTime, resCCTime, resTOF;
-
+    	float locMatches, gloMatches, nEvents;
 
 	//};//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 

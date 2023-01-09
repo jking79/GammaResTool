@@ -7,14 +7,14 @@ options = VarParsing('python')
 
 ## GT to be used
 #options.register('globalTag','124X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-#options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_KUCC_only_126_gammares_v2.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_18A_only_126_gammares_v2.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
 options.parseArguments()
@@ -60,9 +60,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 		#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/809/00000/60ef0541-b8f5-479b-becd-4fdbd0e0599b.root'
-    	'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
+    	#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
 		#'/store/data/Run2022F/EGamma/MINIAOD/PromptReco-v1/000/362/154/00000/0392b31a-851b-4c61-98f5-cfb1598aef5f.root'
-        #'/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
+        '/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
 	),
     secondaryFileNames = cms.untracked.vstring(
 
@@ -80,11 +80,11 @@ process.source = cms.Source("PoolSource",
 #        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/24D8862F-B864-E811-8087-FA163EC5FAA0.root',
 
 
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
+#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
+#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
+#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
+#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
+#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
 		
 #		'/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df3a20-4381-4103-8b98-5fd77e266823.root',
 
@@ -145,10 +145,10 @@ process.source = cms.Source("PoolSource",
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -201,7 +201,7 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
 
    ## do two tier reconstruction of second rechit collection
-   doTwoTier = cms.bool(True), 
+   doTwoTier = cms.bool(False), 
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
@@ -220,8 +220,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #kuWtStcRecHitsEB = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEB"),
    #kuWtStcRecHitsEE = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEE"),
 
-   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
-   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
+   kuCCStcRecHitsEB = cms.InputTag("none", "none"),
+   kuCCStcRecHitsEE = cms.InputTag("none", "none"),
    #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
    #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
 
@@ -235,8 +235,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #uncalibratedRecHitsEB = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
    #uncalibratedRecHitsEE = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
 
-   ku_uncalibratedRecHitsEB = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEB"),
-   ku_uncalibratedRecHitsEE = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEE"),
+   ku_uncalibratedRecHitsEB = cms.InputTag("none","none"),
+   ku_uncalibratedRecHitsEE = cms.InputTag("none","none"),
 
    ## digis
    #EBdigiCollection = cms.InputTag("ecalDigis","ebDigis"),
@@ -311,15 +311,15 @@ process.reconstruction_step = cms.Path(process.jwk_reconstruction)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 process.schedule = cms.Schedule(
-		process.bunchSpacing,
+		#process.bunchSpacing,
         #process.beamSpot,
-		process.digiPath,
+		#process.digiPath,
 		#process.raw2digi_step,
 		#process.ecalraw2digi_step,
       	#process.L1Reco_step,
-		process.reconstruction_step,
+		#process.reconstruction_step,
 		#process.content_step,
-		process.endjob_step,
+		#process.endjob_step,
 		process.tree_step
 )
 
