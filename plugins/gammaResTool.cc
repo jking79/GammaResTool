@@ -212,7 +212,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<pat::Photon>        fphotons;
     std::vector<pat::Electron>  	felectrons;
 
-	float minRecHitEnergy = 0.0;	
+	float minRecHitEnergy = 1.0;	
 	if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
 	for (const auto recHit : *recHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
     for (const auto recHit : *recHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }

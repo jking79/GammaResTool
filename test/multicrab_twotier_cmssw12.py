@@ -61,6 +61,7 @@ def subcrab( runs, events, reqmem ):
         # External files needed by CRAB
         inputDir     = ''
         #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+        inputJSON    = 'Cert_352499-362760_13TeV_PromptReco_Collisions22_jwkgoldenjson.txt'
 
         #--------------------------------------------------------
         # This is the base config:
@@ -84,13 +85,13 @@ def subcrab( runs, events, reqmem ):
         config.Data.useParent      = True
 	    #config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
-        #config.Data.lumiMask     = inputDir+inputJSON
+        config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
         #config.Data.unitsPerJob  =  300 # for auto job splitting
         config.Data.runRange  = runs #'321122-321128'
-        config.Data.unitsPerJob  =  125000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
+        config.Data.unitsPerJob  =  75000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
 
 
         #config.Data.outputDatasetTag = 'reducedRAW_EGamma_ntuple'
@@ -106,17 +107,16 @@ def subcrab( runs, events, reqmem ):
 
             #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
 
-             #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1  352499 - 355062    
-             #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'],	#											 		355094 - 355769								
+             ##Comm['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1  352499 - 355062    
+             ##Comm['/EGamma/Run2022B-PromptReco-v1/MINIAOD'],	#											 		355094 - 355769								
              #['/EGamma/Run2022C-PromptReco-v1/MINIAOD'],	#											 		355809 - 357482
              #['/EGamma/Run2022D-PromptReco-v1/MINIAOD'],	#											 		357538 - 357733
              #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'],	#											 		357734 - 357902
-             #['/EGamma/Run2022D-PromptReco-v3/MINIAOD'],	#											 		358381
+             ##['/EGamma/Run2022D-PromptReco-v3/MINIAOD'],	#											 		358381
 
-             #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v8	 		359090 - 360327
+             ['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v10	 		359090 - 360327
              #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #											 		360389 - 362167
-
-             ['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
+             #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
 
 	    ]
  
@@ -126,7 +126,7 @@ def subcrab( runs, events, reqmem ):
             primaryDataset = inDO[0].split('/')[1]
             runEra         = inDO[0].split('/')[2]
             dataset	   = inDO[0].split('/')[3]
-            trial          = 'gammares_tt_kucc_126_v2b'
+            trial          = 'gammares_tt_kucc_126_v4_spike'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset+"_dispho"
@@ -134,9 +134,10 @@ def subcrab( runs, events, reqmem ):
 
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
             ##config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2',#'nThreads='+str(config.JobType.numCores),
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root'] # EF
-            config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # G
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD prompt
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v3', 'outputFileName=output.root'] # ABCD rereco
+            config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # EFG promp
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v14', 'outputFileName=output.root'] # E rereco
 
             config.Data.inputDataset     = inDO[0]
             # Submit.
@@ -172,9 +173,12 @@ def subcrab( runs, events, reqmem ):
 
 def submit_run():
 
-		#subcrab( "352400-358400","",2500)# Run3 ABCD
-        #subcrab( "359000-362200","",2500)# Run3 EF
-        subcrab( "362300-362800","",2500)# Run3 G
+		##subcrab( "352400-358400","",2500)# Run3 ABCD
+        ##subcrab( "359000-362200","",2500)# Run3 EF
+        ##subcrab( "362300-362800","",2500)# Run3 G
+
+        #subcrab( "355794-359021","",2500)# Run3 CD
+        subcrab( "359022-362760","",2500)# Run3 EFG
 
         #subcrab( "316241-316245","",2500) # very small test batch 18A
         #subcrab( "357101-357268","",2500)#22C?

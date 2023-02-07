@@ -72,7 +72,7 @@ kuStcEcalRecHit = ecalRecHitBase.clone(
         EEuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
         EBuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
         EBrechitCollection = cms.string('kuStcRecHitsEB'),
-	     skipTimeCalib = cms.bool(True),
+	    skipTimeCalib = cms.bool(True),
         )
 
 kuStcEcalLHCRecHit = ecalRecHitBase.clone(
@@ -81,7 +81,7 @@ kuStcEcalLHCRecHit = ecalRecHitBase.clone(
     EBuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
     EBrechitCollection = cms.string('kuStcRecHitsEB'),
     skipTimeCalib = cms.bool(True),
-    # below params for LHCInfo plots form badder
+    # below params for LHCInfo plots from badder
     killDeadChannels = cms.bool( False ),
     recoverEBVFE = cms.bool( False ),
     recoverEEVFE = cms.bool( False ),
@@ -114,13 +114,21 @@ kuCCStcEcalRecHit = ecalRecHitBase.clone(
         skipTimeCalib = cms.bool(True),
         )
 
+kuCCEcalRecHit = ecalRecHitBase.clone(
+        EErechitCollection = cms.string('kuCCRecHitsEE'),
+        EEuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEE"),
+        EBuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEB"),
+        EBrechitCollection = cms.string('kuCCRecHitsEB'),
+        #skipTimeCalib = cms.bool(True),
+        )
+
 kuCCStcEcalLHCRecHit = ecalRecHitBase.clone(
         EErechitCollection = cms.string('kuCCStcRecHitsEE'),
         EEuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEE"),
         EBuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEB"),
         EBrechitCollection = cms.string('kuCCStcRecHitsEB'),
         skipTimeCalib = cms.bool(True),
-        # below params for LHCInfo plots form badder
+        # below params for LHCInfo plots from badder
         killDeadChannels = cms.bool( False ),
         recoverEBVFE = cms.bool( False ),
         recoverEEVFE = cms.bool( False ),
@@ -159,6 +167,13 @@ ku_reduced_multi_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
                                                   kuCCStcEcalRecHit
                                                )
 
+ku_reduced_flipped_ecalRecHitSequence     = cms.Sequence(#kuEcalRecHit*
+                                                  kuStcEcalRecHit*
+                                                  #kuWtStcEcalRecHit*
+                                                  kuCCEcalRecHit
+                                               )
+
+
 ku_spike_multi_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
                                                   kuStcEcalLHCRecHit*
 												  #kuStcEcalRecHit*
@@ -180,6 +195,8 @@ ku_lhc_ecalLocalRecoSequence   = cms.Sequence(ku_lhc_ecalUncalibRecHitSequence*k
 ku_reduced_multi_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_multi_ecalUncalibRecHitSequence*ku_reduced_multi_ecalRecHitSequence)
 
 ku_spike_multi_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_multi_ecalUncalibRecHitSequence*ku_spike_multi_ecalRecHitSequence)
+
+ku_reduced_flipped_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_multi_ecalUncalibRecHitSequence*ku_reduced_flipped_ecalRecHitSequence)
 
 #from RecoLocalCalo.EcalRecProducers.ecalDetailedTimeRecHit_cfi import *
 #_phase2_timing_ecalRecHitSequence = cms.Sequence( ku_ecalRecHitSequence.copy() + ecalDetailedTimeRecHit )

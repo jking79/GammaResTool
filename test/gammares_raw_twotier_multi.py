@@ -197,8 +197,10 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    gedPhotons = cms.InputTag("slimmedPhotons"),
    ootPhotons = cms.InputTag("slimmedOOTPhotons"),
    ## ecal recHits
-   recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
-   recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   #recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
+   #recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   recHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
+   recHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
 
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(True), 
@@ -206,7 +208,6 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
    #kuRecHitsEE = cms.InputTag("kuEcalRecHit", "kuRecHitsEE"),
-
    #kuStcRecHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
    #kuStcRecHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
    #kuStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
@@ -222,6 +223,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
 
    kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
    kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
+   #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
+   #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
    #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
    #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
 
@@ -259,14 +262,15 @@ process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
 #process.beamSpot = cms.Path( process.offlineBeamSpot )
 
 process.jwk_calolocalreco = cms.Sequence(
-				##process.ku_min_ecalLocalRecoSequence
-               	##process.ku_multi_ecalLocalRecoSequence
-                process.kucc_only_ecalLocalRecoSequence
-               	#process.ku_reduced_multi_ecalLocalRecoSequence
-                #process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
-               	##process.ku_ecalLocalRecoSequence
-               	##process.ecalLocalRecoSequence
-				##process.hcalLocalRecoSequence
+				###process.ku_min_ecalLocalRecoSequence
+               	###process.ku_multi_ecalLocalRecoSequence
+                #process.kucc_only_ecalLocalRecoSequence
+               	##process.ku_reduced_multi_ecalLocalRecoSequence
+                process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
+				#process.ku_reduced_flipped_ecalLocalRecoSequence
+               	###process.ku_ecalLocalRecoSequence
+               	###process.ecalLocalRecoSequence
+				###process.hcalLocalRecoSequence
 )
 
 process.jwk_localreco = cms.Sequence(
