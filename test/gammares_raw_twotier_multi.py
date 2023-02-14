@@ -145,10 +145,10 @@ process.source = cms.Source("PoolSource",
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -197,10 +197,10 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    gedPhotons = cms.InputTag("slimmedPhotons"),
    ootPhotons = cms.InputTag("slimmedOOTPhotons"),
    ## ecal recHits
-   #recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
-   #recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
-   recHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
-   recHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
+   recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
+   recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   #recHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
+   #recHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
 
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(True), 
@@ -264,9 +264,9 @@ process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
 process.jwk_calolocalreco = cms.Sequence(
 				###process.ku_min_ecalLocalRecoSequence
                	###process.ku_multi_ecalLocalRecoSequence
-                #process.kucc_only_ecalLocalRecoSequence
+                process.kucc_only_ecalLocalRecoSequence
                	##process.ku_reduced_multi_ecalLocalRecoSequence
-                process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
+                #process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
 				#process.ku_reduced_flipped_ecalLocalRecoSequence
                	###process.ku_ecalLocalRecoSequence
                	###process.ecalLocalRecoSequence

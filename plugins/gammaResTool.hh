@@ -314,11 +314,36 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 	 	std::vector<float> rhCaliRtTime, rhCaliCCTime;
         std::vector<uInt>  rhCaliID;
 
+		// rechit info for diag 
+        std::vector<uInt>  rhID;
+    	std::vector<float> rhRtTime, rhCCTime, rhTimeErr, rhTOF;
+        std::vector<float> rhEnergy, rhAmp;
+        std::vector<bool>  rhisOOT, rhisGS6, rhisGS1, rhisWeird, rhisDiWeird, rhisGood;
+        std::vector<float> rhadcToGeV, rhSwCross;
+        std::vector<float> rhped12, rhped6, rhped1;
+        std::vector<float> rhpedrms12, rhpedrms6, rhpedrms1;
+
         // skimmer output ::
         // Local : 0,1 ; Z->ee : 2,3
         std::vector<uint>  resRhID;
         std::vector<float> resAmp, resE, resRtTime, resCCTime, resTOF;
     	float locMatches, gloMatches, nEvents;
+
+		// photon info for diag
+		std::vector<float>  phoPt, phoEnergy, phoPhi, phoEta, phoPx, phoPy, phoPz;
+		std::vector<float>  phoHadOverEM, phoHadD1OverEM, phoHadD2OverEM, phoHadOverEMVaid, phohadTowOverEM, phohadTowD10OverEM;
+        std::vector<float>  phohadTowD20OverEM, phohadTowOverEMValid, phoE1x5, phoE2x5, phoE3x3, phoE5x5, phoMaxEnergyXtal, phoSigmaEtaEta, phoSigmaIEtaIEta;
+        std::vector<float>  phoR1x5, phoR2x5, phoR9, phoFull5x5_e1x5, phoFull5x5_e2x5, phoFull5x5_e3x3, phoFull5x5_e5x5, phoFull5x5_maxEnergyXtal;
+        std::vector<float>  phoFull5x5_sigmaEtaEta, phoFull5x5_sigmaIEtaIEta, phoFull5x5_r1x5, phoFull5x5_r2x5, phoFull5x5_r9;
+        std::vector<int>    phoNSatXtals, phoMipNHitCone;
+        std::vector<bool>   phoIsSeedSat, phoMipIsHalo;
+        std::vector<float>  phoMipChi2, phoMipTotEnergy, phoMipSlope, phoMipInter;
+
+        std::vector<float>  phoEcalRHSumEtConeDR04, phoHcalTwrSumEtConeDR04, phoHcalDepth1TowerSumEtConeDR04, phoCalDepth2TowerSumEtConeDR04;
+        std::vector<float>  phoHcalTowerSumEtBcConeDR04, phoHcalDepth1TowerSumEtBcConeDR04, phoHcalDepth2TowerSumEtBcConeDR04;
+        std::vector<float>  phoTrkSumPtSolidConeDR04, phoTrkSumPtHollowConeDR04;
+        std::vector<int>    phoNTrkSolidConeDR04, phoNTrkHollowConeDR04;
+		float phoDiMass, phoDiAngle, phoDiDr;
 
 	//};//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 

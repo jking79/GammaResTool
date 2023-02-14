@@ -25,6 +25,9 @@ using namespace std;
 //#define DEBUG true
 #define DEBUG false
 
+#define DIAG true
+//#define DIAG false
+
 //
 // constructors and destructor
 //
@@ -143,6 +146,8 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	using namespace edm;
 
+	bool storeEvent(true);
+
 // -- Consume Tokens --------------------------------------------
 	if( DEBUG ) std::cout << "Consume Tokens -------------------------------------------- " << std::endl;
 
@@ -202,11 +207,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 // -- Process Prime Vertix
 	const auto & primevtx = vertices_->front();
-	
 	auto vtxX = primevtx.position().x();
 	auto vtxY = primevtx.position().y();
 	auto vtxZ = primevtx.position().z();
 
+// -- Process ECAL RecHits
     std::vector<EcalRecHit>         frtrechits;
     std::vector<EcalRecHit>         fccrechits;
     std::vector<pat::Photon>        fphotons;
@@ -221,14 +226,19 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     for (const auto recHit : *kuCCStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
 	}//if( doTwoTier )
 
+// -- Process gedPhotons
     if( DEBUG ) std::cout << "Processing " << gedPhotons_->size() << " gedPhotons" << std::endl;
-    string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80'");
+    //string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80");//2018
+    string phoMvaWp80("mvaPhoID-RunIIFall17-v2-wp80");//r3
+	float phoMinPt = 5.0;
+	float phoMinSeedTime = -25.0;
     for( const auto photon : *gedPhotons_ ){
 
-		//auto passIdCut = photon.photonID(phoMvaWp80);
-		auto passIdCut = true;
-		auto timecut = getPhotonSeedTime(photon) > -25.0;
-        if( passIdCut && timecut ){ fphotons.push_back(photon); }
+		auto passIdCut = photon.photonID(phoMvaWp80);
+        //auto passIdCut = true;
+		auto minPhoPt = photon.pt() > phoMinPt;
+		auto timecut = getPhotonSeedTime(photon) > phoMinSeedTime;
+        if( passIdCut && timecut && minPhoPt ) fphotons.push_back(photon);
 		//if( classcut && timecut ){ fphotons.push_back(photon); phoOOT.push_back(false); }
 
     }//<<>>for( const auto photon : *gedPhotons_ )
@@ -265,9 +275,19 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     }//<<>>for( int io = 0; io < nOotPhotons; io++ )
 */
 
+
+// -- Process electrons
+
+    //std::vector<pat::Electron> gloPhotons;
     if( DEBUG ) std::cout << "Processing Electrons" << std::endl;
+    string eleMvaWp80("mvaEleID-Fall17-noIso-V2-wp80");
+    string eleMvaWpLoose("mvaEleID-Fall17-noIso-V2-wpLoose");
 	for( const auto electron : *electrons_ ){
-		felectrons.push_back(electron);
+        auto passIdCut = electron.electronID(eleMvaWpLoose);
+        //auto passIdCut = true;
+		if( passIdCut ) felectrons.push_back(electron);
+        //if( passIdCut ) gloPhotons.push_back(electron);
+
 	}//<<>>for( const auto electron : *electrons_ )
 
     //------------------------------------------------------------------------------------
@@ -277,9 +297,23 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	rhCaliRtTime.clear();
 	rhCaliCCTime.clear();
 
-    std::vector<float> rhEnergy, rhAmp;
-    std::vector<float> rhRtTime, rhCCTime, rhTOF;
-    std::vector<uInt>  rhID;
+	rhID.clear();
+	rhRtTime.clear();
+	rhCCTime.clear();
+	//rhTimeErr, 
+	rhTOF.clear();
+    rhEnergy.clear();
+	rhAmp.clear();
+	rhisOOT.clear();
+	//rhisGS6, 
+	//rhisGS1, 
+	rhisWeird.clear();
+	rhisDiWeird.clear();
+	//rhadcToGeV,
+	rhSwCross.clear();
+    //rhped12, rhped6, rhped1;
+    //rhpedrms12, rhpedrms6, rhpedrms1;
+
 
     //if( DEBUG ) std::cout << " - enetering RecHit loop" << std::endl;
     for (const auto recHit : frtrechits ){
@@ -301,9 +335,9 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         const auto d_pv = hypo(rhX-vtxX,rhY-vtxY,rhZ-vtxZ);
         const auto tof = (d_rh-d_pv)/SOL;
         //if( DEBUG ) std::cout << " -- proccesing SWISSCROSS info" << std::endl;
-        //float swisscross(0.0);
-        //if( isEB ) swisscross = EcalTools::swissCross(recHitID, *recHitsEB_, 0.0, true);
-        //else swisscross = EcalTools::swissCross(recHitID, *recHitsEE_, 0.0, true);
+        float swisscross(10.0);
+        if( isEB ) swisscross = EcalTools::swissCross(recHitID, *recHitsEB_, 1.0, true);
+        else swisscross = EcalTools::swissCross(recHitID, *recHitsEE_, 1.0, true);
 
         //if( DEBUG ) std::cout << " -- proccesing LASER info" << std::endl;
         // adcToGeVInfo : http://cmslxr.fnal.gov/source/RecoEcal/EgammaCoreTools/src/EcalClusterLazyTools.cc#0204
@@ -322,10 +356,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 		auto cctime = -99.0;
 		if( doTwoTier ){
-		for (const auto ccRecHit : fccrechits ){ if( getRawID(ccRecHit) == recHitID ){ cctime = ccRecHit.time(); break; } }
+			for (const auto ccRecHit : fccrechits ){ if( getRawID(ccRecHit) == recHitID ){ cctime = ccRecHit.time(); break; } }
 		}//if( doTwoTier )
 
         //if( DEBUG ) std::cout << " -- storing values BASE" << std::endl;
+
         rhID.push_back(recHitID);
         //rhPosX.push_back(rhX);
         //rhPosY.push_back(rhY);
@@ -340,9 +375,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         rhEnergy.push_back(recHit.energy());
 		rhAmp.push_back(amplitude);
         //energyError()
-        //rhSwCross.push_back(swisscross);
-        //rhisWeird.push_back(recHit.checkFlag(EcalRecHit::kWeird));
-        //rhisDiWeird.push_back(recHit.checkFlag(EcalRecHit::kDiWeird));
+        rhisOOT.push_back(recHit.checkFlag(EcalRecHit::kOutOfTime));
+		//rhisGood.push_back(recHit.checkFlag(EcalRecHit::kGood));
+        rhSwCross.push_back(swisscross);
+        rhisWeird.push_back(recHit.checkFlag(EcalRecHit::kWeird));
+        rhisDiWeird.push_back(recHit.checkFlag(EcalRecHit::kDiWeird));
         //rhisGS6.push_back(recHit.checkFlag(EcalRecHit::kHasSwitchToGain6));
         //rhisGS1.push_back(recHit.checkFlag(EcalRecHit::kHasSwitchToGain1));
         //if ((laser > 0.f) && (interCalib > 0.f) && (adcToGeV > 0.f)) 
@@ -350,10 +387,14 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         //rhadcToGeV.push_back(laser*interCalib*adcToGeV);
         //if( DEBUG ) std::cout << " -- next rechit" << std::endl;
 
-		if( recHit.energy() > 5.0 ){
+        float rhECut(5.0);
+		if( DIAG ) rhECut = 0;
+        if( recHit.energy() > rhECut ){
+
 			rhCaliID.push_back(recHitID);
 			rhCaliRtTime.push_back(recHit.time());
 			rhCaliCCTime.push_back(cctime);
+
 		}//<<>>if( recHit.energy() > 5.0 )
 
     }//<<>>for (const auto recHit : *recHitsEB_ )   
@@ -362,8 +403,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     std::vector<uInt> locRHCands;
 	std::vector<pat::Photon> gloPhotons;
+    std::vector<pat::Photon> locPhotons;
     std::vector<uInt> locSeedRHs{0,0};
     std::vector<uInt> gloSeedRHs{0,0};
+	float gloDiMass(0), gloDiAngle(0), gloDiDr(0);
+	std::vector<int> selPhoIndx{-1,-1,-1};
 	vector<vector<int>> offsets{{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
     for (const auto photon : fphotons ){
 
@@ -399,15 +443,16 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			if( DEBUG ) std::cout << " Examining Photon with " << phoRhGroup.size()	<< " rechits." << std::endl;
 			for( auto rechit : phoRhGroup ){
 				const auto rhDetId = rechit.detid();
-				const auto rhEnergy = recHitE( rhDetId, phoRecHits );
+				const auto lrhEnergy = recHitE( rhDetId, phoRecHits );
 				for( auto offset : offsets ){ 
 					const auto nbDetId = ( isEB ) ? EBDetId::offsetBy( rhDetId, offset[0], offset[1] ) : EEDetId::offsetBy( rhDetId, offset[0], offset[1] );
 					auto neighborEnergy = recHitE( nbDetId, phoRecHits );
-					auto ordered = rhEnergy > neighborEnergy;
-					auto close = rhEnergy < 1.20*neighborEnergy;
-					//if( DEBUG ) std::cout << " Examining rechit pair with " << rhEnergy << " & " << neighborEnergy << " energies/" << std::endl;
+					auto ordered = lrhEnergy > neighborEnergy;
+					auto close = lrhEnergy < 1.20*neighborEnergy;
+					//if( DEBUG ) std::cout << " Examining rechit pair with " << lrhEnergy << " & " << neighborEnergy << " energies/" << std::endl;
 					if( ordered && close ){  // need to be within 20% of energy
-						if( DEBUG ) std::cout << " Matching loc rechit pair with " << rhEnergy << " & " << neighborEnergy << " energies/" << std::endl;
+						if( DEBUG ) std::cout << " Matching loc rechit pair with " << lrhEnergy << " & " << neighborEnergy << " energies/" << std::endl;
+						locPhotons.push_back( photon );
 						locRHCands.push_back( rhDetId.rawId() ); 
 						locRHCands.push_back( nbDetId.rawId() );
 					}//<<>>if( high < 1.20*low )
@@ -437,19 +482,27 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 				auto pho2Phi = gloPhotons[second].phi();
                 auto pho2Pt = gloPhotons[second].pt();
                 auto pho2E = gloPhotons[second].energy();
-				TLorentzVector pho2vec; 
+				TLorentzVector pho2vec;
+				TVector3 pho2vec3(pho2Pt, pho2Eta, pho2Phi); 
 				pho2vec.SetPtEtaPhiE(pho2Pt, pho2Eta, pho2Phi, pho2E);
-				//const auto dr12 = pho1vec.DeltaR(pho2vec);
+				const auto dr12 = pho1vec.DeltaR(pho2vec);
+				const auto ang12 = pho1vec.Angle(pho2vec3);
 				pho1vec += pho2vec;
 				auto pairMass = pho1vec.M();
 				if( pairMass > 60.0 && pairMass < 120.0 ){ 
-					auto zMassDiff = abs(pairMass-zMass); 
-					if( zMassDiff < zMassMatch ){ phoIndx[0] = first; phoIndx[1] = second; zMassMatch = zMassDiff; }
+					auto zMassDiff = std::abs(pairMass-zMass); 
+					if( zMassDiff < zMassMatch ){ 
+						phoIndx[0] = first; phoIndx[1] = second; zMassMatch = zMassDiff; 
+						gloDiMass = pairMass; gloDiAngle = ang12; gloDiDr = dr12;
+					}//<<>>if( zMassDiff < zMassMatch )}
 				}//<<>>if( pairMass > 60.0 && pairMass < 120.0 )
 			}//<<>>for( int second(first+1); second < nGloPhos; second++ )
 		}//<<>>for( int first(0); first < nGloPhos; first++ )
 		if( zMassMatch < 35.00 ){
+			
+			selPhoIndx[1] = phoIndx[0];
 			auto pho0 = gloPhotons[phoIndx[0]];
+			selPhoIndx[2] = phoIndx[1];
 			auto pho1 = gloPhotons[phoIndx[1]];
         	const auto &phosc0 = pho0.superCluster().isNonnull() ? pho0.superCluster() : pho0.parentSuperCluster();
             const auto &phosc1 = pho1.superCluster().isNonnull() ? pho1.superCluster() : pho1.parentSuperCluster();
@@ -469,6 +522,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		}//<<>>for( int it(0); it+1 < nLocRHCands; it += 2; )
 		locSeedRHs[0] = locRHCands[lead];
 		locSeedRHs[1] = locRHCands[lead+1];
+		selPhoIndx[0] = lead/2;
 	}//<<>>if( nLocRHCands > 1 )
 
 	if( DEBUG ) std::cout << " Storing ids Global : " << gloSeedRHs[0] << ", " << gloSeedRHs[1] << " and Local: " << locSeedRHs[0] << ", " << locSeedRHs[1] << std::endl;
@@ -484,22 +538,68 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     if( gloSeedRHs[0] ) gloMatches++;
 	nEvents++;
 	std::vector<uInt> lgRhIds{locSeedRHs[0],locSeedRHs[1],gloSeedRHs[0],gloSeedRHs[1]};
+	bool hasResRHs( false );
 	for( auto lgRhId : lgRhIds ){
-			
-		auto idx = ( lgRhId > 0 ) ? getRhIdx(lgRhId,rhID) : 0; 
-		resRhID.push_back( ( lgRhId > 0 ) ? lgRhId : 0 );
-		resAmp.push_back( ( lgRhId > 0 ) ? rhAmp[idx] : 0 );
-        resE.push_back( ( lgRhId > 0 ) ? rhEnergy[idx] : 0 );
-        resRtTime.push_back( ( lgRhId > 0 ) ? rhRtTime[idx] : 0 );
-        resCCTime.push_back( ( lgRhId > 0 ) ? rhCCTime[idx] : 0 );
-		resTOF.push_back( ( lgRhId > 0 ) ? rhTOF[idx] : 0 );
+					
+		auto goodrh = lgRhId > 0;
+		if( goodrh ) hasResRHs = true;
+        auto idx = goodrh ? getRhIdx(lgRhId,rhID) : 0;
+		if( DEBUG ) std::cout << " - Storing : good: " << goodrh << " id: " << lgRhId << " idx: " << idx << std::endl;
+		resRhID.push_back( goodrh ? lgRhId : 0 );
+		resAmp.push_back( goodrh ? rhAmp[idx] : 0 );
+        resE.push_back( goodrh ? rhEnergy[idx] : 0 );
+        resRtTime.push_back( goodrh ? rhRtTime[idx] : 0 );
+        resCCTime.push_back( goodrh ? rhCCTime[idx] : 0 );
+		resTOF.push_back( goodrh ? rhTOF[idx] : 0 );
 
 	}//<<>>for( auto lgRhId : lgRhIds )
+	storeEvent = storeEvent || hasResRHs;
     if( DEBUG ) std::cout << " Stored times Global : " << resRtTime[2] << ", " << resRtTime[3] << " and Local: " << resRtTime[0] << ", " << resRtTime[1] << std::endl;
+
+	//gloDiMass = pairMass; gloDiAngle = ang12; gloDiDr = dr12;
+
+	phoDiMass = gloDiMass;
+	phoDiAngle = gloDiAngle;
+	phoDiDr = gloDiDr;
+
+	phoEnergy.clear();
+    phoPt.clear();
+    phoEta.clear();
+    phoPhi.clear();
+	phoHadOverEM.clear();
+	phoSigmaIEtaIEta.clear();
+	phoEcalRHSumEtConeDR04.clear();
+	phoHcalTwrSumEtConeDR04.clear();
+	phoTrkSumPtSolidConeDR04.clear();
+	phoTrkSumPtHollowConeDR04.clear();
+	phoR9.clear();
+
+	bool firstpass(true);
+	for( auto idx : selPhoIndx ){
+		
+		auto selPhotons = (firstpass)? locPhotons : gloPhotons;
+		firstpass = false;
+		if( idx != -1 ){
+			auto photon = selPhotons[idx];
+			phoEnergy.push_back(photon.energy());  
+            phoPt.push_back(photon.pt());
+            phoEta.push_back(photon.eta());
+            phoPhi.push_back(photon.phi());
+			phoHadOverEM.push_back(photon.hadronicOverEm());
+			phoSigmaIEtaIEta.push_back(photon.sigmaIetaIeta() );
+			phoEcalRHSumEtConeDR04.push_back(photon.ecalRecHitSumEtConeDR04());
+			phoHcalTwrSumEtConeDR04.push_back(photon.hcalTowerSumEtConeDR04());
+			phoTrkSumPtSolidConeDR04.push_back(photon.trkSumPtSolidConeDR04());
+			phoTrkSumPtHollowConeDR04.push_back(photon.trkSumPtHollowConeDR04());
+			phoR9.push_back(photon.r9());
+		}//<<>>if( idx != -9 )
+
+	}//<<>>for( auto idx : selPhoIndx )
 
 	// -- Fill output trees ------------------------------------------
 	if( DEBUG ) std::cout << "---------- Next Event -----" << std::endl;
 	outTree->Fill();
+	//if( storeEvent ) outTree->Fill();
 
 	// -- EOFun ------------------------------------------------------
 	//#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
@@ -544,7 +644,37 @@ void GammaResTool::beginJob(){
     outTree->Branch("resE", &resE);
     outTree->Branch("resRtTime", &resRtTime);
     outTree->Branch("resCCTime", &resCCTime);
-    outTree->Branch("resTOF", &resTOF);	
+    outTree->Branch("resTOF", &resTOF);
+
+	if( DIAG ){
+
+    	//outTree->Branch("rhTOF", &rhTOF);
+    	outTree->Branch("rhEnergy", &rhEnergy);
+    	//outTree->Branch("rhAmp", &rhAmp);
+
+	    outTree->Branch("rhisOOT", &rhisOOT);
+	    //outTree->Branch("rhisGood", &rhisGood);
+	    outTree->Branch("rhisWeird", &rhisWeird);
+	    outTree->Branch("rhisDiWeird", &rhisDiWeird);
+	    outTree->Branch("rhSwCross", &rhSwCross);
+
+        outTree->Branch("phoEnergy", &phoEnergy);
+        outTree->Branch("phoPt", &phoPt);
+        outTree->Branch("phoEta", &phoEta);
+        outTree->Branch("phoPhi", &phoPhi);	
+	    outTree->Branch("phoHadOverEM", &phoHadOverEM);
+	    outTree->Branch("phoSigmaIEtaIEta", &phoSigmaIEtaIEta);
+	    outTree->Branch("phoEcalRHSumEtConeDR04", &phoEcalRHSumEtConeDR04);
+	    outTree->Branch("phoHcalTwrSumEtConeDR04", &phoHcalTwrSumEtConeDR04);
+	    outTree->Branch("phoTrkSumPtSolidConeDR04", &phoTrkSumPtSolidConeDR04);
+	    outTree->Branch("phoTrkSumPtHollowConeDR04", &phoTrkSumPtHollowConeDR04);
+		outTree->Branch("phoR9", &phoR9);
+
+        outTree->Branch("phoDiMass", &phoDiMass);
+        outTree->Branch("phoDiAngle", &phoDiAngle);
+        outTree->Branch("phoDiDr", &phoDiDr);
+
+	}//<<>>if( diag )
 
 }//>>>>void GammaResTool::beginJob()
 

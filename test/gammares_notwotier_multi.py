@@ -7,14 +7,14 @@ options = VarParsing('python')
 
 ## GT to be used
 #options.register('globalTag','124X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-#options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_18A_only_126_gammares_v2.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_22C_diag_126_gammares_v2.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
 options.parseArguments()
@@ -60,9 +60,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 		#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/809/00000/60ef0541-b8f5-479b-becd-4fdbd0e0599b.root'
-    	#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
+    	'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
 		#'/store/data/Run2022F/EGamma/MINIAOD/PromptReco-v1/000/362/154/00000/0392b31a-851b-4c61-98f5-cfb1598aef5f.root'
-        '/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
+        #'/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
 	),
     secondaryFileNames = cms.untracked.vstring(
 
@@ -144,11 +144,11 @@ process.source = cms.Source("PoolSource",
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag

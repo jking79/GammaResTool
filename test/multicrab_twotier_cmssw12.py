@@ -126,18 +126,21 @@ def subcrab( runs, events, reqmem ):
             primaryDataset = inDO[0].split('/')[1]
             runEra         = inDO[0].split('/')[2]
             dataset	   = inDO[0].split('/')[3]
-            trial          = 'gammares_tt_kucc_126_v4_spike'
+            #trial          = 'gammares_tt_kucc_126_v4_spike'
+            #trial          = 'gammares_tt_kucc_126_v5_phoclean'
+            trial          = 'gammares_tt_kucc_126_v6_diag'
 
-            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            #config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/ecalTiming/"+trial+"/"
             config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset+"_dispho"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
 
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
             ##config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2',#'nThreads='+str(config.JobType.numCores),
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD prompt
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v3', 'outputFileName=output.root'] # ABCD rereco
+            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v3', 'outputFileName=output.root'] # ABCD rereco
             config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # EFG promp
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v14', 'outputFileName=output.root'] # E rereco
+            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v14', 'outputFileName=output.root'] # E rereco
 
             config.Data.inputDataset     = inDO[0]
             # Submit.
