@@ -14,7 +14,7 @@ options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multip
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_22C_diag_126_gammares_v2.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_22C_diag_126_gammares_v3.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
 options.parseArguments()
@@ -144,8 +144,8 @@ process.source = cms.Source("PoolSource",
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))

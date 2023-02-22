@@ -112,6 +112,10 @@
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
+// Topology 
+#include "Geometry/CaloTopology/interface/CaloTopology.h"
+#include "Geometry/Records/interface/CaloTopologyRecord.h"
+
 // ECAL Record info (Laser Constants)
 #include "CalibCalorimetry/EcalLaserCorrection/interface/EcalLaserDbService.h"
 #include "CalibCalorimetry/EcalLaserCorrection/interface/EcalLaserDbRecord.h"
@@ -290,6 +294,11 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       	const CaloSubdetectorGeometry * barrelGeometry;
       	const CaloSubdetectorGeometry * endcapGeometry;  
 
+		// CaloTopology
+		const edm::ESGetToken<CaloTopology, CaloTopologyRecord> caloTopologyToken_;
+		edm::ESHandle<CaloTopology> caloTopo_;
+		const CaloTopology* topology;
+
   		// lasers
   		edm::ESGetToken<EcalLaserDbService, EcalLaserDbRecord> ecalLaserDbServiceToken_;
   		edm::ESHandle<EcalLaserDbService> laser_;
@@ -335,6 +344,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         std::vector<float>  phohadTowD20OverEM, phohadTowOverEMValid, phoE1x5, phoE2x5, phoE3x3, phoE5x5, phoMaxEnergyXtal, phoSigmaEtaEta, phoSigmaIEtaIEta;
         std::vector<float>  phoR1x5, phoR2x5, phoR9, phoFull5x5_e1x5, phoFull5x5_e2x5, phoFull5x5_e3x3, phoFull5x5_e5x5, phoFull5x5_maxEnergyXtal;
         std::vector<float>  phoFull5x5_sigmaEtaEta, phoFull5x5_sigmaIEtaIEta, phoFull5x5_r1x5, phoFull5x5_r2x5, phoFull5x5_r9;
+		std::vector<float>  phoCovIEtaIEta, phoCovIEtaIPhi, phoCovIPhiIPhi; 
         std::vector<int>    phoNSatXtals, phoMipNHitCone;
         std::vector<bool>   phoIsSeedSat, phoMipIsHalo;
         std::vector<float>  phoMipChi2, phoMipTotEnergy, phoMipSlope, phoMipInter;
@@ -343,7 +353,8 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         std::vector<float>  phoHcalTowerSumEtBcConeDR04, phoHcalDepth1TowerSumEtBcConeDR04, phoHcalDepth2TowerSumEtBcConeDR04;
         std::vector<float>  phoTrkSumPtSolidConeDR04, phoTrkSumPtHollowConeDR04;
         std::vector<int>    phoNTrkSolidConeDR04, phoNTrkHollowConeDR04;
-		float phoDiMass, phoDiAngle, phoDiDr;
+		std::vector<std::vector<uInt>> phoRhIds;
+		float phoDiMass, phoDiAngle, phoDiDr, phoDiPhi, phoDiEta;
 
 	//};//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
@@ -682,6 +693,12 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 		for(auto ix : x ){ sum += wv[it]*sin(ix)*cos(ix); wt += wv[it]; it++;} 
 		return sum/wt;
 	}//auto wsincos
+
+    const auto getRhGrpIDs(const rhGroup rhs ){
+		std::vector<uInt> rt;
+        if(rhs.empty()){ rt.push_back(0);} else{ for(const auto rh : rhs ){ rt.push_back(getRawID(rh));}}
+        return rt;
+    }//<<>>const auto getRhGrpIDs   (const rhGroup rhs )
 
 	//
 	// static data member definitions

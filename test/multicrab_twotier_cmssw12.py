@@ -114,9 +114,9 @@ def subcrab( runs, events, reqmem ):
              #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'],	#											 		357734 - 357902
              ##['/EGamma/Run2022D-PromptReco-v3/MINIAOD'],	#											 		358381
 
-             ['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v10	 		359090 - 360327
+             #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v10	 		359090 - 360327
              #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #											 		360389 - 362167
-             #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
+             ['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
 
 	    ]
  
@@ -130,10 +130,10 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_tt_kucc_126_v5_phoclean'
             trial          = 'gammares_tt_kucc_126_v6_diag'
 
-            #config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
-            config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/ecalTiming/"+trial+"/"
-            config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset+"_dispho"
-            config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
+            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/ecalTiming/"+trial+"/"
+            config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
+            config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs
 
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
             ##config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2',#'nThreads='+str(config.JobType.numCores),
