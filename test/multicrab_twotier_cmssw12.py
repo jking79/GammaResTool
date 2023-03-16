@@ -60,8 +60,8 @@ def subcrab( runs, events, reqmem ):
 
         # External files needed by CRAB
         inputDir     = ''
-        #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
-        inputJSON    = 'Cert_352499-362760_13TeV_PromptReco_Collisions22_jwkgoldenjson.txt'
+        inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+        #inputJSON    = 'Cert_352499-362760_13TeV_PromptReco_Collisions22_jwkgoldenjson.txt'
 
         #--------------------------------------------------------
         # This is the base config:
@@ -105,7 +105,7 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
+             ['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT globalTag=112X_dataRun3_Prompt_v2 
 
              ##Comm['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1  352499 - 355062    
              ##Comm['/EGamma/Run2022B-PromptReco-v1/MINIAOD'],	#											 		355094 - 355769								
@@ -116,7 +116,7 @@ def subcrab( runs, events, reqmem ):
 
              #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v10	 		359090 - 360327
              #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #											 		360389 - 362167
-             ['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
+             #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
 
 	    ]
  
@@ -128,7 +128,8 @@ def subcrab( runs, events, reqmem ):
             dataset	   = inDO[0].split('/')[3]
             #trial          = 'gammares_tt_kucc_126_v4_spike'
             #trial          = 'gammares_tt_kucc_126_v5_phoclean'
-            trial          = 'gammares_tt_kucc_126_v6_diag'
+            #trial          = 'gammares_tt_kucc_126_v7_diag_unclean'
+            trial          = 'gammares_tt_kucc_126_v11_diag' # added spike rechits with 2 gev cut
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/ecalTiming/"+trial+"/"
@@ -136,11 +137,11 @@ def subcrab( runs, events, reqmem ):
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs
 
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
-            ##config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2',#'nThreads='+str(config.JobType.numCores),
+            config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root'] #'nThreads='+str(config.JobType.numCores), # run2 2018
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD prompt
-            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v3', 'outputFileName=output.root'] # ABCD rereco
-            config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # EFG promp
-            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v14', 'outputFileName=output.root'] # E rereco
+            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v3', 'outputFileName=output.root' # ABCD rereco
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # EFG promp
+            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_v14', 'outputFileName=output.root' # E rereco
 
             config.Data.inputDataset     = inDO[0]
             # Submit.
@@ -176,17 +177,20 @@ def subcrab( runs, events, reqmem ):
 
 def submit_run():
 
+		subcrab( "315257-316993","",2500)#Run2 2018A
+
 		##subcrab( "352400-358400","",2500)# Run3 ABCD
         ##subcrab( "359000-362200","",2500)# Run3 EF
         ##subcrab( "362300-362800","",2500)# Run3 G
 
         #subcrab( "355794-359021","",2500)# Run3 CD
-        subcrab( "359022-362760","",2500)# Run3 EFG
+        #subcrab( "359022-362760","",2500)# Run3 EFG
 
         #subcrab( "316241-316245","",2500) # very small test batch 18A
         #subcrab( "357101-357268","",2500)#22C?
 		#subcrab( "360395-360415","",2500)#22F?
 
+		#subcrab( "000000-999999","",2500)#any
 
 ########################################################
 

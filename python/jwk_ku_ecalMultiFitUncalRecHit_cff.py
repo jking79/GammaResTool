@@ -265,10 +265,10 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               # for kOutOfTime flag
               EBtimeNconst      = cms.double(28.5),
               EEtimeNconst      = cms.double(31.8),
-              outOfTimeThresholdGain12pEB    = cms.double(5),      # times estimated precision
-              outOfTimeThresholdGain12mEB    = cms.double(5),      # times estimated precision
-              outOfTimeThresholdGain61pEB    = cms.double(5),      # times estimated precision
-              outOfTimeThresholdGain61mEB    = cms.double(5),      # times estimated precision
+              outOfTimeThresholdGain12pEB    = cms.double(2.75),      # times estimated precision
+              outOfTimeThresholdGain12mEB    = cms.double(2.75),      # times estimated precision
+              outOfTimeThresholdGain61pEB    = cms.double(2.75),      # times estimated precision
+              outOfTimeThresholdGain61mEB    = cms.double(2.75),      # times estimated precision
               outOfTimeThresholdGain12pEE    = cms.double(1000),   # times estimated precision
               outOfTimeThresholdGain12mEE    = cms.double(1000),   # times estimated precision
               outOfTimeThresholdGain61pEE    = cms.double(1000),   # times estimated precision
@@ -292,6 +292,8 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               crossCorrelationStartTime = cms.double(-25),
               crossCorrelationStopTime = cms.double(25),
               crossCorrelationTargetTimePrecision = cms.double(0.01),
+			  crossCorrelationTimeShiftWrtRations = cms.double(0), 
+
               #crossCorrelationMinTimeToBeLate = cms.double(1.0),# 1.0 ns
               #crossCorrelationMinTimeToBeLate = cms.double(0.5),# 0.5 ns
 

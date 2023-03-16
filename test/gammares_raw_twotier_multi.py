@@ -14,7 +14,8 @@ options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multip
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_KUCC_R2018_126_gammares_v4.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_KUCC_tt_R2022C_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+#options.register('outputFileName','ku_KUCC_tt_R2018A_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
 options.parseArguments()
@@ -60,31 +61,31 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 		#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/809/00000/60ef0541-b8f5-479b-becd-4fdbd0e0599b.root'
-    	#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
+    	'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
 		#'/store/data/Run2022F/EGamma/MINIAOD/PromptReco-v1/000/362/154/00000/0392b31a-851b-4c61-98f5-cfb1598aef5f.root'
-        '/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
+        #'/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
 	),
     secondaryFileNames = cms.untracked.vstring(
 
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/26201159-BA64-E811-B349-02163E019F92.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/28389948-BA64-E811-B1DE-FA163E0639A2.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/36DF98ED-BA64-E811-8926-02163E01A036.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/3ED17F49-BA64-E811-B3AA-FA163E649742.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/4E09C5E3-BA64-E811-B4A6-FA163EE8E7AA.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/8A6280FC-BA64-E811-A47B-02163E01A029.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/A8557BB9-BA64-E811-9F57-FA163E1D3FC8.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/F03848F8-BA64-E811-A717-FA163E4907DA.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00001/8434C310-BB64-E811-BEE4-FA163EF0B127.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/944/00000/42332B35-9064-E811-8D6C-FA163EBE4E78.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/123ED0DD-B764-E811-B2CD-02163E01A0B0.root',
-        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/24D8862F-B864-E811-8087-FA163EC5FAA0.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/26201159-BA64-E811-B349-02163E019F92.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/28389948-BA64-E811-B1DE-FA163E0639A2.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/36DF98ED-BA64-E811-8926-02163E01A036.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/3ED17F49-BA64-E811-B3AA-FA163E649742.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/4E09C5E3-BA64-E811-B4A6-FA163EE8E7AA.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/8A6280FC-BA64-E811-A47B-02163E01A029.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/A8557BB9-BA64-E811-9F57-FA163E1D3FC8.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/F03848F8-BA64-E811-A717-FA163E4907DA.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00001/8434C310-BB64-E811-BEE4-FA163EF0B127.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/944/00000/42332B35-9064-E811-8D6C-FA163EBE4E78.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/123ED0DD-B764-E811-B2CD-02163E01A0B0.root',
+#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/24D8862F-B864-E811-8087-FA163EC5FAA0.root',
 
 
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
+        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
+        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
+        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
+        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
+        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
 		
 #		'/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df3a20-4381-4103-8b98-5fd77e266823.root',
 
@@ -145,10 +146,10 @@ process.source = cms.Source("PoolSource",
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -170,6 +171,7 @@ process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
 
 # Make the tree 
 process.tree = cms.EDAnalyzer("GammaResTool",
+
    ## additional collections
    triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
    triggerObjects = cms.InputTag("slimmedPatTrigger"),
@@ -199,11 +201,15 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    ## ecal recHits
    recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
    recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+ 
    #recHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
    #recHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
 
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(True), 
+   #doTwoTier = cms.bool(False),
+   doDiag = cms.bool(True),
+   #doDiag = cms.bool(False),
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
@@ -221,12 +227,12 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #kuWtStcRecHitsEB = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEB"),
    #kuWtStcRecHitsEE = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEE"),
 
-   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
-   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
+   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
+   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
    #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
    #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
-   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
-   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
+   kuRtStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
+   kuRtStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
 
    ## ecal uncalib recHits
    #ku_uncalibratedRecHitsEB = cms.InputTag("kuMfootEcalMultiFitUncalibRecHit","kuMfootEcalUncalibRecHitsEB"),
@@ -264,9 +270,9 @@ process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
 process.jwk_calolocalreco = cms.Sequence(
 				###process.ku_min_ecalLocalRecoSequence
                	###process.ku_multi_ecalLocalRecoSequence
-                process.kucc_only_ecalLocalRecoSequence
+                #process.kucc_only_ecalLocalRecoSequence
                	##process.ku_reduced_multi_ecalLocalRecoSequence
-                #process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
+                process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
 				#process.ku_reduced_flipped_ecalLocalRecoSequence
                	###process.ku_ecalLocalRecoSequence
                	###process.ecalLocalRecoSequence
