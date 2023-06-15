@@ -14,7 +14,7 @@ options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multip
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_KUCC_tt_R2022C_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_KUCC_tt_enctest_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 #options.register('outputFileName','ku_KUCC_tt_R2018A_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
@@ -81,10 +81,10 @@ process.source = cms.Source("PoolSource",
 #        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/24D8862F-B864-E811-8087-FA163EC5FAA0.root',
 
 
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
+        #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
+        #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
+        #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
+        #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
         '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
 		
 #		'/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df3a20-4381-4103-8b98-5fd77e266823.root',
@@ -145,11 +145,11 @@ process.source = cms.Source("PoolSource",
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -208,8 +208,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(True), 
    #doTwoTier = cms.bool(False),
-   doDiag = cms.bool(True),
-   #doDiag = cms.bool(False),
+   #doDiag = cms.bool(True),
+   doDiag = cms.bool(False),
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
@@ -227,10 +227,13 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #kuWtStcRecHitsEB = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEB"),
    #kuWtStcRecHitsEE = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEE"),
 
-   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
-   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
+   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
+   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
    #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
    #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
+   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
+   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
+
    kuRtStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
    kuRtStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
 
@@ -270,10 +273,10 @@ process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
 process.jwk_calolocalreco = cms.Sequence(
 				###process.ku_min_ecalLocalRecoSequence
                	###process.ku_multi_ecalLocalRecoSequence
-                #process.kucc_only_ecalLocalRecoSequence
+                process.kucc_only_ecalLocalRecoSequence
                	##process.ku_reduced_multi_ecalLocalRecoSequence
-                process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
-				#process.ku_reduced_flipped_ecalLocalRecoSequence
+                #process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
+				##process.ku_reduced_flipped_ecalLocalRecoSequence
                	###process.ku_ecalLocalRecoSequence
                	###process.ecalLocalRecoSequence
 				###process.hcalLocalRecoSequence

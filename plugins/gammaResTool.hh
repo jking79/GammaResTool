@@ -258,47 +258,58 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       
       	// RecHits
       	const edm::InputTag recHitsEBTag;
-      	edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEBToken_;
-      	edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEB_;
-      	//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * recHitsEB;
+      	edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> recHitsEBToken_;
+      	edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> recHitsEB_;
+      	//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>> * recHitsEB;
 
       	const edm::InputTag recHitsEETag;
-      	edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEEToken_;
-      	edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > recHitsEE_;
-      	//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * recHitsEE;
+      	edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> recHitsEEToken_;
+      	edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> recHitsEE_;
+      	//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>> * recHitsEE;
 
         // KURtStc RecHits
         const edm::InputTag kuRtStcRecHitsEBTag;
-        edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuRtStcRecHitsEBToken_;
-        edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuRtStcRecHitsEB_;
-        //const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * kuRtStcRecHitsEB;
+        edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuRtStcRecHitsEBToken_;
+        edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuRtStcRecHitsEB_;
+        //const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>> * kuRtStcRecHitsEB;
 
         const edm::InputTag kuRtStcRecHitsEETag;
-        edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuRtStcRecHitsEEToken_;
-        edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuRtStcRecHitsEE_;
-        //const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * kuRtStcRecHitsEE;
+        edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuRtStcRecHitsEEToken_;
+        edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuRtStcRecHitsEE_;
+        //const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>> * kuRtStcRecHitsEE;
 
   		// KUCCStc RecHits
   		const edm::InputTag kuCCStcRecHitsEBTag;
-  		edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEBToken_;
-  		edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEB_;
-  		//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * kuCCStcRecHitsEB;
+  		edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuCCStcRecHitsEBToken_;
+  		edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuCCStcRecHitsEB_;
+  		//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>> * kuCCStcRecHitsEB;
 
   		const edm::InputTag kuCCStcRecHitsEETag;
-  		edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEEToken_;
-  		edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > > kuCCStcRecHitsEE_;
-  		//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> > * kuCCStcRecHitsEE;
+  		edm::EDGetTokenT<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuCCStcRecHitsEEToken_;
+  		edm::Handle<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>> kuCCStcRecHitsEE_;
+  		//const edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>> * kuCCStcRecHitsEE;
+
+  		// Uncalibrated CC RecHits
+  		const edm::InputTag unCCRecHitsEBTag;
+  		edm::EDGetTokenT<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>> unCCRecHitsEBToken_;
+  		edm::Handle<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>> unCCRecHitsEB_;
+  		//const edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>> * unCCRecHitsEB;
+
+  		const edm::InputTag unCCRecHitsEETag;
+  		edm::EDGetTokenT<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>> unCCRecHitsEEToken_;
+  		edm::Handle<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>> unCCRecHitsEE_;
+  		//const edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>> * unCCRecHitsEE;
 
       	// gedPhotons
       	const edm::InputTag gedPhotonsTag;
-      	edm::EDGetTokenT<std::vector<pat::Photon> > gedPhotonsToken_;
-      	edm::Handle<std::vector<pat::Photon> > gedPhotons_;
+      	edm::EDGetTokenT<std::vector<pat::Photon>> gedPhotonsToken_;
+      	edm::Handle<std::vector<pat::Photon>> gedPhotons_;
 
       	// ootPhotons
       	const edm::InputTag ootPhotonsTag;
-      	edm::EDGetTokenT<std::vector<pat::Photon> > ootPhotonsToken_;
-      	edm::Handle<std::vector<pat::Photon> > ootPhotons_;
-     
+      	edm::EDGetTokenT<std::vector<pat::Photon>> ootPhotonsToken_;
+      	edm::Handle<std::vector<pat::Photon>> ootPhotons_;
+
       	// geometry CaloSubdetectorGeometry
 		edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
         edm::ESHandle<CaloGeometry> caloGeo_;
@@ -342,6 +353,10 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         std::vector<float> rhadcToGeV, rhSwCross;
         std::vector<float> rhped12, rhped6, rhped1;
         std::vector<float> rhpedrms12, rhpedrms6, rhpedrms1;
+
+		// rechit info for cc encoding 
+		std::vector<float> unrhJitter, unrhNonJitter, unrhEncNonJitter, unrhEnergy;
+        float totrhs, totrhs0, totrhs05, totrhs1, totrhs2, totrhs5, totrhs10, encrhs;
 
         // skimmer output ::
         // Local : 0,1 ; Z->ee : 2,3
@@ -398,6 +413,9 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
     const auto getRawID( const EcalRecHit recHit ){ auto recHitId = recHit.detid(); return recHitId.rawId();}
     const auto getIsEB( const EcalRecHit recHit ){ auto recHitId = recHit.detid(); return (recHitId.subdetId() == EcalBarrel)?1:0;}
+    const auto getRawID( const EcalUncalibratedRecHit recHit ){ auto recHitId = recHit.id(); return recHitId.rawId();}
+    const auto getIsEB( const EcalUncalibratedRecHit recHit ){ auto recHitId = recHit.id(); return (recHitId.subdetId() == EcalBarrel)?1:0;}
+
     const auto getSubDetID( const EcalRecHit recHit ){ auto recHitId = recHit.detid(); return recHitId.subdetId();}
 
     rhGroup getRHGroup( const scGroup superClusterGroup, float minenr ){
