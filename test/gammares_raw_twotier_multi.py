@@ -14,7 +14,7 @@ options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multip
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_KUCC_tt_enctest_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_tt_1307diagtest_126_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 #options.register('outputFileName','ku_KUCC_tt_R2018A_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
@@ -43,7 +43,7 @@ process.load("RecoLuminosity.LumiProducer.bunchSpacingProducer_cfi")#
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 #process.load('RecoLocalCalo.EcalRecProducers.ecalCPUUncalibRecHitProducer_cfi')#
 #process.load("RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHit_cfi")
-process.load('GammaResTool.gammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
+process.load('GammaResTool.GammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
 #process.load('RecoVertex.BeamSpotProducer.BeamSpot_cff' )
 
 #process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
@@ -145,8 +145,8 @@ process.source = cms.Source("PoolSource",
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -208,8 +208,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(True), 
    #doTwoTier = cms.bool(False),
-   #doDiag = cms.bool(True),
-   doDiag = cms.bool(False),
+   doDiag = cms.bool(True),
+   #doDiag = cms.bool(False),
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
@@ -227,12 +227,12 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #kuWtStcRecHitsEB = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEB"),
    #kuWtStcRecHitsEE = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEE"),
 
-   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
-   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
+   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
+   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
    #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
    #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
-   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
-   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
+   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
+   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
 
    kuRtStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
    kuRtStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
@@ -258,7 +258,6 @@ process.tree = cms.EDAnalyzer("GammaResTool",
 
 
 # Set up the path
-#process.treePath = cms.Path(
 process.tree_step = cms.EndPath(
 	process.unpackedTracksAndVertices +
 	process.tree
@@ -270,57 +269,17 @@ process.digiPath = cms.Path( process.ecalDigis )
 process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
 #process.beamSpot = cms.Path( process.offlineBeamSpot )
 
-process.jwk_calolocalreco = cms.Sequence(
-				###process.ku_min_ecalLocalRecoSequence
-               	###process.ku_multi_ecalLocalRecoSequence
-                process.kucc_only_ecalLocalRecoSequence
-               	##process.ku_reduced_multi_ecalLocalRecoSequence
-                #process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
-				##process.ku_reduced_flipped_ecalLocalRecoSequence
-               	###process.ku_ecalLocalRecoSequence
-               	###process.ecalLocalRecoSequence
-				###process.hcalLocalRecoSequence
-)
-
 process.jwk_localreco = cms.Sequence(
-				#process.bunchSpacingProducer+
-				#process.trackerlocalreco+
-				#process.muonlocalreco+
-				process.jwk_calolocalreco
-				#process.castorreco
+                #process.kucc_only_ecalLocalRecoSequence
+                #process.ku_reduced_multi_ecalLocalRecoSequence
+                process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
+                ##process.ku_reduced_flipped_ecalLocalRecoSequence
 )
-
-process.jwk_highlevelreco = cms.Sequence(
-			    #process.egammaHighLevelRecoPrePF*
-                #process.particleFlowReco*
-                #process.egammaHighLevelRecoPostPF*
-                #process.muoncosmichighlevelreco*
-                #process.muonshighlevelreco *
-                #process.particleFlowLinks*
-                #process.jetHighLevelReco*
-                #process.metrecoPlusHCALNoise*
-                #process.btagging*
-                #process.recoPFMET*
-                #process.PFTau*
-                #process.reducedRecHits #*
-                #process.cosmicDCTracksSeq
-)
-
-process.jwk_reconstruction = cms.Sequence(
-		#process.localreco*
-        process.jwk_localreco
-		#process.globalreco*
-		#process.jwk_highlevelreco*
-		#process.logErrorHarvester
-)
-
-process.content = cms.EDAnalyzer("EventContentAnalyzer")
-process.content_step = cms.Path(process.content)
 
 #process.raw2digi_step = cms.Path(process.RawToDigi)
 #process.ecalraw2digi_step = cms.Path(process.jwk_digisunpacker)
 #process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.jwk_reconstruction)
+process.reconstruction_step = cms.Path(process.jwk_localreco)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 process.schedule = cms.Schedule(
@@ -331,7 +290,6 @@ process.schedule = cms.Schedule(
 		#process.ecalraw2digi_step,
       	#process.L1Reco_step,
 		process.reconstruction_step,
-		#process.content_step,
 		process.endjob_step,
 		process.tree_step
 )
@@ -344,10 +302,3 @@ process.options = cms.untracked.PSet(
     #wantSummary = cms.untracked.bool(True)
 )
 
-#from FWCore.ParameterSet.Utilities import convertToUnscheduled
-#if options.runUnscheduled : 
-#	process = convertToUnscheduled(process)
-
-#from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
-#if options.deleteEarly :
-#	process = customiseEarlyDelete(process)

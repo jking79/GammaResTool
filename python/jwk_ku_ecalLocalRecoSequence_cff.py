@@ -20,8 +20,8 @@ from RecoLocalCalo.EcalRecProducers.ecalDetIdToBeRecovered_cfi import *
 #from RecoLocalCalo.EcalRecProducers.ecalTPSkim_cfi import *
 #from RecoLocalCalo.EcalRecProducers.ecalDetailedTimeRecHit_cfi import *
 
-from GammaResTool.gammaResTool.jwk_ku_ecalRecHit_cff import *
-from GammaResTool.gammaResTool.jwk_ku_ecalMultiFitUncalRecHit_cff import *
+from GammaResTool.GammaResTool.jwk_ku_ecalRecHit_cff import *
+from GammaResTool.GammaResTool.jwk_ku_ecalMultiFitUncalRecHit_cff import *
 
 ku_ecalUncalibRecHitSequence = cms.Sequence(ecalMultiFitUncalibRecHitBase*kuEcalMultiFitUncalibRecHit*ecalDetIdToBeRecovered)
 
@@ -56,7 +56,7 @@ kuEcalLHCRecHit = ecalRecHitBase.clone(
 	EBrechitCollection = cms.string('kuRecHitsEB'),
    skipTimeCalib = cms.bool(False),
    # below params for LHCInfo plots form badder
-   killDeadChannels = cms.bool( False ),
+   killDeadChannels = cms.bool( True ),
    recoverEBVFE = cms.bool( False ),
    recoverEEVFE = cms.bool( False ),
    recoverEBFE = cms.bool( False ),
@@ -87,7 +87,7 @@ kuStcEcalLHCRecHit = ecalRecHitBase.clone(
     EBrechitCollection = cms.string('kuStcRecHitsEB'),
     skipTimeCalib = cms.bool(True),
     # below params for LHCInfo plots from badder
-    killDeadChannels = cms.bool( False ),
+    killDeadChannels = cms.bool( True ),
     recoverEBVFE = cms.bool( False ),
     recoverEEVFE = cms.bool( False ),
     recoverEBFE = cms.bool( False ),

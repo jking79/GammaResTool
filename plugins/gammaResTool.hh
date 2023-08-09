@@ -422,7 +422,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
     
         rhGroup result;
         vector<uInt> rawIds;
-        for ( const auto superCluster : superClusterGroup ){
+        for ( const auto & superCluster : superClusterGroup ){
             auto & hitsAndFractions = superCluster.hitsAndFractions();
             const auto nHAF = hitsAndFractions.size();
             for( uInt iHAF = 0; iHAF < nHAF; iHAF++ ){
