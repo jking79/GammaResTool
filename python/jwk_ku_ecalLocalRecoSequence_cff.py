@@ -42,6 +42,11 @@ ku_reduced_multi_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRe
                                         kuCCEcalMultiFitUncalibRecHit*
                                         ecalDetIdToBeRecovered)
 
+ku_cc_gt_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRecHitBase*
+                                        #kuEcalMultiFitUncalibRecHit*
+                                        kuCCEcalMultiFitUncalibRecHit*
+                                        ecalDetIdToBeRecovered)
+
 ku_reduced_nomulti_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRecHitBase*
                                         kuEcalMultiFitUncalibRecHit*
                                         #kuCCEcalMultiFitUncalibRecHit*
@@ -172,6 +177,12 @@ ku_reduced_multi_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
                                                   kuCCStcEcalRecHit
                                                )
 
+ku_cc_gt_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
+                                                  kuCCEcalRecHit
+                                                  #kuWtStcEcalRecHit*
+                                                  #kuCCStcEcalRecHit
+                                               )
+
 ku_reduced_flipped_ecalRecHitSequence     = cms.Sequence(#kuEcalRecHit*
                                                   kuStcEcalRecHit*
                                                   #kuWtStcEcalRecHit*
@@ -209,6 +220,9 @@ ku_spike_multi_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_multi_ecalUncal
 ku_reduced_flipped_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_multi_ecalUncalibRecHitSequence*ku_reduced_flipped_ecalRecHitSequence)
 
 ku_spike_nomulti_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_nomulti_ecalUncalibRecHitSequence*ku_spike_nomulti_ecalRecHitSequence)
+
+ku_cc_gt_ecalLocalRecoSequence   = cms.Sequence(ku_cc_gt_ecalUncalibRecHitSequence*ku_cc_gt_ecalRecHitSequence)
+
 
 #from RecoLocalCalo.EcalRecProducers.ecalDetailedTimeRecHit_cfi import *
 #_phase2_timing_ecalRecHitSequence = cms.Sequence( ku_ecalRecHitSequence.copy() + ecalDetailedTimeRecHit )

@@ -172,8 +172,8 @@ kuWtEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               addPedestalUncertaintyEE = cms.double(0.),
 
               # decide which algorithm to be use to calculate the jitter
-              #timealgo = cms.string("RatioMethod"),
-              timealgo = cms.string("WeightsMethod"),
+              timealgo = cms.string("RatioMethod"),
+              #timealgo = cms.string("WeightsMethod"),
               ##timealgo = cms.string("WeightsMethodnoOOT"),
               #timealgo = cms.string("KansasDummy"),
 
@@ -259,16 +259,25 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               EEtimeFitLimits_Lower = cms.double(0.2),
               EEtimeFitLimits_Upper = cms.double(1.4),
               # for time error
+              #EBtimeConstantTerm= cms.double(.85),
               EBtimeConstantTerm= cms.double(.6),
               EEtimeConstantTerm= cms.double(1.0),
 
               # for kOutOfTime flag
+              #EBtimeNconst      = cms.double(25.5),
               EBtimeNconst      = cms.double(28.5),
               EEtimeNconst      = cms.double(31.8),
-              outOfTimeThresholdGain12pEB    = cms.double(2.75),      # times estimated precision
-              outOfTimeThresholdGain12mEB    = cms.double(2.75),      # times estimated precision
-              outOfTimeThresholdGain61pEB    = cms.double(2.75),      # times estimated precision
-              outOfTimeThresholdGain61mEB    = cms.double(2.75),      # times estimated precision
+
+              outOfTimeThresholdGain12pEB    = cms.double(2.5),      # times estimated precision
+              outOfTimeThresholdGain12mEB    = cms.double(2.5),      # times estimated precision
+              outOfTimeThresholdGain61pEB    = cms.double(2.5),      # times estimated precision
+              outOfTimeThresholdGain61mEB    = cms.double(2.5),      # times estimated precision
+
+              #outOfTimeThresholdGain12pEB    = cms.double(5),      # times estimated precision
+              #outOfTimeThresholdGain12mEB    = cms.double(5),      # times estimated precision
+              #outOfTimeThresholdGain61pEB    = cms.double(5),      # times estimated precision
+              #outOfTimeThresholdGain61mEB    = cms.double(5),      # times estimated precision
+
               outOfTimeThresholdGain12pEE    = cms.double(1000),   # times estimated precision
               outOfTimeThresholdGain12mEE    = cms.double(1000),   # times estimated precision
               outOfTimeThresholdGain61pEE    = cms.double(1000),   # times estimated precision
@@ -294,7 +303,7 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               crossCorrelationTargetTimePrecision = cms.double(0.01),
 			  crossCorrelationTimeShiftWrtRations = cms.double(0), 
 
-              #crossCorrelationMinTimeToBeLate = cms.double(1.0),# 1.0 ns
+              #crossCorrelationMinTimeToBeLate = cms.double(2.0),# 1.0 ns
               #crossCorrelationMinTimeToBeLate = cms.double(0.5),# 0.5 ns
 
               )

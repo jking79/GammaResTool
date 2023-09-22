@@ -6,15 +6,17 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing('python')
 
 ## GT to be used
-#options.register('globalTag','124X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-#options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+##options.register('globalTag','124X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabltag to be used');
+##options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabltag to be used');
+#options.register('globalTag','130X_dataRun3_Candidate_2023_08_08_21_30_44',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','130X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+options.register('globalTag','132X_dataRun3_Express_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_tt_1307diagtest_126_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_tt_131diag_126_gammares_v13.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 #options.register('outputFileName','ku_KUCC_tt_R2018A_126_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 ## parsing command line arguments
@@ -54,14 +56,63 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')#
 ## Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")#
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 ## Define the input source
 #eventList = open(options.rlelist,'r')
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
+
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/081/00000/1544045f-d9c3-47a4-b31c-e08bc488f0dc.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/081/00000/90a1f768-e33b-46df-adc7-c2e6318b36d5.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/081/00000/e456709e-b59f-41d3-8d92-6b88c69ffc18.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/082/00000/9948e5c1-f309-4fe1-bdab-9c61b83e4ac5.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/082/00000/ddee20fb-56fe-45a9-a7c8-aa38850e2592.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/086/00000/d805d8b5-173a-41d5-beae-1b15532e6c85.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/087/00000/cc2657bd-87a2-43c5-b904-725f17216d25.root',
+        '/store/data/Run2023F/ZeroBias/RAW/v1/000/373/088/00000/03e9d5a0-2d39-4090-aba5-e378e256c09a.root',
+
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/04f24116-3e5e-4d66-a029-fd2c2fcfdaca.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/0c9575ba-8a64-4537-8dee-83af6ed02b59.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/1c78c82f-99e9-4fd8-8551-74591e745952.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/2dc15752-63dd-49fb-8f29-f278b13dd08a.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/3885916c-9890-40e8-bb6c-70863d9b5d6e.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/3cf46990-85b4-40b1-950b-338179cf004f.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/3d3fa3d5-8419-41b7-9218-b8bc177e7743.root',
+     #   '/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/41a3b249-7bab-4cf9-8138-03ba4a490ee1.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/534a9b86-9915-4962-8f89-38abd1d427e2.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/5350f914-ce7c-4e48-8d19-e7ffbed52ebd.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/58a05630-45b8-40d4-b237-aa5750cda69a.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/5b75b186-c7aa-4de3-ba11-f83d5cd03557.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/5e6cca5b-b3c6-4cae-a00a-d770e8f8bf30.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/73224f95-f4c7-4b75-b9b7-1c861f2eac08.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/751087b8-d58e-4cd2-9d38-2dff67d09f56.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/754eb530-3522-443c-8371-1157d31406e1.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/7642825e-868c-498c-96bf-1fd7327f2986.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/7cb8eeb9-50a7-4f2c-8b33-63392802bf5d.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/8935c147-5a6f-45cb-aec6-0f1c7ac851e6.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/8c90f76b-af6d-4c0c-874f-efb78acc912a.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/8eff40dc-371f-4318-ac46-00e6b43e55c0.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/91962d78-7162-4378-9975-fbd57b0c048c.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/92811b2b-365e-4700-8c21-2f4b3fcd93e4.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/959235f3-7230-4822-892a-3a504f327fb7.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/98d1b86e-a754-4715-adcc-34b3e0ffbfcc.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/9ca091dc-e01f-4ed3-b2f8-794d11e192b1.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/aee44530-0734-491d-a97b-b8de9d25bd86.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/c5e8af1e-2d5e-47d8-8623-9fb825dd94da.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/cf5361c2-b1e4-45df-aa73-46f3bb896780.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/da300b9a-860a-4ccb-a76b-60cd627ae706.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/dbb37251-0b95-4d73-a262-928ae2fc0d39.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/de119dc0-c657-4520-b1ed-4768725908da.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/e4109b21-9846-408d-820f-5d1a56ba97a4.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/e4eb9fb4-0fc8-43e3-a029-42647cca246a.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/ef799316-8b8f-46bb-853e-379f0a0330de.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/f1632c55-5905-4251-83d1-4625503463f6.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/f2b69df0-29a9-4e1e-8ea3-f86a6b961680.root',
+        #'/store/data/Run2023B/ZeroBias/RAW/v1/000/366/850/00000/f721444f-b367-4dfc-b0fc-8de7416ac50a.root',
+
 		#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/809/00000/60ef0541-b8f5-479b-becd-4fdbd0e0599b.root'
-    	'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
+##i    	'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
 		#'/store/data/Run2022F/EGamma/MINIAOD/PromptReco-v1/000/362/154/00000/0392b31a-851b-4c61-98f5-cfb1598aef5f.root'
         #'/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
 	),
@@ -85,7 +136,7 @@ process.source = cms.Source("PoolSource",
         #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
         #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
         #'/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
-        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
+##        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
 		
 #		'/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df3a20-4381-4103-8b98-5fd77e266823.root',
 
@@ -146,10 +197,10 @@ process.source = cms.Source("PoolSource",
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -208,8 +259,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(True), 
    #doTwoTier = cms.bool(False),
-   doDiag = cms.bool(True),
-   #doDiag = cms.bool(False),
+   #doDiag = cms.bool(True),
+   doDiag = cms.bool(False),
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
@@ -229,10 +280,10 @@ process.tree = cms.EDAnalyzer("GammaResTool",
 
    #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
    #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
-   #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
-   #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
-   kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
-   kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
+   kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
+   kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
+   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEB"),
+   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalLHCRecHit", "kuCCStcRecHitsEE"),
 
    kuRtStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
    kuRtStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
@@ -271,8 +322,9 @@ process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
 
 process.jwk_localreco = cms.Sequence(
                 #process.kucc_only_ecalLocalRecoSequence
+                process.ku_cc_gt_ecalLocalRecoSequence 
                 #process.ku_reduced_multi_ecalLocalRecoSequence
-                process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
+                #process.ku_spike_multi_ecalLocalRecoSequence # vary on reduced
                 ##process.ku_reduced_flipped_ecalLocalRecoSequence
 )
 
@@ -291,7 +343,7 @@ process.schedule = cms.Schedule(
       	#process.L1Reco_step,
 		process.reconstruction_step,
 		process.endjob_step,
-		process.tree_step
+		#process.tree_step
 )
 
 ### Extra bits from other configs

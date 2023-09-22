@@ -10,6 +10,7 @@ test/oldworkingArea/
 test/myWorkingArea/
 test/myWorkSpace/
 test/compWorkingArea/
+*_log*.txt
 *.root
 *.pyc
 *.log
