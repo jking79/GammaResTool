@@ -197,10 +197,10 @@ process.source = cms.Source("PoolSource",
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(2000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(47000))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -331,7 +331,8 @@ process.jwk_localreco = cms.Sequence(
 #process.raw2digi_step = cms.Path(process.RawToDigi)
 #process.ecalraw2digi_step = cms.Path(process.jwk_digisunpacker)
 #process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.jwk_localreco)
+#process.reconstruction_step = cms.Path(process.jwk_localreco)
+process.reconstruction_step = cms.Path( process.ecalLocalRecoSequence )
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
 process.schedule = cms.Schedule(
