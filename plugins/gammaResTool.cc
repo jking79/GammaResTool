@@ -185,10 +185,10 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	iEvent.getByToken(recHitsEBToken_, recHitsEB_);
 	iEvent.getByToken(recHitsEEToken_, recHitsEE_);
 
-    if( doDiag ){
-    	iEvent.getByToken(kuRtStcRecHitsEBToken_, kuRtStcRecHitsEB_);
-    	iEvent.getByToken(kuRtStcRecHitsEEToken_, kuRtStcRecHitsEE_);
-    }//if( doTwoTier )
+    //if( doDiag ){
+    //	iEvent.getByToken(kuRtStcRecHitsEBToken_, kuRtStcRecHitsEB_);
+    //	iEvent.getByToken(kuRtStcRecHitsEEToken_, kuRtStcRecHitsEE_);
+    //}//if( doTwoTier )
 
 	if( doTwoTier ){
     	iEvent.getByToken(kuCCStcRecHitsEBToken_, kuCCStcRecHitsEB_);
@@ -247,15 +247,15 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<pat::Photon>        fphotons;
     std::vector<pat::Electron>  	felectrons;
 
-	float minRecHitEnergy = 0.3;
+	float minRecHitEnergy = 0.01;
     float minRecHitAmp = 5;	
 	if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
 	for (const auto & recHit : *recHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); }
     for (const auto & recHit : *recHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); }
-    if( doDiag ){
-        for (const auto & recHit : *kuRtStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
-        for (const auto & recHit : *kuRtStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
-    }//<<>>if( doDiag )
+    //if( doDiag ){
+    //    for (const auto & recHit : *kuRtStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
+    //    for (const auto & recHit : *kuRtStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
+    //}//<<>>if( doDiag )
 	if( doTwoTier ){
     	for (const auto & recHit : *kuCCStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
     	for (const auto & recHit : *kuCCStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
@@ -265,17 +265,17 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 // -- Process gedPhotons
     if( DEBUG ) std::cout << "Processing " << gedPhotons_->size() << " gedPhotons" << std::endl;
-	string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80");//2018
+	//string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80");//2018
     //string phoMvaWp80("mvaPhoID-RunIIFall17-v2-wp80");//r3
-    string phoCutTight("cutBasedPhotonID-Fall17-94X-V2-tight");//2022
+    //string phoCutTight("cutBasedPhotonID-Fall17-94X-V2-tight");//2022
     string phoCutLoose("cutBasedPhotonID-Fall17-94X-V2-loose");//2022
     //string phoCutLoose("cutBasedPhotonID-Fall17-94X-V1-loose");//2018
 	float phoMinPt = 5.0;
 	float phoMinSeedTime = -25.0;
     for( const auto & photon : *gedPhotons_ ){
 
-		auto passIdCut = photon.photonID(phoCutLoose);
-        //auto passIdCut = true;
+		//auto passIdCut = photon.photonID(phoCutLoose);
+        auto passIdCut = true;
 		auto minPhoPt = photon.pt() > phoMinPt;
 		auto phoSeedTime = getPhotonSeedTime(photon);
 		auto timecut = phoSeedTime > phoMinSeedTime;
@@ -323,15 +323,15 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     //std::vector<pat::Electron> gloPhotons;
     if( DEBUG ) std::cout << "Processing Electrons" << std::endl;
-    string eleMvaWp80("mvaEleID-Fall17-noIso-V2-wp80");
-    string eleMvaWpLoose("mvaEleID-Fall17-noIso-V2-wpLoose");//r3
-    string eleCutTight("cutBasedElectronID-Fall17-94X-V2-tight");
-    string eleCutLoose("cutBasedElectronID-Fall17-94X-V2-loose");//2022
-    //string eleCutLoose("cutBasedElectronID-Fall17-94X-V1-loose");//2018
+    //string eleMvaWp80("mvaEleID-Fall17-noIso-V2-wp80");
+    //string eleMvaWpLoose("mvaEleID-Fall17-noIso-V2-wpLoose");//r3
+    //string eleCutTight("cutBasedElectronID-Fall17-94X-V2-tight");
+    //string eleCutLoose("cutBasedElectronID-Fall17-94X-V2-loose");//2022
+    string eleCutLoose("cutBasedElectronID-Fall17-94X-V1-loose");//2018
 	for( const auto & electron : *electrons_ ){
 
-        auto passIdCut = electron.electronID(eleCutLoose);
-        //auto passIdCut = true;
+        //auto passIdCut = electron.electronID(eleCutLoose);
+        auto passIdCut = true;
 		if( passIdCut ) felectrons.push_back(electron);
 
 	}//<<>>for( const auto electron : *electrons_ )
@@ -386,7 +386,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         const auto & pediter = pedestals_->find(recHitID);
         const auto pedrms12 = (pediter != pedestals_->end()) ? pediter->rms(1) : 0.0;
         const auto adcToGeV = laser*interCalib*adcToGeV0;
-        const auto amplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV)/pedrms12 : 0;
+        const auto amplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV)/pedrms12 : -99;
 
 		miniRhId.push_back(recHitID);
 		miniRhAmp.push_back(amplitude);
@@ -430,9 +430,9 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
     //if( DEBUG ) std::cout << " - enetering Diag RecHit loop" << std::endl;
     if( doDiag ){
-	    for (const auto & recHit : frtrechits ){
+	    for (const auto & recHit : frechits ){
 
-		if( recHit.energy() > 2.0 ){
+		if( recHit.energy() > 10.0 ){
 	
 	        //if( DEBUG ) std::cout << " -- proccesing ID info" << std::endl;
 	        // something in this section is seg faluting after several rechits for crab jobs
@@ -452,9 +452,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	        const auto tof = (d_rh-d_pv)/SOL;
 	        //if( DEBUG ) std::cout << " -- proccesing SWISSCROSS info" << std::endl;
 	        float swisscross(10.0);
-	        if( isEB ) swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEB_, 1.0, true);
-	        else swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEE_, 1.0, true);
-	
+	        //if( isEB ) swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEB_, 1.0, true);
+	        //else swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEE_, 1.0, true);
+            if( isEB ) swisscross = EcalTools::swissCross(recHitID, *recHitsEB_, 1.0, true);
+            else swisscross = EcalTools::swissCross(recHitID, *recHitsEE_, 1.0, true);
+
 	        //if( DEBUG ) std::cout << " -- proccesing LASER info" << std::endl;
 	        // adcToGeVInfo : http://cmslxr.fnal.gov/source/RecoEcal/EgammaCoreTools/src/EcalClusterLazyTools.cc#0204
 	        const auto laser = laser_->getLaserCorrection(recHitID,evTime);
@@ -468,7 +470,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	        const auto & pediter = pedestals_->find(recHitID);
 			const auto pedrms12 = (pediter != pedestals_->end()) ? pediter->rms(1) : 0.0;
 			const auto adcToGeV = laser*interCalib*adcToGeV0;
-			const auto amplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV)/pedrms12 : 0;
+			const auto amplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV)/pedrms12 : -99.0;
 
 			auto cctime = -999.0;
 			auto ccisoot = false;
@@ -948,13 +950,13 @@ void GammaResTool::beginJob(){
 
     	outTree->Branch("rhID", &rhID);
     	outTree->Branch("rhRtTime", &rhRtTime);
-        outTree->Branch("rhCCTime", &rhCCTime);
-        //outTree->Branch("rhTOF", &rhTOF);
+        //outTree->Branch("rhCCTime", &rhCCTime);
+        outTree->Branch("rhTOF", &rhTOF);
         outTree->Branch("rhEnergy", &rhEnergy);
-        //outTree->Branch("rhAmp", &rhAmp);
+        outTree->Branch("rhAmp", &rhAmp);
 
 	    outTree->Branch("rhRtisOOT", &rhRtisOOT);
-        outTree->Branch("rhCCisOOT", &rhCCisOOT);
+        //outTree->Branch("rhCCisOOT", &rhCCisOOT);
 	    //outTree->Branch("rhisGood", &rhisGood);
 	    outTree->Branch("rhisWeird", &rhisWeird);
 	    outTree->Branch("rhisDiWeird", &rhisDiWeird);

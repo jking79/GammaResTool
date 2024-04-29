@@ -7,8 +7,9 @@ options = VarParsing('python')
 
 ## GT to be used
 #options.register('globalTag','124X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+options.register('globalTag','140X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
@@ -42,7 +43,7 @@ process.load("RecoLuminosity.LumiProducer.bunchSpacingProducer_cfi")#
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 #process.load('RecoLocalCalo.EcalRecProducers.ecalCPUUncalibRecHitProducer_cfi')#
 #process.load("RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHit_cfi")
-process.load('GammaResTool.gammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
+process.load('GammaResTool.GammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
 #process.load('RecoVertex.BeamSpotProducer.BeamSpot_cff' )
 
 #process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
@@ -53,7 +54,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')#
 ## Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")#
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 5000
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## Define the input source
 #eventList = open(options.rlelist,'r')
@@ -62,9 +63,21 @@ process.source = cms.Source("PoolSource",
 		#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/809/00000/60ef0541-b8f5-479b-becd-4fdbd0e0599b.root'
     	#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
 		#'/store/data/Run2022F/EGamma/MINIAOD/PromptReco-v1/000/362/154/00000/0392b31a-851b-4c61-98f5-cfb1598aef5f.root'
-        '/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
+        #'/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
+		#'/store/data/Run2024A/EGamma0/MINIAOD/PromptReco-v1/000/378/927/00000/5893ee0a-d192-4827-b3ef-5c3e1dfeb328.root'
+
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/168/00000/1529db6d-eaa3-42a7-aa27-19503567abe4.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/169/00000/fea774ab-d0e5-4487-acf2-5f8882af677d.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/170/00000/eb9fa4fc-4cd2-46c8-83cc-6be21b26d512.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/171/00000/57d47ad8-a3fc-4df6-af91-a59d27e9deb7.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/178/00000/940c2796-400c-4573-888a-288829b014ea.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/237/00000/5277f772-c202-4252-934e-27f35ea60969.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/238/00000/0ae6e1a7-b056-48e6-b3b2-f100da658834.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/238/00000/19104a78-bf72-424a-84aa-13a4a4b45932.root',
+        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/238/00000/1caec1ed-50a3-4cd7-b1bc-23867b789129.root',
+
 	),
-    secondaryFileNames = cms.untracked.vstring(
+#    secondaryFileNames = cms.untracked.vstring(
 
 #        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/26201159-BA64-E811-B349-02163E019F92.root',
 #        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/28389948-BA64-E811-B1DE-FA163E0639A2.root',
@@ -137,18 +150,18 @@ process.source = cms.Source("PoolSource",
 #        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/11368d45-2c64-46b2-aae5-cc35b1e18d42.root',
 #        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/116043a5-e71e-4df8-8014-34fdb3391301.root'
 
-	),
+#	),
     #eventsToProcess = cms.untracked.VEventRange(eventList)
 )
 
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -331,7 +344,8 @@ process.schedule = cms.Schedule(
 process.options = cms.untracked.PSet(
     #numberOfThreads = cms.untracked.uint32(4),
     #numberOfStreams = cms.untracked.uint32(4),
-    SkipEvent = cms.untracked.vstring('ProductNotFound'),
+    #####SkipEvent = cms.untracked.vstring('ProductNotFound'),
+    TryToContinue = cms.untracked.vstring('ProductNotFound'),
     #wantSummary = cms.untracked.bool(True)
 )
 

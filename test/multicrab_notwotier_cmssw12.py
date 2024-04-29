@@ -61,6 +61,7 @@ def subcrab( runs, events, reqmem ):
         # External files needed by CRAB
         inputDir     = ''
         #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+        inputJSON    = ''
 
         #--------------------------------------------------------
         # This is the base config:
@@ -89,7 +90,7 @@ def subcrab( runs, events, reqmem ):
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
         #config.Data.unitsPerJob  =  300 # for auto job splitting
-        config.Data.runRange  = runs #'321122-321128'
+        #config.Data.runRange  = runs #'321122-321128'
         config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
 
 
@@ -103,6 +104,14 @@ def subcrab( runs, events, reqmem ):
 
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
+
+            #['/EGamma0/Run2024A-PromptReco-v1/MINIAOD'], 	# 378927-378962 52.6M
+            #['/EGamma0/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379350	0.54T
+            ['/EGamma0/Run2024C-PromptReco-v1/MINIAOD'],	# 379413-379765	3.3T
+
+            #['/EGamma1/Run2024A-PromptReco-v1/MINIAOD'],	# 378919-378961	52.1M
+			#['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
+            ['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
 
             #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
 
@@ -123,14 +132,17 @@ def subcrab( runs, events, reqmem ):
 	         #print( inDO[0] )
             primaryDataset = inDO[0].split('/')[1]
             runEra         = inDO[0].split('/')[2]
-            dataset	   = inDO[0].split('/')[3]
-            trial          = 'gammares_ratio_126_v2'
+            dataset	   	   = inDO[0].split('/')[3]
+
+            #trial          = 'gammares_ratio_126_v2'
+            trial          = 'gammares_cc_140_v2'
 
             config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset+"_dispho"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
 
+            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root']  # 2024 tested
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
-            config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root']  # 2018A tested
+            #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root']  # 2018A tested
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root'] # EF
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # G
@@ -169,12 +181,15 @@ def subcrab( runs, events, reqmem ):
 
 def submit_run():
 
-		#subcrab( "352400-358400","",2500)# Run3 ABCD
-        #subcrab( "359000-362200","",2500)# Run3 EF
-        #subcrab( "362300-362800","",2500)# Run3 G
+		#subcrab( "378981-379349","",2500)#	Run3 24B		
+        subcrab( "379413-379774","",2500)#	Run3 24C
+
+		#subcrab( "352400-358400","",2500)# Run3 22ABCD
+        #subcrab( "359000-362200","",2500)# Run3 22EF
+        #subcrab( "362300-362800","",2500)# Run3 22G
 
         #subcrab( "316241-316245","",2500) # very small test batch 18A
-        subcrab( "316000-316499","",2500) # 18A	
+        #subcrab( "316000-316499","",2500) # 18A	
         #subcrab( "357101-357268","",2500)#22C?
 		#subcrab( "360395-360415","",2500)#22F?
 
@@ -182,4 +197,4 @@ def submit_run():
 ########################################################
 
 submit_run()
-
+ubcrab( "378981-379349","",2500)# 
