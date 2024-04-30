@@ -1,0 +1,7 @@
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_1.root/
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_2.root/
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_3.root/
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_4.root/
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_5.root/
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_6.root/
+gammares_cc_140_v1_EGamma1_MINIAOD_Run2024A-PromptReco-v1_378927-379349_dispho/240416_001225/0000/output_7.root/

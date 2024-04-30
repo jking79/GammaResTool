@@ -157,11 +157,11 @@ process.source = cms.Source("PoolSource",
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag

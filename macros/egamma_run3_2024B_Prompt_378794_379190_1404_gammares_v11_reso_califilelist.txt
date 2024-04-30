@@ -1,0 +1,2 @@
+kuntuple_gammares_cc_140_v2_EGamma0_MINIAOD_Run2024B-PromptReco-v1_378981-379349_dispho_v6.txt 379191 379323
+kuntuple_gammares_cc_140_v2_EGamma1_MINIAOD_Run2024B-PromptReco-v1_378981-379349_dispho_v6.txt 379191 379323
