@@ -218,6 +218,9 @@ kuWtEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               )
         )
 
+#from RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHit_cfi import *
+#from RecoLocalCalo.EcalRecProducers.ecalDetailedTimeRecHit_cfi import *
+
 kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
         EBhitCollection = cms.string("kuCCEcalUncalibRecHitsEB"),
         EEhitCollection = cms.string('kuCCEcalUncalibRecHitsEE'),
@@ -259,19 +262,19 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               EEtimeFitLimits_Lower = cms.double(0.2),
               EEtimeFitLimits_Upper = cms.double(1.4),
               # for time error
-              #EBtimeConstantTerm= cms.double(.85),
-              EBtimeConstantTerm= cms.double(.6),
+              EBtimeConstantTerm= cms.double(.85),
+              #EBtimeConstantTerm= cms.double(.6),
               EEtimeConstantTerm= cms.double(1.0),
 
               # for kOutOfTime flag
-              #EBtimeNconst      = cms.double(25.5),
-              EBtimeNconst      = cms.double(28.5),
+              EBtimeNconst      = cms.double(25.5),
+              #EBtimeNconst      = cms.double(28.5),
               EEtimeNconst      = cms.double(31.8),
 
-              outOfTimeThresholdGain12pEB    = cms.double(2.5),      # times estimated precision
-              outOfTimeThresholdGain12mEB    = cms.double(2.5),      # times estimated precision
-              outOfTimeThresholdGain61pEB    = cms.double(2.5),      # times estimated precision
-              outOfTimeThresholdGain61mEB    = cms.double(2.5),      # times estimated precision
+              outOfTimeThresholdGain12pEB    = cms.double(3.0),      # times estimated precision
+              outOfTimeThresholdGain12mEB    = cms.double(3.0),      # times estimated precision
+              outOfTimeThresholdGain61pEB    = cms.double(3.0),      # times estimated precision
+              outOfTimeThresholdGain61mEB    = cms.double(3.0),      # times estimated precision
 
               #outOfTimeThresholdGain12pEB    = cms.double(5),      # times estimated precision
               #outOfTimeThresholdGain12mEB    = cms.double(5),      # times estimated precision
@@ -285,6 +288,8 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               amplitudeThresholdEB    = cms.double(10),
               amplitudeThresholdEE    = cms.double(10),
 
+              useSlewCorrectionEB = cms.bool(True),
+              useSlewCorrectionEE = cms.bool(False),
               #ebSpikeThreshold = cms.double(1.042),
 
               # these are now taken from DB. Here the MC parameters for backward compatibility
@@ -301,10 +306,68 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               crossCorrelationStartTime = cms.double(-25),
               crossCorrelationStopTime = cms.double(25),
               crossCorrelationTargetTimePrecision = cms.double(0.01),
-			  crossCorrelationTimeShiftWrtRations = cms.double(0), 
+	      crossCorrelationTimeShiftWrtRations = cms.double(0), 
 
               #crossCorrelationMinTimeToBeLate = cms.double(2.0),# 1.0 ns
               #crossCorrelationMinTimeToBeLate = cms.double(0.5),# 0.5 ns
 
               )
         )
+
+import RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHitProducer_cfi as _mod
+#ecalMultiFitUncalibRecHitCCBase = _mod.ecalMultiFitUncalibRecHitProducer.clone()
+kuCCNativeEcalMultiFitUncalibRecHit = _mod.ecalMultiFitUncalibRecHitProducer.clone(
+        algoPSet = cms.PSet(
+              timealgo = cms.string('crossCorrelationMethod'),
+              EBtimeNconst = cms.double(25.5),
+              EBtimeConstantTerm = cms.double(0.85),
+              outOfTimeThresholdGain12pEB = cms.double(3.0),
+              outOfTimeThresholdGain12mEB = cms.double(3.0),
+              outOfTimeThresholdGain61pEB = cms.double(3.0),
+              outOfTimeThresholdGain61mEB = cms.double(3.0),
+              useSlewCorrectionEB = cms.bool(True),
+              useSlewCorrectionEE = cms.bool(False),
+              timeCalibTag = cms.ESInputTag(':CC'),
+              timeOffsetTag = cms.ESInputTag(':CC')
+        )#algoPSet = cms.PSet
+)#kuCCNativeEcalMultiFitUncalibRecHit = _mod.ecalMultiFitUncalibRecHitProducer.clone
+
+# use CC timing method for Run3 and Phase 2 (carried over from Run3 era)
+#import FWCore.ParameterSet.Config as cms
+#from Configuration.ProcessModifiers.ecal_cctiming_cff import ecal_cctiming
+ecal_ccunrhtiming =  cms.Modifier()
+ecal_ccunrhtiming.toModify(kuCCNativeEcalMultiFitUncalibRecHit,
+     algoPSet = dict(timealgo = 'crossCorrelationMethod',
+         EBtimeNconst = 25.5,
+         EBtimeConstantTerm = 0.85,
+         outOfTimeThresholdGain12pEB = 3.0,
+         outOfTimeThresholdGain12mEB = 3.0,
+         outOfTimeThresholdGain61pEB = 3.0,
+         outOfTimeThresholdGain61mEB = 3.0,
+         useSlewCorrectionEB = True,
+         useSlewCorrectionEE = False,
+         timeCalibTag = ':CC',
+         timeOffsetTag = ':CC'
+     )
+)
+
+#kuCCNativeEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitCCBase.clone(
+#        EBhitCollection = cms.string("kuCCEcalUncalibRecHitsEB"),
+#        EEhitCollection = cms.string('kuCCEcalUncalibRecHitsEE'),
+#        algoPSet = cms.PSet(
+#              timealgo = cms.string('crossCorrelationMethod'),
+#              EBtimeNconst = cms.double(25.5),
+#              EBtimeConstantTerm = cms.double(0.85),
+#              outOfTimeThresholdGain12pEB = cms.double(3.0),
+#              outOfTimeThresholdGain12mEB = cms.double(3.0),
+#              outOfTimeThresholdGain61pEB = cms.double(3.0),
+#              outOfTimeThresholdGain61mEB = cms.double(3.0),
+#              useSlewCorrectionEB = cms.bool(True),
+#              useSlewCorrectionEE = cms.bool(False),
+#              timeCalibTag = cms.ESInputTag(':CC'),
+#              timeOffsetTag = cms.ESInputTag(':CC'),
+#
+#              )
+#        )
+
+

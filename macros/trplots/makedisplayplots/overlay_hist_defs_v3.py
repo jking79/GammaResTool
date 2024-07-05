@@ -688,10 +688,10 @@ hl_v25_gack_18_ecut_small = [
 ]
 
 hl_v25_gack_18_small = [
-   ["GData_sigma","",kucc_v25_gack_18As_lsd+kucc+lstfr,"CC Same RO"],
-   ["GData_sigma","",kucc_v25_gack_18As_gi+kucc+gitfr,"CC Z -> ee"],
-   ["GData_sigma","",kucc_v25_gack_18As_lsd+mini+lstfr,"Rt Same RO"],
-   ["GData_sigma","",kucc_v25_gack_18As_gi+mini+gitfr,"Rt Z -> ee"],
+   ["GData_sigma","",kucc_v25_gack_18As_gi+mini+gitfr,"Ratio Global"],
+   ["GData_sigma","",kucc_v25_gack_18As_lsd+mini+lstfr,"Ratio Same Read Out Unit"],
+   ["GData_sigma","",kucc_v25_gack_18As_gi+kucc+gitfr,"CC Global"],
+   ["GData_sigma","",kucc_v25_gack_18As_lsd+kucc+lstfr,"CC Same Read Out Unit"],
 ]
 
 hl_v25_gack_OOTcorr_18_small = [

@@ -347,8 +347,8 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 
 		// rechit info for diag 
         std::vector<uInt>  rhID;
-    	std::vector<float> rhRtTime, rhCCTime, rhTimeErr, rhTOF;
-        std::vector<float> rhEnergy, rhAmp;
+    	std::vector<float> rhRtTime, rhCCTime, rhUnCCTime, rhTimeErr, rhTOF;
+        std::vector<float> rhEnergy, rhAmp, rhRawAmp;
         std::vector<bool>  rhRtisOOT, rhCCisOOT,rhisGS6, rhisGS1, rhisWeird, rhisDiWeird, rhisGood;
         std::vector<float> rhadcToGeV, rhSwCross;
         std::vector<float> rhped12, rhped6, rhped1;
@@ -362,7 +362,17 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         // Local : 0,1 ; Z->ee : 2,3
         std::vector<uint>  resRhID;
         std::vector<float> resAmp, resE, resRtTime, resCCTime, resTOF;
+		// res1 & res2 local, resZ global
+        std::vector<uint>  res1RhID;
+        std::vector<float> res1Amp, res1E, res1RtTime, res1CCTime, res1TOF;
+        std::vector<uint>  res2RhID;
+        std::vector<float> res2Amp, res2E, res2RtTime, res2CCTime, res2TOF;
+        std::vector<uint>  resZ1RhID;
+        std::vector<float> resZ1Amp, resZ1E, resZ1RtTime, resZ1CCTime, resZ1TOF;
+        std::vector<uint>  resZ2RhID;
+        std::vector<float> resZ2Amp, resZ2E, resZ2RtTime, resZ2CCTime, resZ2TOF;
     	float locMatches, gloMatches, nEvents;
+        float locAMatches, gloAMatches;
 
 		// photon info for diag
 		std::vector<float>  phoPt, phoEnergy, phoPhi, phoEta, phoPx, phoPy, phoPz;
@@ -387,6 +397,61 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 	//
 	// Helper functions ( single line function defs, mostly )
 	//
+
+    struct DetIDStruct
+    { 
+      DetIDStruct() {}
+      DetIDStruct(const Int_t inI1, const Int_t inI2, const Int_t inTT, const ECAL inEcal) : i1(inI1), i2(inI2), TT(inTT), ecal(inEcal)  {}
+      
+      Int_t i1; // EB: iphi, EE: ix
+      Int_t i2; // EB: ieta, EE: iy
+      Int_t TT; // trigger tower
+      ECAL ecal; // EB, EM, EP
+    };
+    
+    void SetupDetIDsEB( std::map<UInt_t,DetIDStruct> &DetIDMap )
+    {  
+		std::string ecal_config_path("ecal_config/"); 
+        const std::string detIDConfigEB(ecal_config_path+"fullinfo_detids_EB.txt");
+        std::ifstream infile( detIDConfigEB, std::ios::in);
+        
+        UInt_t cmsswId, dbID; 
+        Int_t hashedId, iphi, ieta, absieta, FED, SM, TT25, iTT, strip5, Xtal, phiSM, etaSM;
+        TString pos;
+        
+        while (infile >> cmsswId >> dbID >> hashedId >> iphi >> ieta >> absieta >> pos >> FED >> SM >> TT25 >> iTT >> strip5 >> Xtal >> phiSM >> etaSM)
+        {   
+            //std::cout << "DetID Input Line: " << cmsswId << " " << iphi << " "  << ieta << " " << EB << std::endl;
+			DetIDStruct payload(iphi,ieta,TT25,ECAL::EB);
+			DetIDMap[cmsswId] = payload;
+            //DetIDMap[cmsswId] = {iphi,ieta,TT25,ECAL::EB};
+            //auto idinfo = DetIDMap[cmsswId];
+            //std::cout << "DetID set to : " << idinfo.i1 << " " << idinfo.i2 << " " << idinfo.ecal << std::endl;
+        }
+    }
+    
+    void SetupDetIDsEE( std::map<UInt_t,DetIDStruct> &DetIDMap )
+    {   
+		std::string ecal_config_path("ecal_config/");
+        const std::string detIDConfigEE(ecal_config_path+"fullinfo_detids_EE.txt");
+        std::ifstream infile( detIDConfigEE, std::ios::in);
+        
+        UInt_t cmsswId, dbID; 
+        Int_t hashedId, side, ix, iy, SC, iSC, Fed, TTCCU, strip, Xtal, quadrant;
+        TString EE;
+        
+        while (infile >> cmsswId >> dbID >> hashedId >> side >> ix >> iy >> SC >> iSC >> Fed >> EE >> TTCCU >> strip >> Xtal >> quadrant)
+        {   
+            ECAL ec = ECAL::EM;
+            if( side > 0 ) ec = ECAL::EP;
+            //std::cout << "DetID Input Line: " << cmsswId << " " << ix << " "  << iy << " " << ec << std::endl; 
+            DetIDStruct payload(ix,iy,TTCCU,ec);
+            DetIDMap[cmsswId] = payload;
+            //DetIDMap[cmsswId] = {ix,iy,TTCCU,ec};
+            //auto idinfo = DetIDMap[cmsswId];
+            //std::cout << "DetID set to : " << idinfo.i1 << " " << idinfo.i2 << " " << idinfo.ecal << std::endl;
+        }
+    } 
 
 	float recHitE( const DetId id, const EcalRecHitCollection & recHits, int di, int dj ){
 

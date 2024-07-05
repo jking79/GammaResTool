@@ -1,0 +1,1 @@
+list_files/gammares_ttcc_140_v11_test_EGamma1_MINIAOD_Run2023D-PromptReco-v1_filelist.txt 000000 999999

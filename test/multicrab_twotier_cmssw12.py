@@ -62,9 +62,9 @@ def subcrab( runs, events, reqmem ):
         inputDir     = ''
         #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
         #inputJSON    = 'Cert_352499-362760_13TeV_PromptReco_Collisions22_jwkgoldenjson.txt'
-        inputJSON    = 'Cert_Collisions2023_eraB_366403_367079_Golden.json'
+        #inputJSON    = 'Cert_Collisions2023_eraB_366403_367079_Golden.json'
         #inputJSON    = 'Cert_Collisions2023_eraC_367095_368823_Golden.json'
-        #inputJSON    = 'Cert_Collisions2023_eraD_369803_370790_Golden.json'
+        inputJSON    = 'Cert_Collisions2023_eraD_369803_370790_Golden.json'
 
         #--------------------------------------------------------
         # This is the base config:
@@ -77,7 +77,8 @@ def subcrab( runs, events, reqmem ):
         #config.General.requestName = None
 
         config.JobType.pluginName  = 'Analysis'
-        config.JobType.psetName    = 'gammares_raw_twotier_multi.py'
+        #config.JobType.psetName    = 'gammares_raw_twotier_multi.py'
+        config.JobType.psetName    = 'gammares_twotier_multi.py'
         #config.JobType.numCores    = 8
         #config.JobType.maxMemoryMB = 2250 #reqmem
         #config.JobType.maxJobRuntimeMin = 1500
@@ -86,7 +87,7 @@ def subcrab( runs, events, reqmem ):
 
         config.Data.inputDataset = None
         config.Data.useParent      = True
-	    #config.Data.secondaryInputDataset = secInputPaths
+	#config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
         config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
@@ -95,7 +96,7 @@ def subcrab( runs, events, reqmem ):
         #config.Data.unitsPerJob  =  300 # for auto job splitting
         config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  75000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
-        config.Data.unitsPerJob  =  1000
+        config.Data.unitsPerJob  =  25000
 
         #config.Data.outputDatasetTag = 'reducedRAW_EGamma_ntuple'
 	     
@@ -131,12 +132,12 @@ def subcrab( runs, events, reqmem ):
              #['/EGamma0/Run2023D-PromptReco-v2/MINIAOD'],    # 370666 - 370790 130X_dataRun3_Prompt_v4
 
              #['/EGamma1/Run2023A-PromptReco-v2/MINIAOD'],    # 366323 - 366361  130X_dataRun3_Prompt_v2
-             ['/EGamma1/Run2023B-PromptReco-v1/MINIAOD'],    # 366403 - 367065 130X_dataRun3_Prompt_v2
+             #['/EGamma1/Run2023B-PromptReco-v1/MINIAOD'],    # 366403 - 367065 130X_dataRun3_Prompt_v2
              #['/EGamma1/Run2023C-PromptReco-v1/MINIAOD'],    # 367094 - 367515 130X_dataRun3_Prompt_v3
              #['/EGamma1/Run2023C-PromptReco-v2/MINIAOD'],    # 367516 - 367758 130X_dataRun3_Prompt_v3
              ##['/EGamma1/Run2023C-PromptReco-v3/MINIAOD'],    # 367661 - 367758 130X_dataRun3_Prompt_v3
              #['/EGamma1/Run2023C-PromptReco-v4/MINIAOD'],    # 367770 - 368412 130X_dataRun3_Prompt_v3
-             #['/EGamma1/Run2023D-PromptReco-v1/MINIAOD'],    # 369844 - 370472 130X_dataRun3_Prompt_v4
+             ['/EGamma1/Run2023D-PromptReco-v1/MINIAOD'],    # 369844 - 370472 130X_dataRun3_Prompt_v4
              #['/EGamma1/Run2023D-PromptReco-v2/MINIAOD'],    # 370666 - 370790 130X_dataRun3_Prompt_v4
 
 	    ]
@@ -147,16 +148,32 @@ def subcrab( runs, events, reqmem ):
             primaryDataset = inDO[0].split('/')[1]
             runEra         = inDO[0].split('/')[2]
             dataset	   = inDO[0].split('/')[3]
+
             #trial          = 'gammares_tt_kucc_126_v4_spike'
             #trial          = 'gammares_tt_kucc_126_v5_phoclean'
             #trial          = 'gammares_tt_kucc_126_v7_diag_unclean'
             #trial          = 'gammares_tt_kucc_126_v11_diag' # added spike rechits with 2 gev cut
-            trial          = 'gammares_ttcc_131_v11_diag'
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1' # kOOT flag disable online calibration && -1.65 while setting koot flag 
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_slewc' # kOOT flag disable online calibration && -1.65 while setting koot flag + gain switch punt EB
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_exp1' # no gain and no min of zero amplitude set slew to 0
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_dslew' # bad pulse shape for double gain slew
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_exp2' # no min amplitude - no slew correction
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_gstest' # no min amplitude - has gain vs slew test
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_qfix' # no min amplitude - slew + cc > 0 set to 0
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_fix1' # use weights to zero out terms with slew issue in computeCC
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_ebsf' # added parameters to turn on and off slew correction for EB && EE seperatly - eb true ee false
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_nosf' # added parameters to turn on and off slew correction for EB && EE seperatly - eb false ee false
+            #trial          = 'gammares_ttcc_140_v11_diag_ebsf_ccgt' # using 140X_dataRun3_Candidate_2024_06_26_20_41_23 GT for CC calibration in 22/23
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_exp3' # changed pulse template normilization to max sample amplitude instead of sum of amplitudes
+            trial          = 'gammares_ttcc_140_v11_diag_mod1_exp3' # changed pulse template normilization to max pulse template amplitude instead of sum of amplitudes
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
-            #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/ecalTiming/"+trial+"/"
-            config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
+            #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
+            #config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
+            #config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
+            config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_request"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs
+
 
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
             #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root'] #'nThreads='+str(config.JobType.numCores), # run2 2018
@@ -169,7 +186,9 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=130X_dataRun3_Prompt_v2', 'outputFileName=output.root'] # 23 AB prompt
             #config.JobType.pyCfgParams   = ['globalTag=130X_dataRun3_Prompt_v3', 'outputFileName=output.root'] # 23 Cv1-3 prompt
             #config.JobType.pyCfgParams   = ['globalTag=130X_dataRun3_Prompt_v3_forRun368229_v1', 'outputFileName=output.root'] # 23 Cv4 prpt
-            config.JobType.pyCfgParams   = ['globalTag=130X_dataRun3_Candidate_2023_08_08_21_30_44', 'outputFileName=output.root'] # 23 CC GT
+            #config.JobType.pyCfgParams   = ['globalTag=130X_dataRun3_Candidate_2023_08_08_21_30_44', 'outputFileName=output.root'] # 23 CC GT
+            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Candidate_2024_06_26_20_41_23', 'outputFileName=output.root'] # 22/23 CC GT 140
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=True','doDiag=True']
 
             config.Data.inputDataset     = inDO[0]
             # Submit.
@@ -205,29 +224,31 @@ def subcrab( runs, events, reqmem ):
 
 def submit_run():
 
-		#subcrab( "315257-316993","",2500)#Run2 2018A
+	#subcrab( "315257-316993","",2500)#Run2 2018A
 
         #subcrab( "366850-366873","",2500)#
 
-		#subcrab( "366323-367065","",2500)# Run 3 23 AB
+	#subcrab( "366323-367065","",2500)# Run 3 23 AB
         #subcrab( "366323-366361","","2500")# Run 3 23 A
-        subcrab( "366403-367079","","2500")# Run 3 23 B
+        #subcrab( "366403-367079","","2500")# Run 3 23 B
         #subcrab( "367094-367758","",2500)# Run 3 23 C1&3
         #subcrab( "367770-368412","",2500)# Run 3 23 C4
 
-		##subcrab( "352400-358400","",2500)# Run3 22ABCD
+	##subcrab( "352400-358400","",2500)# Run3 22ABCD
         ##subcrab( "359000-362200","",2500)# Run3 22EF
         ##subcrab( "362300-362800","",2500)# Run3 22G
 
         #subcrab( "355794-359021","",2500)# Run3 CD
         #subcrab( "359022-362760","",2500)# Run3 EFG
-		#subcrab( "355890-355895","",2500)
+	#subcrab( "355890-355895","",2500)
 
         #subcrab( "316241-316245","",2500) # very small test batch 18A
         #subcrab( "357101-357268","",2500)#22C?
-		#subcrab( "360395-360415","",2500)#22F?
+	#subcrab( "360395-360415","",2500)#22F?
 
-		#subcrab( "000000-999999","",2500)#any
+        #subcrab( "369844-369999","",2500)#23D (369844-369999),(370092-370243),(370293-370580)
+        #subcrab( "370293-370580","",2500)#23D 
+        subcrab( "370496-370580","",2500)#23D
 
 ########################################################
 

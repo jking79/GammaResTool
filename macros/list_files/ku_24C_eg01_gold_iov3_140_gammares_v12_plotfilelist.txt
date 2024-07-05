@@ -1,0 +1,2 @@
+list_files/egammares_gammares_cc_140_json_v2_EGamma0_MINIAOD_Run2024C-PromptReco-v1_379415-380238_dispho_v2.txt none 380066 380238 EGamma0/
+list_files/egammares_gammares_cc_140_json_v2_EGamma1_MINIAOD_Run2024C-PromptReco-v1_379415-380238_dispho_v2.txt none 380066 380238 EGamma1/

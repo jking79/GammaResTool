@@ -1,0 +1,1 @@
+list_files/egammares_gammares_ttcc_140_v11_diag_EGamma1_MINIAOD_Run2023D-PromptReco-v1_v2.txt 369844 369999
