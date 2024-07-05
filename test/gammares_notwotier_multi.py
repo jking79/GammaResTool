@@ -15,7 +15,10 @@ options.register('globalTag','140X_dataRun3_Prompt_v2',VarParsing.multiplicity.s
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_18A_diag_126_gammares_v10.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_24E_diag_140_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+
+options.register('doTwoTier',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to do twotier processing');
+options.register('doDiag',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to store diagnostic info');
 
 ## parsing command line arguments
 options.parseArguments()
@@ -60,94 +63,24 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 #eventList = open(options.rlelist,'r')
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
-		#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/809/00000/60ef0541-b8f5-479b-becd-4fdbd0e0599b.root'
-    	#'/store/data/Run2022C/EGamma/MINIAOD/PromptReco-v1/000/355/892/00000/08458ea6-e15b-46ff-a71d-6f61d4c6d288.root'
-		#'/store/data/Run2022F/EGamma/MINIAOD/PromptReco-v1/000/362/154/00000/0392b31a-851b-4c61-98f5-cfb1598aef5f.root'
-        #'/store/data/Run2018A/EGamma/MINIAOD/17Sep2018-v2/100000/10E13819-4C42-FA4F-B6A1-53A26A2F388A.root'
-		#'/store/data/Run2024A/EGamma0/MINIAOD/PromptReco-v1/000/378/927/00000/5893ee0a-d192-4827-b3ef-5c3e1dfeb328.root'
 
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/168/00000/1529db6d-eaa3-42a7-aa27-19503567abe4.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/169/00000/fea774ab-d0e5-4487-acf2-5f8882af677d.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/170/00000/eb9fa4fc-4cd2-46c8-83cc-6be21b26d512.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/171/00000/57d47ad8-a3fc-4df6-af91-a59d27e9deb7.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/178/00000/940c2796-400c-4573-888a-288829b014ea.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/237/00000/5277f772-c202-4252-934e-27f35ea60969.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/238/00000/0ae6e1a7-b056-48e6-b3b2-f100da658834.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/238/00000/19104a78-bf72-424a-84aa-13a4a4b45932.root',
-        '/store/data/Run2024B/EGamma0/MINIAOD/PromptReco-v1/000/379/238/00000/1caec1ed-50a3-4cd7-b1bc-23867b789129.root',
+        #'file:967aebe0-e567-4139-9f91-d9e67f6b2ace.root'
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/43f9417c-f2bc-4e2c-a114-ac6d5c5b7052.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/444fe16d-0217-4915-92ca-101fdad77998.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/67beed64-8d00-4f97-93b2-72292c720443.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/6f38df6b-6ddb-400d-85ba-e8da46fb9500.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/967aebe0-e567-4139-9f91-d9e67f6b2ace.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/9aaff3a9-b4d8-4025-9dfa-a64751429a80.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/9ba1c87f-217b-46b0-b44b-7a6bc0a2ba17.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/b15ef1a9-d310-4a98-9da3-edbd85b93b01.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/b8a7f31d-8c9c-4254-99aa-38fd0d6d638f.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/d868dddd-3fff-456a-bc1f-09fba3339620.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/e0bd624f-b25d-48f0-890c-1340ea1eb666.root',
+        'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/f7b05c22-6939-429c-9a83-51cf69cdedc1.root',
 
 	),
 #    secondaryFileNames = cms.untracked.vstring(
 
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/26201159-BA64-E811-B349-02163E019F92.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/28389948-BA64-E811-B1DE-FA163E0639A2.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/36DF98ED-BA64-E811-8926-02163E01A036.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/3ED17F49-BA64-E811-B3AA-FA163E649742.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/4E09C5E3-BA64-E811-B4A6-FA163EE8E7AA.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/8A6280FC-BA64-E811-A47B-02163E01A029.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/A8557BB9-BA64-E811-9F57-FA163E1D3FC8.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00000/F03848F8-BA64-E811-A717-FA163E4907DA.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/758/00001/8434C310-BB64-E811-BEE4-FA163EF0B127.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/944/00000/42332B35-9064-E811-8D6C-FA163EBE4E78.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/123ED0DD-B764-E811-B2CD-02163E01A0B0.root',
-#        '/store/data/Run2018A/EGamma/RAW/v1/000/316/985/00000/24D8862F-B864-E811-8087-FA163EC5FAA0.root',
-
-
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f966971d-944d-4b72-8b31-f23914a64695.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/f9fd7d6f-d376-4dd8-a456-065dfa315842.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/faa18a05-0c6b-4319-b684-03a7b4953cc8.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/fb874daf-4226-4e33-8041-d0e657517b87.root',
-#        '/store/data/Run2022C/EGamma/RAW/v1/000/355/892/00000/ffeab3bd-21aa-491f-8813-5e40e430dcd8.root'
-		
-#		'/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df3a20-4381-4103-8b98-5fd77e266823.root',
-
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0010965c-a872-454b-9b4f-58ac78517be6.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/003464aa-8285-40a1-bdfc-623b8c3c9c11.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/00f12706-41f5-4de7-b6ec-3d5642ce1079.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01367a50-7548-46f7-a1ab-21ee2b461c09.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/013c0377-784e-4fec-a671-2c0001950dda.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01754c90-e053-4e3a-b46d-9297dd14d1ac.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df0966-fd10-4513-a227-ba0116eaf323.root',
-#        #'/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/01df3a20-4381-4103-8b98-5fd77e266823.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/02e2a278-bb19-4bfa-82c9-ec160adce841.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/035b02fb-dbe9-4889-a46d-0dc40acc49a9.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/03b7d404-2afd-459a-8c4c-88be935fb000.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/03f4c919-314b-49d4-a979-13596d55997a.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0416a8d1-cc81-41d3-aa6a-e3850a174fbf.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/04f1bea2-4572-4089-a1cf-f0b98ebb58fc.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/055fa8c0-2f83-4ecf-b3e9-bbbdf8a6b701.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/05679cb3-468f-4ed3-a795-9c94c9027b43.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/06013a2c-d014-4b40-b6bf-391617ce1897.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/07025fe3-45e6-49de-8bf9-2011f65cef75.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/076f7b4c-449f-4d7d-9f64-34a9cb073793.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/081d0f90-4314-4b2e-abf9-21b8eef00af4.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/08b1c8b6-b8eb-4ee5-99df-6a9bb3d35a8c.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/08fc9701-09a4-4423-bf54-7573634e2f8b.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/09614c60-7af4-49b3-b16f-8373bd8e165c.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0a3b1163-529d-4887-ba78-0c7677ba724a.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0a430a98-5f17-44e7-bfc3-b67e55b5fbc2.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0a685ecd-5220-43e4-b1ad-3d9d2ee3208a.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0b62d850-f979-4aa3-bb96-7bdf98e35529.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0bfd60c7-fa0e-454d-bfb9-4e7508d50eb6.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0bfdec2a-098d-461d-8570-f03681ebf7c1.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0c3188cd-249c-48e0-b5c7-cbf72c852e74.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0cd4d5ca-0244-474e-91e2-dd7137ffb2c7.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0d347e7b-bc3f-4e3e-8328-580874a53c32.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0d798a37-8423-427e-9049-07b6911fdbe5.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0d9b834e-a110-42ff-afba-0ef75ff2d58b.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0e9d6c19-31cd-4f7d-abb3-f94db32c6234.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0f0ceb8a-eeaf-4fba-a88a-11d3fcf69ac8.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0f25b562-9ff3-4e92-926a-62ae92fef387.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0f28ad51-b4a2-4a63-a72c-e4e28756c43a.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0f7c6b44-aaf6-461c-b690-85dea88ca036.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0facce5e-4b5a-45f3-b72c-5b96be3ede0b.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0fba0679-fac9-48b6-94cb-fc206713ad21.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0fc2731d-80d2-4ba1-8154-3dcad3b615d9.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/0fc889c2-c932-4e08-97b7-2bba83f0484a.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/10a2f010-1f2b-4081-8c45-05538991b453.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/10f5c8e7-41dc-40fd-b208-d8bd514b2db2.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/1119be7c-35cc-4f5a-bb33-043b2b121f03.root',
-#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/11368d45-2c64-46b2-aae5-cc35b1e18d42.root',
 #        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/116043a5-e71e-4df8-8014-34fdb3391301.root'
 
 #	),
@@ -156,12 +89,13 @@ process.source = cms.Source("PoolSource",
 
 
 ## How many events to process
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -214,8 +148,8 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
 
    ## do two tier reconstruction of second rechit collection
-   doTwoTier = cms.bool(False), 
-   doDiag = cms.bool(True),
+   doTwoTier = cms.bool(options.doTwoTier), 
+   doDiag = cms.bool(options.doDiag),
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),

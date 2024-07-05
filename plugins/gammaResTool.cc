@@ -25,9 +25,6 @@ using namespace std;
 //#define DEBUG true
 #define DEBUG false
 
-//#define DIAG true   replaced with tag below
-//#define DIAG false
-
 //
 // constructors and destructor
 //
@@ -339,6 +336,27 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     //------------------------------------------------------------------------------------
     if( DEBUG ) std::cout << "Processing Mini & Cali RecHits" << std::endl;
 
+/*
+    std::map<UInt_t,DetIDStruct> DetIDMap;
+    SetupDetIDsEB( DetIDMap );
+    SetupDetIDsEE( DetIDMap );
+    for( auto iter : DetIDMap ){ 
+		const auto recHitID = iter.first;
+		const auto i1 = iter.second.i1;
+		const auto i2 = iter.second.i2;
+		const auto bmp = iter.second.ecal;
+		const int side = ( bmp == ECAL::EB ) ? 0 : ( bmp == ECAL::EP ) ? 1 : -1;
+		const auto geometry( ( side == 0 ) ? barrelGeometry : endcapGeometry );
+        const auto recHitPos = geometry->getGeometry(recHitID)->getPosition();
+		
+        const auto rhX = recHitPos.x();
+        const auto rhY = recHitPos.y();
+        const auto rhZ = recHitPos.z();
+
+		std::cout << recHitID << " " << i1 << " " << i2 << " " <<  side << " " << rhX << " " << rhY << " " << rhZ << std::endl; 
+	}//<<>>for( auto iter : DetIDMap )
+*/
+
     rhCaliID.clear();
 	rhCaliEnergy.clear();
 	rhCaliRtTime.clear();
@@ -349,15 +367,23 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<float> miniRhEnergy;
     std::vector<float> miniRhRtTime;
     std::vector<float> miniRhCCTime;
+    std::vector<float> miniRhUnCCTime;
     std::vector<float> miniRhTOF;
 
     //if( DEBUG ) std::cout << " - enetering RecHit loop" << std::endl;
     for (const auto & recHit : frechits ){
 
 		const auto recHitID = getRawID(recHit);
-        auto cctime = -999.0;
+        float cctime = -999.0;
+		float uncctime = -999.0;
         if( doTwoTier ){
-            for (const auto & ccRecHit : fccrechits ){ if( getRawID(ccRecHit) == recHitID ){ cctime = ccRecHit.time(); break; } }
+            for (const auto & ccRecHit : fccrechits ){ 
+				if( getRawID(ccRecHit) == recHitID ){ 
+					cctime = ccRecHit.time(); 
+					uncctime = ccRecHit.nonCorrectedTime();
+					break; 
+				}//if( getRawID(ccRecHit) == recHitID )
+			}//for (const auto & ccRecHit : fccrechits )
         }//if( doTwoTier )
 
         const auto isEB = getIsEB(recHit);
@@ -393,6 +419,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		miniRhEnergy.push_back(recHit.energy());
 		miniRhRtTime.push_back(recHit.time());
 		miniRhCCTime.push_back(cctime);
+		miniRhUnCCTime.push_back(uncctime);
 		miniRhTOF.push_back(tof);
 
         float rhECut(5.0);
@@ -412,10 +439,12 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	rhID.clear();
 	rhRtTime.clear();
 	rhCCTime.clear();
+    rhUnCCTime.clear();
 	//rhTimeErr, 
 	rhTOF.clear();
     rhEnergy.clear();
 	rhAmp.clear();
+    //rhRawAmp.clear();
 	rhRtisOOT.clear();
     rhCCisOOT.clear();
 	rhisGS6.clear(); 
@@ -471,13 +500,16 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			const auto pedrms12 = (pediter != pedestals_->end()) ? pediter->rms(1) : 0.0;
 			const auto adcToGeV = laser*interCalib*adcToGeV0;
 			const auto amplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV)/pedrms12 : -99.0;
+            //const auto rawamplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV) : -99.0;
 
 			auto cctime = -999.0;
+            auto uncctime = -999.0;
 			auto ccisoot = false;
 			if( doTwoTier ){
 				for (const auto ccRecHit : fccrechits ){ 
 					if( getRawID(ccRecHit) == recHitID ){ 
 						cctime = ccRecHit.time(); 
+						uncctime = ccRecHit.nonCorrectedTime();
 						ccisoot = ccRecHit.checkFlag(EcalRecHit::kOutOfTime);
 						break; 
 					}//<<>>for (const auto ccRecHit : fccrechits )
@@ -495,9 +527,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	        //rhPosPhi.push_back(recHitPos.phi());
 	        rhRtTime.push_back(recHit.time());
 	        rhCCTime.push_back(cctime);
+            rhUnCCTime.push_back(uncctime);
 	        //if( DEBUG ) std::cout << " -- storing values FLAGS" << std::endl;
 	        rhEnergy.push_back(recHit.energy());
-			rhAmp.push_back(amplitude);
+			//rhRawAmp.push_back(rawamplitude);
+            rhAmp.push_back(amplitude);
 	        //energyError()
 	        rhRtisOOT.push_back(recHit.checkFlag(EcalRecHit::kOutOfTime));
             rhCCisOOT.push_back(ccisoot);
@@ -534,26 +568,26 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 			if( isEB ){
 
 				float energy = -9.0;
-				//float rhNonTime = -99.0;
+				float rhNonTime = -99.0;
         		for (const auto ccRecHit : fccrechits ){ 
 					if( getRawID(ccRecHit) == recHitID ){ 
 						energy = ccRecHit.energy();
-						//rhNonTime = ccRecHit.nonCorrectedTime(); 
+						rhNonTime = ccRecHit.nonCorrectedTime(); 
 						break; 
 					}//<<>>if( getRawID(ccRecHit) == recHitID ) 
 				}//<<>>for (const auto ccRecHit : fccrechits )
 
-				auto jitter = recHit.jitter();
+				auto jitter = 25.f*recHit.jitter();
 				auto nonjitter = recHit.chi2();
-				//auto encNonTime = recHit.nonCorrectedTime();
+				auto encNonTime = recHit.nonCorrectedTime();
 
-				//std::cout << "NonCorrectedTime : rh = " << rhNonTime << " unrh = " << encNonTime; 
-				//std::cout << " diff = " << rhNonTime - encNonTime << std::endl;
+				if( DEBUG ) std::cout << "NonCorrectedTime : rh = " << rhNonTime << " unrh = " << encNonTime; 
+				if( DEBUG ) std::cout << " diff = " << rhNonTime - encNonTime << " unjitter : " << jitter << std::endl;
 
 				//std::cout << " Storing cc encoding info " << std::endl;
 				unrhJitter.push_back(jitter);
 				unrhNonJitter.push_back(nonjitter);
-				//unrhEncNonJitter.push_back(encNonTime);
+				unrhEncNonJitter.push_back(encNonTime);
 				unrhEnergy.push_back(energy);
 
 /*
@@ -620,6 +654,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<int> selPhoType;
     std::vector<uInt> locSeedRHs{0,0};
     std::vector<uInt> gloSeedRHs{0,0};
+    std::vector<uInt> gloAllSeedRHs;
 	float gloDiMass(-1), gloDiAngle(-1), gloDiDr(-1), gloDiPhi(-1), gloDiEta(-1);
 	//std::vector<int> selPhoIndx{-1,-1,-1};
 	vector<vector<int>> offsets{{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
@@ -684,6 +719,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	if( DEBUG ) std::cout << " Selected " << gloPhotons.size() << " global photons and " << locRHCands.size() << " local rechits. " << std::endl;
 
 	// select rhs for global
+	gloAllSeedRHs.clear();
 	int nGloPhos = gloPhotons.size();
 	if( nGloPhos > 1 ){
 		float zMassMatch(35.00);
@@ -733,11 +769,12 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         	const auto &phosc0 = pho0.superCluster().isNonnull() ? pho0.superCluster() : pho0.parentSuperCluster();
             const auto &phosc1 = pho1.superCluster().isNonnull() ? pho1.superCluster() : pho1.parentSuperCluster();
 			gloSeedRHs[0] = ((phosc0.get())->seed()->seed()).rawId();
+			gloAllSeedRHs.push_back(((phosc0.get())->seed()->seed()).rawId());
 			gloSeedRHs[1] = ((phosc1.get())->seed()->seed()).rawId();
+            gloAllSeedRHs.push_back(((phosc1.get())->seed()->seed()).rawId());
 			if( DEBUG ) std::cout << " Selecting matching glo photon pair with : " << gloSeedRHs[0] << " & " << gloSeedRHs[1];
             if( DEBUG ) std::cout << " and dZmass : " << zMassMatch << std::endl;
 			
-
 		}//<<>>if( zMassMatch < 35.00 )
 	}//<<>>if( gloPhotons.size() > 1 )i
 
@@ -767,6 +804,78 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	if( DEBUG ) std::cout << " Storing ids Global : " << gloSeedRHs[0] << ", " << gloSeedRHs[1]; 
     if( DEBUG ) std::cout << " and Local: " << locSeedRHs[0] << ", " << locSeedRHs[1] << std::endl;
+
+
+    res1RhID.clear();
+    res1Amp.clear();
+    res1E.clear();
+    res1RtTime.clear();
+    res1CCTime.clear();
+    res1TOF.clear();
+
+    res2RhID.clear();
+    res2Amp.clear();
+    res2E.clear();
+    res2RtTime.clear();
+    res2CCTime.clear();
+    res2TOF.clear();
+
+	//int nLocRHCands = locRHCands.size(); 
+	for( int it(0); it < nLocRHCands; it+=2 ){
+
+		locAMatches++;
+		bool goodrh = locRHCands[it] > 0;
+		auto idx1 = goodrh ? getRhIdx(locRHCands[it],miniRhId) : 0;
+		auto idx2 = goodrh ? getRhIdx(locRHCands[it+1],miniRhId) : 0;
+        res1RhID.push_back( goodrh ? locRHCands[it] : 0 );
+        res1Amp.push_back( goodrh ? miniRhAmp[idx1] : -999 );
+        res1E.push_back( goodrh ? miniRhEnergy[idx1] : -999 );
+        res1RtTime.push_back( goodrh ? miniRhRtTime[idx1] : -999 );
+        res1CCTime.push_back( goodrh ? miniRhCCTime[idx1] : -999 );
+        res1TOF.push_back( goodrh ? miniRhTOF[idx1] : -999 );
+        res2RhID.push_back( goodrh ? locRHCands[it+1] : 0 );
+        res2Amp.push_back( goodrh ? miniRhAmp[idx2] : -999 );
+        res2E.push_back( goodrh ? miniRhEnergy[idx2] : -999 );
+        res2RtTime.push_back( goodrh ? miniRhRtTime[idx2] : -999 );
+        res2CCTime.push_back( goodrh ? miniRhCCTime[idx2] : -999 );
+        res2TOF.push_back( goodrh ? miniRhTOF[idx2] : -999 );
+
+	}//<<>>for( int it(0); it < res1RhID.size(); it++ )
+
+    resZ1RhID.clear();
+    resZ1Amp.clear();
+    resZ1E.clear();
+    resZ1RtTime.clear();
+    resZ1CCTime.clear();
+    resZ1TOF.clear();
+    resZ2RhID.clear();
+    resZ2Amp.clear();
+    resZ2E.clear();
+    resZ2RtTime.clear();
+    resZ2CCTime.clear();
+    resZ2TOF.clear();
+
+	int nGloAllSeedRHs = gloAllSeedRHs.size();
+    for( int it(0); it < nGloAllSeedRHs; it+=2 ){
+
+		gloAMatches++;
+        bool goodrh = gloAllSeedRHs[it] > 0;
+        auto idx1 = goodrh ? getRhIdx(gloAllSeedRHs[it],miniRhId) : 0;
+        auto idx2 = goodrh ? getRhIdx(gloAllSeedRHs[it+1],miniRhId) : 0;
+        resZ1RhID.push_back( goodrh ? gloAllSeedRHs[it] : 0 );
+        resZ1Amp.push_back( goodrh ? miniRhAmp[idx1] : -999 );
+        resZ1E.push_back( goodrh ? miniRhEnergy[idx1] : -999 );
+        resZ1RtTime.push_back( goodrh ? miniRhRtTime[idx1] : -999 );
+        resZ1CCTime.push_back( goodrh ? miniRhCCTime[idx1] : -999 );
+        resZ1TOF.push_back( goodrh ? miniRhTOF[idx1] : -999 );
+        resZ2RhID.push_back( goodrh ? gloAllSeedRHs[it+1] : 0 );
+        resZ2Amp.push_back( goodrh ? miniRhAmp[idx2] : -999 );
+        resZ2E.push_back( goodrh ? miniRhEnergy[idx2] : -999 );
+        resZ2RtTime.push_back( goodrh ? miniRhRtTime[idx2] : -999 );
+        resZ2CCTime.push_back( goodrh ? miniRhCCTime[idx2] : -999 );
+        resZ2TOF.push_back( goodrh ? miniRhTOF[idx2] : -999 );	
+
+    }//<<>>for( int it(0); it < res1RhID.size(); it++ )
 
 	resRhID.clear();
 	resAmp.clear();
@@ -876,6 +985,8 @@ void GammaResTool::beginJob(){
 
     locMatches = 0;
     gloMatches = 0;
+    locAMatches = 0;
+    gloAMatches = 0;
 	nEvents = 0;
 
 	//totrhs = 0;
@@ -937,10 +1048,38 @@ void GammaResTool::beginJob(){
     outTree->Branch("resCCTime", &resCCTime);
     outTree->Branch("resTOF", &resTOF);
 
+    outTree->Branch("res1RhID", &res1RhID);
+    outTree->Branch("res1Amp", &res1Amp);
+    outTree->Branch("res1E", &res1E);
+    outTree->Branch("res1RtTime", &res1RtTime);
+    outTree->Branch("res1CCTime", &res1CCTime);
+    outTree->Branch("res1TOF", &res1TOF);
+
+    outTree->Branch("res2RhID", &res2RhID);
+    outTree->Branch("res2Amp", &res2Amp);
+    outTree->Branch("res2E", &res2E);
+    outTree->Branch("res2RtTime", &res2RtTime);
+    outTree->Branch("res2CCTime", &res2CCTime);
+    outTree->Branch("res2TOF", &res2TOF);
+
+    outTree->Branch("resZ1RhID", &resZ1RhID);
+    outTree->Branch("resZ1Amp", &resZ1Amp);
+    outTree->Branch("resZ1E", &resZ1E);
+    outTree->Branch("resZ1RtTime", &resZ1RtTime);
+    outTree->Branch("resZ1CCTime", &resZ1CCTime);
+    outTree->Branch("resZ1TOF", &resZ1TOF);
+
+    outTree->Branch("resZ2RhID", &resZ2RhID);
+    outTree->Branch("resZ2Amp", &resZ2Amp);
+    outTree->Branch("resZ2E", &resZ2E);
+    outTree->Branch("resZ2RtTime", &resZ2RtTime);
+    outTree->Branch("resZ2CCTime", &resZ2CCTime);
+    outTree->Branch("resZ2TOF", &resZ2TOF);
+
     if( doTwoTier ){
 
         outTree->Branch("unrhJitter", &unrhJitter);
-        outTree->Branch("unrhNonJitter", &unrhNonJitter);
+        outTree->Branch("unrhChi2", &unrhNonJitter);
         outTree->Branch("unrhEncNonJitter", &unrhEncNonJitter);
         outTree->Branch("unrhEnergy", &unrhEnergy);
 
@@ -950,21 +1089,23 @@ void GammaResTool::beginJob(){
 
     	outTree->Branch("rhID", &rhID);
     	outTree->Branch("rhRtTime", &rhRtTime);
-        //outTree->Branch("rhCCTime", &rhCCTime);
+        outTree->Branch("rhCCTime", &rhCCTime);
+        outTree->Branch("rhUnCCTime", &rhUnCCTime);
         outTree->Branch("rhTOF", &rhTOF);
         outTree->Branch("rhEnergy", &rhEnergy);
-        outTree->Branch("rhAmp", &rhAmp);
+        //outTree->Branch("rhRawAmp", &rhRawAmp);
 
 	    outTree->Branch("rhRtisOOT", &rhRtisOOT);
-        //outTree->Branch("rhCCisOOT", &rhCCisOOT);
+        outTree->Branch("rhCCisOOT", &rhCCisOOT);
 	    //outTree->Branch("rhisGood", &rhisGood);
 	    outTree->Branch("rhisWeird", &rhisWeird);
 	    outTree->Branch("rhisDiWeird", &rhisDiWeird);
 	    outTree->Branch("rhSwCross", &rhSwCross);
-        //outTree->Branch("rhisGS6", &rhisGS6);
-        //outTree->Branch("rhisGS1", &rhisGS1);
-        //outTree->Branch("rhadcToGeV", &rhadcToGeV);
-        //outTree->Branch("rhpedrms12", &rhpedrms12);
+        outTree->Branch("rhAmp", &rhAmp);
+        outTree->Branch("rhisGS6", &rhisGS6);
+        outTree->Branch("rhisGS1", &rhisGS1);
+        outTree->Branch("rhadcToGeV", &rhadcToGeV);
+        outTree->Branch("rhpedrms12", &rhpedrms12);
 
         outTree->Branch("phoEnergy", &phoEnergy);
         outTree->Branch("phoRhIds", &phoRhIds);
@@ -1008,6 +1149,7 @@ void GammaResTool::endJob(){
 	if( nEvents == 0 ) nEvents = 1;
 	//if( DEBUG ) 
 	std::cout << " Found Global % " << gloMatches/nEvents << " and Local % " << locMatches/nEvents << " of " << nEvents << std::endl;
+    std::cout << " Found Global % " << gloAMatches/nEvents << " and Local % " << locAMatches/nEvents << " of " << nEvents << std::endl;
 	//std::cout << " Range Acceptance : " << encrhs << " / " << totrhs << " = " << encrhs/totrhs << std::endl;
 
 }//>>>>void GammaResTool::endJob()

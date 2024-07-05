@@ -61,8 +61,8 @@ def subcrab( runs, events, reqmem ):
         # External files needed by CRAB
         inputDir     = ''
         #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
-        inputJSON    = ''
-
+        inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
+        #inputJSON    = ''
         #--------------------------------------------------------
         # This is the base config:
         #--------------------------------------------------------
@@ -83,9 +83,9 @@ def subcrab( runs, events, reqmem ):
 
         config.Data.inputDataset = None
         #config.Data.useParent      = True
-	    #config.Data.secondaryInputDataset = secInputPaths
+	#config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
-        #config.Data.lumiMask     = inputDir+inputJSON
+        config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
@@ -99,31 +99,35 @@ def subcrab( runs, events, reqmem ):
         config.JobType.allowUndistributedCMSSW = True
         config.Data.publication      = False
         config.Site.storageSite      = 'T3_US_FNALLPC'
-        config.Data.outLFNDirBase    = '/store/user/jaking/ecalTiming/'
+        #config.Data.outLFNDirBase    = '/store/user/jaking/ecalTiming/'
         #--------------------------------------------------------
 
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            #['/EGamma0/Run2024A-PromptReco-v1/MINIAOD'], 	# 378927-378962 52.6M
+            ##['/EGamma0/Run2024A-PromptReco-v1/MINIAOD'], 	# 378927-378962 52.6M
             #['/EGamma0/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379350	0.54T
             ['/EGamma0/Run2024C-PromptReco-v1/MINIAOD'],	# 379413-379765	3.3T
+            #['/EGamma0/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T 
 
-            #['/EGamma1/Run2024A-PromptReco-v1/MINIAOD'],	# 378919-378961	52.1M
-			#['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
+            ##['/EGamma1/Run2024A-PromptReco-v1/MINIAOD'],	# 378919-378961	52.1M
+	    #['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
             ['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
+            #['/EGamma1/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T
+
+
 
             #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
 
-            #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1  352499 - 355062    
-            #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'],	#											 		355094 - 355769											 
-            #['/EGamma/Run2022C-PromptReco-v1/MINIAOD'],	#											 		355809 - 357482
-            #['/EGamma/Run2022D-PromptReco-v1/MINIAOD'],	#											 		357538 - 357733
-            #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'],	#											 		357734 - 357902
-            #['/EGamma/Run2022D-PromptReco-v3/MINIAOD'],	#											 		358381
-            #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v8	 		359090 - 360327
-            #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #											 		360389 - 362167
-            #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   		362399 - 362760
+            #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1 352499 - 355062    
+            #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'], #						    355094 - 355769											 
+            #['/EGamma/Run2022C-PromptReco-v1/MINIAOD'], #						    355809 - 357482
+            #['/EGamma/Run2022D-PromptReco-v1/MINIAOD'], #						    357538 - 357733
+            #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'], #						    357734 - 357902
+            #['/EGamma/Run2022D-PromptReco-v3/MINIAOD'], #						    358381
+            #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v8	    359090 - 360327
+            #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #						    360389 - 362167
+            #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   	    362399 - 362760
 
 	    ]
  
@@ -132,20 +136,26 @@ def subcrab( runs, events, reqmem ):
 	         #print( inDO[0] )
             primaryDataset = inDO[0].split('/')[1]
             runEra         = inDO[0].split('/')[2]
-            dataset	   	   = inDO[0].split('/')[3]
+            dataset	   = inDO[0].split('/')[3]
 
             #trial          = 'gammares_ratio_126_v2'
-            trial          = 'gammares_cc_140_v2'
+            #trial          = 'gammares_cc_140_v2'
+            trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
 
-            config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset+"_dispho"
-            config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
+            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
+            #config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
+            #config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
+            config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_request"
+            config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra
 
-            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root']  # 2024 tested
-            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',#'nThreads='+str(config.JobType.numCores), 
-            #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root']  # 2018A tested
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root'] # ABCD
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root'] # EF
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root'] # G
+            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
+            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4','doTwoTier=False','doDiag=False']  
+            #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=False']]  # 2018A tested
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # ABCD
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # EF
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # G
 
             config.Data.inputDataset     = inDO[0]
             # Submit.
@@ -181,20 +191,20 @@ def subcrab( runs, events, reqmem ):
 
 def submit_run():
 
-		#subcrab( "378981-379349","",2500)#	Run3 24B		
-        subcrab( "379413-379774","",2500)#	Run3 24C
+	#subcrab( "378981-379391","",2500)#	Run3 24B		
+        subcrab( "379415-380238","",2500)#	Run3 24C
+        #subcrab( "380306-380947","",2500)#      Run3 24D
 
-		#subcrab( "352400-358400","",2500)# Run3 22ABCD
+	#subcrab( "352400-358400","",2500)# Run3 22ABCD
         #subcrab( "359000-362200","",2500)# Run3 22EF
         #subcrab( "362300-362800","",2500)# Run3 22G
 
         #subcrab( "316241-316245","",2500) # very small test batch 18A
         #subcrab( "316000-316499","",2500) # 18A	
         #subcrab( "357101-357268","",2500)#22C?
-		#subcrab( "360395-360415","",2500)#22F?
+	#subcrab( "360395-360415","",2500)#22F?
 
 
 ########################################################
 
 submit_run()
-ubcrab( "378981-379349","",2500)# 

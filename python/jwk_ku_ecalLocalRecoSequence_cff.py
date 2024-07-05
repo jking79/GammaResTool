@@ -19,8 +19,10 @@ from RecoLocalCalo.EcalRecProducers.ecalDetIdToBeRecovered_cfi import *
 #from RecoLocalCalo.EcalRecProducers.ecalCompactTrigPrim_cfi import *
 #from RecoLocalCalo.EcalRecProducers.ecalTPSkim_cfi import *
 #from RecoLocalCalo.EcalRecProducers.ecalDetailedTimeRecHit_cfi import *
+from RecoLocalCalo.Configuration.ecalLocalRecoSequence_cff import *
 
 from GammaResTool.GammaResTool.jwk_ku_ecalRecHit_cff import *
+from GammaResTool.GammaResTool.jwk_ku_cc_ecalRecHit_cff import *
 from GammaResTool.GammaResTool.jwk_ku_ecalMultiFitUncalRecHit_cff import *
 
 ku_ecalUncalibRecHitSequence = cms.Sequence(ecalMultiFitUncalibRecHitBase*kuEcalMultiFitUncalibRecHit*ecalDetIdToBeRecovered)
@@ -45,6 +47,11 @@ ku_reduced_multi_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRe
 ku_cc_gt_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRecHitBase*
                                         #kuEcalMultiFitUncalibRecHit*
                                         kuCCEcalMultiFitUncalibRecHit*
+                                        ecalDetIdToBeRecovered)
+
+ku_cc_native_gt_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRecHitBase*
+                                        #kuEcalMultiFitUncalibRecHit*
+                                        kuCCNativeEcalMultiFitUncalibRecHit*
                                         ecalDetIdToBeRecovered)
 
 ku_reduced_nomulti_ecalUncalibRecHitSequence = cms.Sequence(#ecalMultiFitUncalibRecHitBase*
@@ -132,6 +139,15 @@ kuCCEcalRecHit = ecalRecHitBase.clone(
         #skipTimeCalib = cms.bool(True),
         )
 
+kuCCNativeEcalRecHit = ecalRecHitCCBase.clone(
+        EErechitCollection = cms.string('kuCCRecHitsEE'),
+        EEuncalibRecHitCollection = cms.InputTag("kuCCNativeEcalMultiFitUncalibRecHit","EcalUncalibRecHitsEE"),
+        EBuncalibRecHitCollection = cms.InputTag("kuCCNativeEcalMultiFitUncalibRecHit","EcalUncalibRecHitsEB"),
+        EBrechitCollection = cms.string('kuCCRecHitsEB'),
+        #skipTimeCalib = cms.bool(True),
+        )
+
+
 kuCCStcEcalLHCRecHit = ecalRecHitBase.clone(
         EErechitCollection = cms.string('kuCCStcRecHitsEE'),
         EEuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEE"),
@@ -149,21 +165,21 @@ kuCCStcEcalLHCRecHit = ecalRecHitBase.clone(
         )
 
 ku_ecalRecHitSequence        = cms.Sequence(ecalRecHitBase*
-					                    	kuEcalRecHit
+					    kuEcalRecHit
                                             #ecalCompactTrigPrim*
                                             #ecalTPSkim+
                                             #ecalPreshowerRecHit
-											)
+				            )
 
 ku_min_ecalRecHitSequence        = cms.Sequence(ecalRecHitBase*kuEcalRecHit)
 
 kucc_only_ecalRecHitSequence        = cms.Sequence(kuCCStcEcalRecHit)
 
 ku_multi_ecalRecHitSequence        = cms.Sequence(kuEcalRecHit*
-						                        #kuStcEcalRecHit*
+					        #kuStcEcalRecHit*
                                                 kuWtStcEcalRecHit*
                                                 kuCCStcEcalRecHit
-						                    )
+					       )
 
 ku_lhc_ecalRecHitSequence        = cms.Sequence(kuEcalLHCRecHit*
                                                   #kuStcEcalRecHit*
@@ -179,9 +195,19 @@ ku_reduced_multi_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
 
 ku_cc_gt_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
                                                   kuCCEcalRecHit
+                                                  #kuCCStcEcalRecHit
                                                   #kuWtStcEcalRecHit*
                                                   #kuCCStcEcalRecHit
                                                )
+
+ku_cc_native_gt_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
+                                                  #kuCCEcalRecHit
+                                                  kuCCNativeEcalRecHit
+                                                  #kuCCStcEcalRecHit
+                                                  #kuWtStcEcalRecHit*
+                                                  #kuCCStcEcalRecHit
+                                               )
+
 
 ku_reduced_flipped_ecalRecHitSequence     = cms.Sequence(#kuEcalRecHit*
                                                   kuStcEcalRecHit*
@@ -192,7 +218,7 @@ ku_reduced_flipped_ecalRecHitSequence     = cms.Sequence(#kuEcalRecHit*
 
 ku_spike_multi_ecalRecHitSequence        = cms.Sequence(#kuEcalRecHit*
                                                   kuStcEcalLHCRecHit*
-												  #kuStcEcalRecHit*
+						  #kuStcEcalRecHit*
                                                   kuCCStcEcalLHCRecHit
                                                )
 
@@ -223,6 +249,7 @@ ku_spike_nomulti_ecalLocalRecoSequence   = cms.Sequence(ku_reduced_nomulti_ecalU
 
 ku_cc_gt_ecalLocalRecoSequence   = cms.Sequence(ku_cc_gt_ecalUncalibRecHitSequence*ku_cc_gt_ecalRecHitSequence)
 
+ku_cc_native_ecalLocalRecoSequence = cms.Sequence(ku_cc_native_gt_ecalUncalibRecHitSequence*ku_cc_native_gt_ecalRecHitSequence)
 
 #from RecoLocalCalo.EcalRecProducers.ecalDetailedTimeRecHit_cfi import *
 #_phase2_timing_ecalRecHitSequence = cms.Sequence( ku_ecalRecHitSequence.copy() + ecalDetailedTimeRecHit )

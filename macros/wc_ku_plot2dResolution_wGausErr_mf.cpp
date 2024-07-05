@@ -435,7 +435,8 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
         std::string califilename;
         std::string srunstr;
         std::string erunstr;
-        ss >> infilename >> califilename >> srunstr >> erunstr;
+        std::string subdir;
+        ss >> infilename >> califilename >> srunstr >> erunstr >> subdir;
         std::cout << "open input file : " << infilename << std::endl;
         std::cout << "open input cali : " << califilename << std::endl;
         //std::cout << "For Run " << srunstr << " to Run " << erunstr << std::endl;
@@ -443,36 +444,37 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
         auto erun = std::stoi(erunstr);
         std::cout << "For Run " << srun << " to Run " << erun << std::endl;
 
-		const std::string eosdir("root://cmseos.fnal.gov//store/user/");
-
 		//auto tfilename = indir+infilename;
         //auto fInFile = TFile::Open(tfilename.c_str(), "update");
         //fInFile->cd();
         //auto fInTree = (TTree*)fInFile->Get(disphotreename.c_str());
 
-        std::ifstream infile(infilename);
+        std::ifstream infile( infilename );
         std::string str;
 
         auto fInTree = new TChain(disphotreename.c_str());
         std::cout << "Adding files to TChain." << std::endl;
         while (std::getline(infile,str)){
             const std::string eosdir("root://cmseos.fnal.gov//store/user/");
-            auto tfilename = eosdir + indir + str;
+            //const std::string eosdir("/uscms/home/jaking/nobackup/el8/ecaltiming/CMSSW_14_0_4/src/GammaResTool/GammaResTool/");
+            auto tfilename = eosdir + indir + subdir + str;
             //auto tfilename = indir + "/" + str;
-            std::cout << "--  adding file: " << tfilename << std::endl;
+            //std::cout << "--  adding file: " << tfilename << std::endl;
+			std::cout << "-";
         	fInTree->Add(tfilename.c_str());
         }//<<>>while (std::getline(infile,str))
-
+		std::cout << std::endl;
 
 		//auto calidir = "/home/t3-ku/jaking/ecaltiming/skimmed_trees/local_chain/";
-		//auto calidir = "cali_root_files/";
-		//TFile* fCaliFile(NULL);
-		//if( calimapname != "none" ){
-			string calidir = "";
-			auto califilein = calidir+califilename;
-        	auto fCaliFile = TFile::Open(califilein.c_str(), "read");
-		//}//<<>>if( calimapname != "none" ){
-        //std::cout << "fInFile : " << fInFile  << " fInTree : " << fInTree << " fCaliFile : " << fCaliFile << std::endl;
+		string calidir = "cali_root_files/";
+		TFile* fCaliFile(NULL);
+		if( calimapname != "none" ){
+			//string calidir = "";
+			string califilein = calidir+califilename;
+			std::cout << "Using caliFile : " << califilein << std::endl;
+        	if( califilename != "none" ) fCaliFile = TFile::Open( califilein.c_str(), "read" );
+		}//<<>>if( calimapname != "none" ){
+        std::cout << "fInFile : " << infilename  << " fInTree : " << fInTree << " fCaliFile : " << fCaliFile << std::endl;
 
         std::cout << "set branches to get from fInFile : fInTree" << std::endl;
 
@@ -537,9 +539,10 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 		//unsigned int lastRun(0);
         auto nEntries = fInTree->GetEntries();
 		if( debug ) nEntries = ( nEntries < 10000 ) ? nEntries : 10000;
+		if( debug ) std::cout << "Mf2d Proccessing " << nEntries << " entries : " << std::endl;
         for (auto centry = 0U; centry < nEntries; centry++){
-        	// if( entry%int(nEntries*0.1) == 0 ) std::cout << "Proccessed " << entry/nEntries << "\% of " << nEntries << " entries." << std::endl;
-	        if( centry%(100000) == 0 ) std::cout << "Mf2d Proccessed " << centry << " of " << nEntries << " entries." << std::endl;        
+
+			if( centry%10000000 == 0 or centry == 0) std::cout << "Proccessed " << centry << " of " << nEntries << " " << (1000.0*static_cast<float>(centry)/static_cast<float>(nEntries))/10.0 << "%" << std::endl;
 
 			auto entry = fInTree->LoadTree(centry);
 
@@ -759,6 +762,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 	 	//delete fInFile;
 
         //delete fCaliFile;  <<<<<<<<<<<<<<   delete califiles ????????????????
+		if(debug) std::cout << " -------- Next Input file " << std::endl;
 
     } // while (std::getline(infilelist,infiles))
 
@@ -833,7 +837,8 @@ int main ( int argc, char *argv[] ){
 		// 1 2 3 4  5  6  7  8  9  10 11 12 13 14 15
     	//std::string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 950 2250 9000"); 
    		//std::string xbinstr("VARIABLE 0 75 100 125 150 175 200 225 250 275 325 375 450 550 725 925 1325 1700 2250"); 
-    	std::string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 750 950 1275 1700 2250");
+    	//std::string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 750 950 1275 1700 2250");
+        std::string xbinstr("VARIABLE 60 80 100 120 150 180 240 320 400 480 560 640 800 1600 3200");
 		bool useAmp(true);
         //std::string xbinstr("VARIABLE 0 10 12 14 16 18 20 22 24 26 30 34 40 48 62 78 120");
         //bool useAmp(false);
@@ -841,124 +846,42 @@ int main ( int argc, char *argv[] ){
         //if( argc != 7 ) { std::cout << "Insufficent arguments." << std::endl; }
         //else {
 
-        	//auto indir = "jaking/ecalTiming/EGamma/";//argv[1];
-            //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v2b/EGamma/";
-            //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v4_flipped/EGamma/";
-            //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v3/EGamma/";
-            //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v5_phoclean/EGamma/";
-        	//auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v7_diag/EGamma/";
-            //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v7_diag_unclean/EGamma/";
-            //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v10_reso/EGamma/";
-            auto indir = "jaking/ecalTiming/";
+            //auto indir = "jaking/ecalTiming/";
+            auto indir = "jaking/ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/";
 
-            //auto infilelistname = "gres_Run2022A_infilelist.txt"; //argv[2];
-            //auto infilelistname = "egres_Run2022C_355892_test_infilelist.txt";
-            //auto infilelistname = "egamma_run22C_partial_126_gammares_v2a_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22A_352400-358400_126_gammares_v2a_plotfilelist.txt";
-            //auto infilelistname = "egamma_run18A_316000-316499_126_gammares_v2a_plotfilelist.txt";
-
-            //auto infilelistname = "egamma_run22AB_352319-355793_126_gammares_v2b_plotfilelist.txt";
-        	//auto infilelistname = "egamma_run22C_355794_357486_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22D_357487_359021_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22E_359022_360331_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22G_362350_362760_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV1_352319_356513_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV2_356514_357289_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV3_357290_358883_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV4_358884_359420_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV6_360090_360981_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV8_361417_362522_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV9_362523_362760_126_gammares_v2b_plotfilelist.txt";
-
-            //auto infilelistname = "egamma_run3_prompt_359421_360089_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV2_356514_357289_126_gammares_v2b_iov3cal_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_126_gammares_v2b_iov3cal_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22Dv2_357734_358219_126_gammares_v3_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV9_362523_362760_126_gammares_v4Flip_plotfilelist.txt";
-
-            //auto infilelistname = "egamma_run22IOV2_356514_357289_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV3_357290_358883_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV6_360090_360981_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV7_360982_361416_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV8_361417_362522_126_gammares_v4Flip_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV9_362523_362760_126_gammares_v4Flip_plotfilelist.txt";
-
-            //auto infilelistname = "egamma_run22IOV3_357290_358883_126_gammares_v3_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_126_gammares_v3_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV3_357290_358883_nocali_126_gammares_v2b_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_nocali_126_gammares_v2b_plotfilelist.txt";
-
-            //auto infilelistname = "egamma_run22IOV2_356514_357289_126_gammares_v5_plotfilelist.txt";
-            //auto infilelistname = "egamma_run22IOV5_359421_360089_126_gammares_v5_plotfilelist.txt";
-            //auto infilelistname = "egamma_run2018A_100000_999999_126_gammares_v7_plotfilelist.txt";
-
-            //auto infilelistname = "tt_run3_2022C_Prompt_355794_359021_126_gammares_v10_reso_plotfilelist.txt";
-            //auto infilelistname = "tt_run3_2022D1_Prompt_355794_359021_126_gammares_v10_reso_plotfilelist.txt";
-            //auto infilelistname = "tt_run3_2022D2_Prompt_355794_359021_126_gammares_v10_reso_plotfilelist.txt";
             //auto infilelistname = "tt_run3_2022E_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
             //auto infilelistname = "tt_run3_2022F_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
             //auto infilelistname = "tt_run3_2022G_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
     		//auto infilelistname = "ku_23D_eg0_diag_126_gammares_v10_reso_plotfilelist.txt";
-            auto infilelistname = "ku_23B_378794_379366_eg01_140_gammares_v10_reso_plotfilelist.txt";
+            //auto infilelistname = "ku_23B_378794_379366_eg01_140_gammares_v10_reso_plotfilelist.txt";
 
-            //std::string outfilename = "gres_Run2022A_2dhists_test"; //argv[3];
-            //std::string outfilename = "egres_Run2022C_partial_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022C_355892_test_resplots";
-            //std::string outfilename = "egres_Run2018A_316000-316499_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022A_352400-358400_126_v2a_resplots";
+            //auto infilelistname = "list_files/ku_24C_eg01_140_gammares_v12_plotfilelist.txt";
+            //auto infilelistname = "list_files/ku_24C_eg01_gold_140_gammares_v12_plotfilelist.txt";
+            //auto infilelistname = "list_files/ku_24C_eg01_gold_iov1_140_gammares_v12_plotfilelist.txt";
+            //auto infilelistname = "list_files/ku_24C_eg01_gold_iov2_140_gammares_v12_plotfilelist.txt";
+            //auto infilelistname = "list_files/ku_24C_eg01_gold_iov3_140_gammares_v12_plotfilelist.txt";
+			//auto infilelistname = "list_files/ku_24D_eg01_140_gammares_v12_plotfilelist.txt";
+			//auto infilelistname = "list_files/ku_24D_eg01_cali_140_gammares_v12_plotfilelist.txt";
+            //auto infilelistname = "list_files/ku_24CD_eg01_mixed_cali_140_gammares_v12_plotfilelist.txt";
+            //auto infilelistname = "list_files/ku_24CE_test_140_gammares_v12_plotfilelist.txt";
+            auto infilelistname = "list_files/ku_23D_eg1_sfeb_ccgt_140_gammares_v12_plotfilelist.txt";
 
-            //std::string outfilename = "egres_Run2022AB_352319_355793_126_v2a_resplots"; 
-            //std::string outfilename = "egres_Run2022C_355794_357486_126_v2a_resplots";  
-            //std::string outfilename = "egres_Run2022D_357487_359021_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022E_359022_360331_126_v2a_resplots"; 
-            //std::string outfilename = "egres_Run2022G_362350_362760_126_v2a_resplots"; 
-            //std::string outfilename = "egres_Run2022IOV1_352319_356513_126_v2a_resplots"; 
-            //std::string outfilename = "egres_Run2022IOV2_356514_357289_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022IOV3_357290_358883_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022IOV4_358884_359420_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022IOV6_360090_360981_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022IOV8_361417_362522_126_126_v2a_resplots";
-            //std::string outfilename = "egres_Run2022IOV9_362523_362760_126_v2a_resplots";
 
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v4Flip_v2_resplots";
-
-            //std::string outfilename = "egres_Run2022IOV2_356514_357289_126_v2b_iov3cal_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v2b_iov3cal_resplots";
-            //std::string outfilename = "egres_Run2022Dv2_357734_358219_126_v3_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v4Flip_resplots";
-
-            //std::string outfilename = "egres_Run2022IOV2_356514_357289_126_v4Flip_resplots";
-            //std::string outfilename = "egres_Run2022IOV3_357290_358883_126_v4Flip_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v4Flip_resplots";
-            //std::string outfilename = "egres_Run2022IOV6_360090_360981_126_v4Flip_resplots";
-            //std::string outfilename = "egres_Run2022IOV7_360982_361416_126_v4Flip_resplots";
-            //std::string outfilename = "egres_Run2022IOV8_361417_362522_126_v4Flip_resplots";
-            //std::string outfilename = "egres_Run2022IOV9_362523_362760_126_v4Flip_resplots";
-
-            //std::string outfilename = "egres_Run2022IOV3_357290_358883_126_v3_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v3_resplots";
-            //std::string outfilename = "egres_Run2022IOV3_357290_358883_nocali_126_v2b_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_nocali_126_v2b_resplots";
-
-            //std::string outfilename = "egres_Run2022IOV2_356514_357289_126_v5_resplots";
-            //std::string outfilename = "egres_Run2022IOV5_359421_360089_126_v5_resplots_v5";
-            //std::string outfilename = "egres_Run2018A_100000_999999_126_v7_resplots_v5";
-
-            //std::string outfilename = "egres_Run2018C_356800_357250_126_v10_resplots";
-            //std::string outfilename = "egres_Run2018D1_357600_357700_126_v10_resplots";
-            //std::string outfilename = "egres_Run2018D2_357800_358200_126_v10_resplots";
             //std::string outfilename = "egres_Run2018E_359022_362760_126_v10_resplots";
             //std::string outfilename = "egres_Run2018F_360332_362180_126_v10_resplots";
             //std::string outfilename = "egres_Run2018G_362350_362700_126_v10_resplots";
             //std::string outfilename = "egres_Run2023D_dmv_eg0_diag_126_v10_resplots";
-            std::string outfilename = "egres_Run2024B_eg01_378794_379323_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024B_eg01_378794_379323_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024C_nojson_eg01_Full_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024C_goldjson_eg01_Full_cali_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024C_goldjson_eg01_379367_379543_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024C_goldjson_eg01_380066_380238_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots";
+            //std::string outfilename = "egres_Run2024CD_mixed_eg01_Full_cali_140_v10_resplots";
+            std::string outfilename = "egres_Run2023D_SF_140_v10_resplots";
 
             auto tvarname = ""; //argv[4];
-			auto calimapname = "none"; //argv[5];
+			auto calimapname = "infile"; //argv[5];
             auto isd_type = "yes"; //argv[6];
             //auto brun = std::stoi(argv[7]);
             //auto erun = std::stoi(argv[8]);
@@ -969,9 +892,9 @@ int main ( int argc, char *argv[] ){
 			runTimeFitter( fitInFile, "", "", "", "", outfilename, "SRO_Data_Hist", xbinstr );
             runTimeFitter( fitInFile, "", "", "", "", outfilename, "DRO_Data_Hist", xbinstr );
             runTimeFitter( fitInFile, "", "", "", "", outfilename, "ZEE_Data_Hist", xbinstr );
-            //runTimeFitter( fitInFile, "", "", "", "", outfilename, "SRO_CC_Data_Hist", xbinstr );
-            //runTimeFitter( fitInFile, "", "", "", "", outfilename, "DRO_CC_Data_Hist", xbinstr );
-            //runTimeFitter( fitInFile, "", "", "", "", outfilename, "ZEE_CC_Data_Hist", xbinstr );
+            runTimeFitter( fitInFile, "", "", "", "", outfilename, "SRO_CC_Data_Hist", xbinstr );
+            runTimeFitter( fitInFile, "", "", "", "", outfilename, "DRO_CC_Data_Hist", xbinstr );
+            runTimeFitter( fitInFile, "", "", "", "", outfilename, "ZEE_CC_Data_Hist", xbinstr );
         //}
         return 1;
 }

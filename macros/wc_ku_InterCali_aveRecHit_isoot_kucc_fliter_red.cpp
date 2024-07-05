@@ -49,7 +49,7 @@ template <typename T> std::string to_string(T value)
 }
 
 enum ECAL {EB, EM, EP, NONE};
-std::string ecal_config_path("/uscms/home/jaking/nobackup/llpa/CMSSW_10_6_20/src/LLPGamma/LLPgammaAnalyzer/macros/ecal_config/");
+std::string ecal_config_path("ecal_config/");
 
 struct DetIDStruct
 {
@@ -131,8 +131,8 @@ void wc_ku_InterCali_aveRecHit_mini( string indir, string infilelistname, string
     //const int  nPhotons = 4;
     const double offset = 0.0;
     const int bin_offset = 86;
-	//const float minRhEnergy = 5.0;
-    const float minRhEnergy = 10.0;
+	const float minRhEnergy = 5.0;
+    //const float minRhEnergy = 10.0;
 
 	//const bool debug = true;
     const bool debug = false;
@@ -219,6 +219,7 @@ void wc_ku_InterCali_aveRecHit_mini( string indir, string infilelistname, string
          std::map<UInt_t,DetIDStruct> DetIDMap;
          SetupDetIDsEB( DetIDMap );
          SetupDetIDsEE( DetIDMap );
+		 //for( auto iter : DetIDMap ){ std::cout << iter.first << " " << iter.second.i1 << " " << iter.second.i2 << std::endl; }
 
     	 std::map<UInt_t,Float_t> sumXtalMiniRecTime;
     	 std::map<UInt_t,Float_t> sumXtalCCStcRecTime;
@@ -286,10 +287,11 @@ void wc_ku_InterCali_aveRecHit_mini( string indir, string infilelistname, string
          while (std::getline(infile,instr)){
 			auto tfilename = eosdir + indir + instr;
          	//auto tfilename = indir + "/" + str;
-         	std::cout << "--  adding file: " << tfilename << std::endl;
+         	//std::cout << "--  adding file: " << tfilename << std::endl;
+			std::cout << "-";
          	fInTree->Add(tfilename.c_str());
          }//<<>>while (std::getline(infile,str))
-
+		 std::cout << std::endl;
 
          run = 0;
          rhCaliID = 0;
@@ -313,8 +315,7 @@ void wc_ku_InterCali_aveRecHit_mini( string indir, string infilelistname, string
 		 //nEntries = 1000000;
          for (Long64_t centry = 0; centry < nEntries; centry++){
 			  
-     	     if( centry%100000 == 0 or centry == 0) std::cout << "Proccessed " << centry << " of " << nEntries 
-																<< " (" << static_cast<float>((10000*centry)/nEntries)/(100) << "%)" << std::endl;
+     	     if( centry%1000000 == 0 or centry == 0) std::cout << "Proccessed " << centry << " of " << nEntries << " (" << static_cast<float>((10000*centry)/nEntries)/(100) << "%)" << std::endl;
              //if( centry > 100 ) break;
      	     //if( centry%100 != 0 ) continue;   //{  std::cout << "Continuing on : " << centry << endl; continue;	}
 
@@ -480,120 +481,22 @@ int main ( int argc, char *argv[] ){
         //if( argc != 4 ) { std::cout << "Insufficent arguments." << std::endl; }
         //else {
 
-                //auto indir = "lpcsusylep/jaking/ecalTiming/tt_KUCCRes_126_Test/EGamma/"; //argv[1];
-                //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v2b/EGamma/";
-                //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v4_flipped/EGamma/";
                 //auto indir = "jaking/ecalTiming/gammares_tt_kucc_126_v3/EGamma/";
 				//auto indir = "ecalTiming/gammares_tt_kucc_126_v7_diag/EGamma/";
-				//auto indir = "ecalTiming/gammares_tt_kucc_126_v10_diag/EGamma/";
-                //auto indir = "ecalTiming/gammares_tt_kucc_126_v10_reso/EGamma/";
-                //auto indir = "ecalTiming/gammares_ttcc_1307_v11_diag/EGamma1/";
-                auto indir = "ecalTiming/";
+				//auto indir = "ecalTiming/gammares_ttcc_140_v11_diag/EGamma1/";
+                auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/EGamma1/";
  
-                ///auto infilelist = "egamma_miniaod_run2018A_316241-316245.txt"; //argv[2];
-                ///auto infilelist = "egamma_miniaod_run2022A_352400-358400.txt";
-                //auto infilelist = "egamma_run352400-run358400_califilelist.txt";
-                //auto infilelist = "egamma_run22C_partial_126_gammares_v2a_califilelist.txt";
-                //auto infilelist = "egamma_run18A_316000-316499_126_gammares_v2a_califilelist.txt";
-                //auto infilelist = "egamma_run22A_352400-358400_126_gammares_v2a_califilelist.txt";
-
-                //auto infilelist = "egamma_run3_prompt_352319_356513_126_gammares_v2b_califilelist.txt";//1
-                //auto infilelist = "egamma_run3_prompt_356514_357289_126_gammares_v2b_califilelist.txt";//2
-                //auto infilelist = "egamma_run3_prompt_357290_358883_126_gammares_v2b_califilelist.txt";//3
-                //auto infilelist = "egamma_run3_prompt_358884_359420_126_gammares_v2b_califilelist.txt";//4
-                //auto infilelist = "egamma_run3_prompt_359421_360089_126_gammares_v2b_califilelist.txt";//5
-                //auto infilelist = "egamma_run3_prompt_360090_360981_126_gammares_v2b_califilelist.txt";//6
-                //auto infilelist = "egamma_run3_prompt_361417_362522_126_gammares_v2b_califilelist.txt";//8
-                //auto infilelist = "egamma_run3_prompt_362523_362760_126_gammares_v2b_califilelist.txt";//9
-				//auto infilelist = "egamma_run3_prompt_2022C_126_gammares_v2b_califilelist.txt";
-
-                //auto infilelist = "egamma_run3_prompt_357487_357733_126_gammares_v4Flip_califilelist.txt"; //D1
-                //auto infilelist = "egamma_run3_iov5_359421_360089_126_gammares_v4Flip_califilelist.txt"; //5
-                //auto infilelist = "egamma_run3_prompt_362523_362760_126_gammares_v4Flip_califilelist.txt"; //9
-                //auto infilelist = "egamma_run3_iov2_356514_357289_126_gammares_v4Flip_califilelist.txt";//2
-                //auto infilelist = "egamma_run3_prompt_357290_358883_126_gammares_v4Flip_califilelist.txt";//3
-                //auto infilelist = "egamma_run3_iov4_358884_359420_126_gammares_v4Flip_califilelist.txt";//4
-                //auto infilelist = "egamma_run3_22E_359022_360331_126_gammares_v4Flip_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov6_360090_360981_126_gammares_v4Flip_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov7_360982_361416_126_gammares_v4Flip_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov8_361417_362522_126_gammares_v4Flip_califilelist.txt";
-
-                //auto infilelist = "egamma_run3_prompt_357734_358219_126_gammares_v3_califilelist.txt";
-
-                //auto infilelist = "egamma_run3_iov2_356514_357289_126_gammares_v3_califilelist.txt"; 
-                //auto infilelist = "egamma_run3_iov3_357290_358883_126_gammares_v3_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov4_358884_359420_126_gammares_v3_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov5_359421_360089_126_gammares_v3_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov6_360090_360981_126_gammares_v3_califilelist.txt"; 
-                //auto infilelist = "egamma_run3_iov7_360982_361416_126_gammares_v3_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov8_361417_362522_126_gammares_v3_califilelist.txt";
-                //auto infilelist = "egamma_run3_iov9_362523_362760_126_gammares_v3_califilelist.txt";
-
-                //auto infilelist = "egamma_run3_IOV5_359421_360089_126_gammares_v7_califilelist.txt";
-				//auto infilelist = "egamma_run3_Run2018A_Full_126_gammares_v7_califilelist.txt";
-
-				//auto infilelist = "egamma_run3_iov9_362523_362760_126_gammares_diag_v10_califilelist.txt";
-
-				//auto infilelist = "tt_run3_2022C_Prompt_355794_359021_126_gammares_v10_reso_califilelist.txt";
-                //auto infilelist = "tt_run3_2022D1_Prompt_355794_359021_126_gammares_v10_reso_califilelist.txt";
-                //auto infilelist = "tt_run3_2022D2_Prompt_355794_359021_126_gammares_v10_reso_califilelist.txt";
-                //auto infilelist = "tt_run3_2022E_Prompt_359022_362760_126_gammares_v10_reso_califilelist.txt";
-                //auto infilelist = "tt_run3_2022F_Prompt_359022_362760_126_gammares_v10_reso_califilelist.txt";
-                //auto infilelist = "tt_run3_2022G_Prompt_359022_362760_126_gammares_v10_reso_califilelist.txt";
-
                 //auto infilelist = "tt_run3_2023B_Prompt_366323_367065_1301_gammares_v11_reso_califilelist.txt";
-                auto infilelist = "egamma1_run3_2024B_Prompt_378794_379190_1404_gammares_v11_reso_califilelist.txt";
+                //auto infilelist = "egamma1_run3_2024B_Prompt_378794_379190_1404_gammares_v11_reso_califilelist.txt";
+                //auto infilelist = "list_files/egamma1_run3_2024C_Prompt_379415-380238_1404_gammares_v11_reso_califilelist.txt";
+                //auto infilelist = "list_files/egamma1_run3_2024D_Prompt_380066-380947_1404_gammares_v11_reso_califilelist.txt";
+				//auto infilelist = "list_files/egamma1_run3_2023D_Prompt_369844_369999_1404_gammares_v11_reso_califilelist.txt";
+                auto infilelist = "list_files/egamma1_run3_2023D_Prompt_370293-370580_1404_ccgt_gammares_v11_reso_califilelist.txt";
 
-                //auto outfilename = "tt_KUCCRes_126_run2022A_352400-358400_Cali.root"; //argv[3];
-                //auto outfilename = "tt_KUCCRes_126_v2a_run2022C_partial_Cali.root"; //argv[3];
-                //auto outfilename = "st_RatioRes_126_v2a_run2018A_316000-316499_Cali.root"; //argv[3];
- 
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022IOV1_352319_356513_Cali.root"; //argv[3];
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022IOV2_356514_357289_Cali.root"; //argv[3];
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022IOV3_357290_358883_Cali.root"; //argv[3]; 
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022_358884_359420_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022IOV5_359421_360089_Cali.root"; 
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022_360090_360981_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022_361417_362522_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022IOV9_362523_362760_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v2b_run3_2022C_355794_357486_Cali.root";
-
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022E_359022_360331_Cali.root"; //E
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022_357487_357733_Cali.root";//D1 
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022_357734_358219_Cali.root";
-
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022IOV2_356514_357289_Cali2.root"; //2
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022_357290_358883_Cali.root"; //3
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022IOV4_358884_359420_Cali.root"; //4
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022IOV5_359421_360089_Cali.root"; //5
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022IOV6_360090_360981_Cali.root"; //6
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022IOV7_360982_361416_Cali.root"; //7
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022IOV8_361417_362522_Cali.root"; //8
-                //auto outfilename = "tt_KUCCRes_126_v4Flip_run3_2022_362523_362760_Cali.root"; //9
-
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV2_356514_357289_Cali.root"; //2
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV3_357290_358883_Cali.root"; //3
-        		//auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV4_358884_359420_Cali.root"; //4
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV5_359421_360089_Cali_v2.root"; //5
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV6_360090_360981_Cali.root"; //6
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV7_360982_361416_Cali.root"; //7
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV8_361417_362522_Cali.root"; //8
-                //auto outfilename = "tt_KUCCRes_126_v3_run3_2022IOV9_362523_362760_Cali.root"; //9
-
-                //auto outfilename = "tt_KUCCRes_126_v7_run3_2022IOV5_359421_360089_Cali_10GeV_v5.root"; //5
-				//auto outfilename = "tt_KUCCRes_126_v7_run3_2018A_Full_Cali_v4.root";
-
-				//auto outfilename = "tt_KUCCRes_126_v10diag_run3_2022IOV9_362523_362760_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v10reso_run3_2022C_Prompt_355794_359021_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v10reso_run3_2022D1_Prompt_355794_359021_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v10reso_run3_2022D2_Prompt_355794_359021_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v10reso_run3_2022E_Prompt_359022_362760_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v10reso_run3_2022F_Prompt_359022_362760_Cali.root";
-                //auto outfilename = "tt_KUCCRes_126_v10reso_run3_2022G_Prompt_359022_362760_Cali.root";
-
-                //auto outfilename = "tt_KUCCRes_1307_v11_run3_2023B_Prompt_366323_367065_Cali.root";
-                auto outfilename = "tt_KUCCRes_1404_v12_run3_2024B_eg1_Prompt_379191_379323_Cali.root";
+                //auto outfilename = "tt_KUCCRes_1404_v12_run3_2024B_eg1_Prompt_379191_379323_Cali.root";
                 //auto outfilename = "tt_KUCCRes_1404_v12_run3_2024B_Prompt_379324_379366_Cali.root";
+                //auto outfilename = "tt_KUCCRes_1404_v12_run3_2024C_eg1_Prompt_379415_380238_Cali.root";
+                auto outfilename = "tt_KUCCRes_1404_v12_run3_2024D_eg1_Prompt_370293_370580_ccgt_Cali.root";
 
                 wc_ku_InterCali_aveRecHit_mini( indir, infilelist, outfilename );
         //}

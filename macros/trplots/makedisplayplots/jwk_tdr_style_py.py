@@ -1,7 +1,7 @@
 from ROOT import *
 
-can_x_width = 700
-can_y_width = 600
+can_x_width = 1200
+can_y_width = 900
 
 def fixOverlay():
         gPad.RedrawAxis()
@@ -93,7 +93,7 @@ def setTDRStyle():
         tdrStyle.SetTitleColor(1)
         tdrStyle.SetTitleTextColor(1)
         tdrStyle.SetTitleFillColor(10)
-        tdrStyle.SetTitleFontSize(0.065)
+        tdrStyle.SetTitleFontSize(0.045)
         #// tdrStyle.SetTitleH(0)  // Set the height of the title box
         #// tdrStyle.SetTitleW(0)  // Set the width of the title box
         #tdrStyle.SetTitleX(0.5)  #// Set the position of the title box
@@ -106,7 +106,7 @@ def setTDRStyle():
 
         tdrStyle.SetTitleColor(1, "XYZ")
         tdrStyle.SetTitleFont(42, "XYZ")
-        tdrStyle.SetTitleSize(0.05, "XYZ")
+        tdrStyle.SetTitleSize(0.04, "XYZ")
         #tdrStyle.SetTitleXSize(0.06)  #// Another way to set the size?  0.02
         #tdrStyle.SetTitleYSize(0.06) 
         #tdrStyle.SetTitleXOffset(0.9)
@@ -121,7 +121,7 @@ def setTDRStyle():
         tdrStyle.SetLabelFont(42, "XYZ")
         tdrStyle.SetLabelOffset(0.007, "XYZ")
         #tdrStyle.SetLabelSize(0.05, "XYZ")
-        tdrStyle.SetLabelSize(0.03, "XYZ")
+        tdrStyle.SetLabelSize(0.02, "XYZ")
 
 #// For the axis:
 

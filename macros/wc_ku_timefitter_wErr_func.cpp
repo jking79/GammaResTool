@@ -309,7 +309,7 @@ void runTimeFitter(const std::string & infilename, const std::string & plotconfi
   //std::vector<Double_t> fXBins{75.0,150.0,175.0,225.0,275.0,325.0,375.0,475.0,600.0,950.0,2250.0,4500.0};
   //std::vector<Double_t> fXBins{75.0,150.0,175.0,225.0,275.0,325.0,375.0,475.0,600.0,950.0,2250.0,9000.0};
   //std::vector<Double_t> fXBins{0.0,75.0,125.0,175.0,225.0,275.0,325.0,375.0,425.0,500.0,700.0,2250.0,9000.0};
-  fNBinsX = fXBins.size();
+  fNBinsX = fXBins.size()-1;
   std::string ftstr = "Gaus1core";
   SetupTimeFitType(ftstr,fTimeFitType);
   fRangeLow = 2.0f;
@@ -618,7 +618,7 @@ void runTimeFitter(const std::string & infilename, const std::string & plotconfi
   //GFitInfo.ResultsMap.clear();
   // loop over good bins to delete things
   //auto & TimeFitStructMap = FitInfo.TimeFitStructMap;
-  for (auto ibinX = 1; ibinX < fNBinsX; ibinX++){
+  for (auto ibinX = 1; ibinX <= fNBinsX; ibinX++){
     // get pair input
     auto & TimeFit = TimeFitStructMap[ibinX];
     //auto & GTimeFit = GTimeFitStructMap[ibinX];
