@@ -136,7 +136,7 @@ kuCCEcalRecHit = ecalRecHitBase.clone(
         EEuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEE"),
         EBuncalibRecHitCollection = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEB"),
         EBrechitCollection = cms.string('kuCCRecHitsEB'),
-        #skipTimeCalib = cms.bool(True),
+        skipTimeCalib = cms.bool(True),
         )
 
 kuCCNativeEcalRecHit = ecalRecHitCCBase.clone(

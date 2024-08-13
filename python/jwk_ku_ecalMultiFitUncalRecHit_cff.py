@@ -288,8 +288,6 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               amplitudeThresholdEB    = cms.double(10),
               amplitudeThresholdEE    = cms.double(10),
 
-              useSlewCorrectionEB = cms.bool(True),
-              useSlewCorrectionEE = cms.bool(False),
               #ebSpikeThreshold = cms.double(1.042),
 
               # these are now taken from DB. Here the MC parameters for backward compatibility
@@ -325,8 +323,6 @@ kuCCNativeEcalMultiFitUncalibRecHit = _mod.ecalMultiFitUncalibRecHitProducer.clo
               outOfTimeThresholdGain12mEB = cms.double(3.0),
               outOfTimeThresholdGain61pEB = cms.double(3.0),
               outOfTimeThresholdGain61mEB = cms.double(3.0),
-              useSlewCorrectionEB = cms.bool(True),
-              useSlewCorrectionEE = cms.bool(False),
               timeCalibTag = cms.ESInputTag(':CC'),
               timeOffsetTag = cms.ESInputTag(':CC')
         )#algoPSet = cms.PSet
@@ -344,8 +340,6 @@ ecal_ccunrhtiming.toModify(kuCCNativeEcalMultiFitUncalibRecHit,
          outOfTimeThresholdGain12mEB = 3.0,
          outOfTimeThresholdGain61pEB = 3.0,
          outOfTimeThresholdGain61mEB = 3.0,
-         useSlewCorrectionEB = True,
-         useSlewCorrectionEE = False,
          timeCalibTag = ':CC',
          timeOffsetTag = ':CC'
      )

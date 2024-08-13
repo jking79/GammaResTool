@@ -165,7 +165,8 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_ttcc_140_v11_diag_mod1_nosf' # added parameters to turn on and off slew correction for EB && EE seperatly - eb false ee false
             #trial          = 'gammares_ttcc_140_v11_diag_ebsf_ccgt' # using 140X_dataRun3_Candidate_2024_06_26_20_41_23 GT for CC calibration in 22/23
             #trial          = 'gammares_ttcc_140_v11_diag_mod1_exp3' # changed pulse template normilization to max sample amplitude instead of sum of amplitudes
-            trial          = 'gammares_ttcc_140_v11_diag_mod1_exp3' # changed pulse template normilization to max pulse template amplitude instead of sum of amplitudes
+            #trial          = 'gammares_ttcc_140_v11_diag_mod1_exp3' # changed pulse template normilization to max pulse template amplitude instead of sum of amplitudes
+            trial          = 'gammares_ttcc_140_v11_mod1_pr_test2'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
@@ -248,7 +249,8 @@ def submit_run():
 
         #subcrab( "369844-369999","",2500)#23D (369844-369999),(370092-370243),(370293-370580)
         #subcrab( "370293-370580","",2500)#23D 
-        subcrab( "370496-370580","",2500)#23D
+        #subcrab( "370496-370580","",2500)#23D
+        subcrab( "370575-370580","",2500)#23D small test
 
 ########################################################
 

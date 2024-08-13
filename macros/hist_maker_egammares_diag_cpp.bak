@@ -223,27 +223,47 @@ void profileTH2D(TH2D* nhist, TH1D* prof, TH1D* fithist){
     for (auto ibinX = 1; ibinX <= nXBins; ibinX++){
 
         auto phist = (TH1F*)nhist->ProjectionY("temp",ibinX,ibinX);
+        //double error;
+        //auto content = hist->IntegralAndError(ibinX,ibinX,1,nYBins,error);
 
         auto mean = phist->GetMean();
+        //auto mean = 0.f;
         auto stdv = phist->GetStdDev();
+        //auto error = phist->GetMeanError();
         auto norm = phist->GetBinContent(phist->GetMaximumBin());
         auto high = mean + 0.2*stdv;
+        //auto high = 0.2;
         auto low = mean - 0.2*stdv;
+        //auto low = -0.2;
         //std::cout << " - Profile: m " << mean << " s " << stdv << " h " << high << " l " << low << " n " << norm << std::endl;
         if( abs(stdv) > 0.01 && abs(norm) > 1 ){
             auto tmp_form = new TFormula("tmp_formula","[0]*exp(-0.5*((x-[1])/[2])**2)");
             auto tmp_fit  = new TF1("tmp_fit",tmp_form->GetName(),low,high);
+            //auto tmp_fit  = new TF1("tmp_fit","crystalball",low,high);
+            //auto tmp_fit = new TF1("crystalball", twosided_crystalball_function, low, high, 7);
+            //auto tmp_fit  = new TF1("tmp_fit","gaus",high,low);
             tmp_fit->SetParameter(0,norm); //tmp_fit->SetParLimits(0,norm/2,norm*2);
             tmp_fit->SetParameter(1,mean); //tmp_fit->SetParLimits(1,-2,2);
             tmp_fit->SetParameter(2,stdv); //tmp_fit->SetParLimits(2,0,10);
+            //tmp_fit->SetParameter(3,0.25);
+            //tmp_fit->SetParameter(4,0.25);
+            //tmp_fit->SetParameter(5,1);
+            //tmp_fit->SetParameter(6,1);
             phist->Fit(tmp_fit->GetName(),"RBQ0");
+            //phist->Fit(tmp_fit->GetName(),"R");
+            //auto fnorm = tmp_fit->GetParameter(0);
             auto fmean = tmp_fit->GetParameter(1);
+            //auto fstd = tmp_fit->GetParameter(2);
             auto error = tmp_fit->GetParError(1);
+            //auto fChi2 = tmp_fit->GetChisquare();
             auto fNdf = tmp_fit->GetNDF();
             auto fProb = tmp_fit->GetProb();
+            //auto error = fstd/std::sqrt(fnorm);
+            //std::cout << " - Profile: fm " << fmean << " fChi2 " << fProb  << " e " << error << " fNdf " << fNdf << std::endl;
 
             // set new contents
             if( fNdf > 0 && fProb > 0.05 && error < 1.0 ){
+                //auto fChi2Ndf = fChi2/fNdf;
                 fithist->SetBinContent( ibinX, fProb );
                 fithist->SetBinError( ibinX, 0 );
                 prof->SetBinContent( ibinX, fmean );
@@ -294,7 +314,11 @@ void fillMeanHist(TH1D* numi, TH1D* denom, TH1D* result ){
 		float mnerr(0.0);
         if( dc > 20 ){
             ratio = nc/dc;
+			//float mnsq(0);
+			//for( int i = 0; i < times.size(); i++ ){ mnsq = sq2(times[i]-ratio); }
+			//mnerr = std::sqrt( mnsq/(dc*(dc+1)) );
 			mnerr = std::sqrt( sq2(ncer/dc)-(sq2(ratio)/dc) ); 
+            //mnerr = std::sqrt((sq2(ncer/dc)+sq2((nc/sq2(dc))*dcer))/dc);
         }//<<>>if( dc > 0 )
         result->SetBinContent(ibin,ratio);
         result->SetBinError(ibin,mnerr);
@@ -312,6 +336,8 @@ void fillRatioHist(TH1D* numi, TH1D* denom, TH1D* result ){
         auto dcer = denom->GetBinError(ibin);
         if( dc > 0 ){
             auto ratio = nc/dc;
+			//auto rerr = ratio*std::sqrt(hypo(ncer/nc,dcer/dc));
+			//auto rerr = std::sqrt((nc+1)*(nc+2)/((dc+2)*(dc+3))-((nc+1)/(dc+2)));
 			auto rerr = std::sqrt( ((nc+1)*(dc-nc+1)) / (sq2(dc+2)*(dc+3)) );	
         	result->SetBinContent(ibin,ratio);
         	result->SetBinError(ibin,rerr);
@@ -353,6 +379,10 @@ class makehists : egammares_hist_base {
     bool fMap[nEBEEMaps];
     TH2D *ebeeMapP[nEBEEMaps], *ebeeMapT[nEBEEMaps], *ebeeMapR[nEBEEMaps];
 	
+	//std::vector<std::vector<float>> cryscctimes, crysrttimes;
+    //TH1D *hist1d136[nCrys], *hist1d140[nCrys], *hist1d137[nCrys], *hist1d138[nCrys], *hist1d139[nCrys], *hist1d143[nCrys], *hist1d144[nCrys];
+    //TH1D *hist1d140[nCrys], *hist1d137[nCrys], *hist1d138[nCrys], *hist1d144[nCrys];
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,6 +412,9 @@ void makehists::makeEBEEMaps( std::vector<unsigned int> rhcol ){
     if( DEBUG ) std::cout << " -- start fill of ebee maps:" << std::endl;
     if(fill){
         if( DEBUG ) std::cout << " -- Filling ebeeMapT : " << nMaps << " with nRH : " << nrh << std::endl;
+        //vector<float> times;
+        //for( int idx = 0; idx < nrh; idx++ ) times.push_back((*rhTime)[getRhIdx(rhcol[idx])]);
+        //auto mtime = mean(times);
         for( int idx = 0; idx < nrh; idx++ ){
             const auto rhIDX = getRhIdx(rhcol[idx]);
             auto idinfo = DetIDMap[rhcol[idx]];
@@ -411,6 +444,10 @@ void makehists::makeEBEEMaps( int phoit ){
 
 }//int makehists::makeEBEEMaps( int phoit )
 
+//makehists::makehists(){}
+
+//makehists::~makehists(){}
+
 //-----------------------------------------------------------------------------------------------------------------------------
 ////----------------------------------------  Make Hists function call  ---------------------------------------------------------------
 ////-----------------------------------------------------------------------------------------------------------------------------
@@ -421,9 +458,10 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
     //bool debug = true; // this is for main loop only
 	bool debug = false;
 
-    // these need to be changed to input paramters for public verions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     const std::string disphotreename("tree/llpgtree");
+    //const std::string eosdir("");
     const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+    //const std::string eosdir("root://cmseos.fnal.gov//store/user/lpcsusylep/jaking/");
     //const std::string listdir("llpgana_list_files/");
 
     std::cout << "Producing Histograms for : " << outfilename << std::endl;
@@ -452,6 +490,8 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
     std::cout << "Setting up For Main Loop." << std::endl;
     auto nEntries = fInTree->GetEntries();
     if(debug) nEntries = 1000;
+    //nEntries = 2500000;
+    //nEntries = 10000;
     std::cout << "Proccessing " << nEntries << " entries." << std::endl;
     int npace = nEntries/20;
     for (Long64_t centry = 0; centry < nEntries; centry++){
@@ -480,6 +520,18 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
         ebeeMapR[it]->Write(); delete ebeeMapR[it];
     }//<<>>for( int it = 0; it < nEBEEMaps; it++ )
 
+/*
+    for( int i = 0; i < nCrys; i++ ){
+    	hist1d136[i]->Write(); delete hist1d136[i];
+    	hist1d140[i]->Write(); delete hist1d140[i];
+    	hist1d137[i]->Write(); delete hist1d137[i];
+    	hist1d138[i]->Write(); delete hist1d138[i];
+    	hist1d139[i]->Write(); delete hist1d139[i];
+    	hist1d143[i]->Write(); delete hist1d143[i];
+    	hist1d144[i]->Write(); delete hist1d144[i];
+    }//<<>>for( int i = 0; i < nCrys; i++ ){
+*/
+
     fOutFile->Close();
     std::cout << "llpgana_hist_maker : Thats all Folks!!" << std::endl;
 }//<<>>void llpgana_hist_maker
@@ -496,6 +548,8 @@ void makehists::eventLoop( Long64_t entry ){
     if( DEBUG ) std::cout << "Run : " << run << " in range " << startRun << " to " << endRun << " Good? " << goodRunRange << std::endl;
     auto goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
     auto goodGloRHs = (*resRhID)[2] != 0 && (*resRhID)[3] != 0;
+	//auto goodLocTimes = (*resCCTime)[0] != 0 && (*resCCTime)[1] != 0 && (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0;
+	//auto goodGloTimes = (*resCCTime)[2] != 0 && (*resCCTime)[3] != 0 && (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0;
     auto goodLocTimes = (*resRtTime)[0] > -99 && (*resRtTime)[1] > -99;
     auto goodGloTimes = (*resRtTime)[2] > -99 && (*resRtTime)[3] > -99;
 
@@ -504,7 +558,10 @@ void makehists::eventLoop( Long64_t entry ){
     auto minGloEnergy = goodGloRHs ? (*resE)[2] > 10.0 && (*resE)[3] > 10.0 : false;
 	// ""CutSelct"" are pass filters -> if "True" then events will have the stated condition
     auto sieieLocCut = false; //goodLocRHs ? (*phoSigmaIEtaIEta)[0] < 0.013 : false;//less then 
+    //auto sieieLocCut = (*phoSigmaIEtaIEta)[0] > 0.013;//greater then
 	auto sieieGloCut = false; //goodLocRHs ? (*phoSigmaIEtaIEta)[1] < 0.013 && (*phoSigmaIEtaIEta)[2] < 0.013 : false;//less then 
+    //auto sieieGloCut = (*phoSigmaIEtaIEta)[1] > 0.013 && (*phoSigmaIEtaIEta)[2] > 0.013;//greater then
+    //auto sieieGloCut = ((*phoSigmaIEtaIEta)[1] < 0.013 && (*phoSigmaIEtaIEta)[2] > 0.013) || ((*phoSigmaIEtaIEta)[1] > 0.013 && (*phoSigmaIEtaIEta)[2] < 0.013);// Glo mixed cutt
 
     auto locCutSelct = true;
 	//auto locCutSelct = minLocEnergy;
@@ -536,31 +593,152 @@ void makehists::eventLoop( Long64_t entry ){
 		hist1d[0]->Fill(run);
         hist1d[69]->Fill((event/EVPHR)*100);
 
+/*
+        //------------------------------------------------------------------------------------------------
+		if( DEBUG ) std::cout << " - Cali Rechit loop " << std::endl;
+		//std::vector<float> cctimes;
+        //std::vector<float> rttimes;
+		for( int it=0; it < (*rhCaliRtTime).size(); it++){
+            std::vector<std::vector<int>> crystals{{22,130},{-19,207},{59,115},{-68,64}};
+            auto rhIdInfo = DetIDMap[(*rhCaliID)[it]];
+            for( int i = 0; i < nCrys; i++ ){
+				//cctimes.clear();
+                //rttimes.clear();
+                auto rhsel = (rhIdInfo.i2 == (crystals[i])[0]) && (rhIdInfo.i1 == (crystals[i])[1]);
+                if( rhsel ){
+                    //auto evntSel = (event/EVPHR) + (run - srun)*10;
+                    auto evntSel = run - startRun;
+                    if( DEBUG ) std::cout << " eventSel  " << evntSel << " " << event << " " << run - startRun << std::endl;
+                    hist1d136[i]->Fill(evntSel,(*rhCaliCCTime)[it]);
+                    hist1d140[i]->Fill(evntSel,(*rhCaliRtTime)[it]);
+                    hist1d137[i]->Fill(evntSel);
+                    hist1d138[i]->Fill((*rhCaliRtTime)[it]);
+                    hist1d139[i]->Fill((*rhCaliRtTime)[it]);
+					//cctimes.push_back((*rhCaliCCTime)[it]);
+					//rttimes.push_back((*rhCaliRtTime)[it]);
+                }//<<>>if( rh22x135 )
+            }//<<>>for( int i = 0; i < nCrys; i++ )
+			//cryscctimes.push_back(cctimes);
+			//crysrttimes.push_back(rttimes);
+		}//<<>>for( int it=0; it < (*rhCaliCCTime).size(); it++)
+        //------------------------------------------------------------------------------------------------
+*/
+
+/*
+
+        if( DEBUG ) std::cout << " - CC Encoding loop  " << std::endl;
+        for( int it=0; it < (*unrhJitter).size(); it++){
+
+            auto energy = (*unrhEnergy)[it];
+            auto time = 25*(*unrhJitter)[it];
+            auto untime = 25*(*unrhNonJitter)[it];
+            auto enctime = 25*(*unrhEncNonJitter)[it];
+            auto offset = 0.0;
+            auto slope = 1.0;
+            auto actdif = time - untime;
+            auto adjtime = slope*time + offset;
+            //auto adjtime = (1.2 + 0.4*(1.0-std::exp(-1*amp/20)))*time + offset; 
+            //auto fac = (std::abs(time) - 12.5)*(std::abs(time) - 12.5) - 156.25;
+            //auto adjtime = (1.0 + 0.8*(1.0-std::exp(-1*fac*fac)))*time + offset;
+            auto encdif = adjtime - untime;
+            auto reso = enctime - untime;
+
+            hist2d[157]->Fill( encdif, energy );
+            totrhs0++;//hist1d[0]->Fill(16);
+            if( energy > 0.5 ) totrhs05++;//hist1d[1]->Fill(16); //if( inwindow ) hist1d[0]->Fill(i); }
+            if( energy > 1.0 ) totrhs1++; //hist1d[2]->Fill(16); //if( inwindow ) hist1d[1]->Fill(i); }
+            if( energy > 2.0 ) totrhs2++;//hist1d[3]->Fill(16); //if( inwindow ) hist1d[2]->Fill(i); }
+            if( energy > 5.0 ) totrhs5++;//hist1d[4]->Fill(16); //if( inwindow ) hist1d[3]->Fill(i); }
+            if( energy > 10.0 ) totrhs10++;//hist1d[5]->Fill(16); //if( inwindow ) hist1d[4]->Fill(i); }
+            for( int i = 0; i < 15; i++ ){
+                bool inwindow = std::abs(encdif) < i; 
+                if( inwindow ) hist1d[150]->Fill(i);
+                if( energy > 0.5 ){ if( inwindow ) hist1d[151]->Fill(i); }
+                if( energy > 1.0 ){ if( inwindow ) hist1d[152]->Fill(i); }
+                if( energy > 2.0 ){ if( inwindow ) hist1d[153]->Fill(i); }
+                if( energy > 5.0 ){ if( inwindow ) hist1d[154]->Fill(i); }
+                if( energy > 10.0 ){ if( inwindow ) hist1d[155]->Fill(i); }
+            }//<<>>for( int i = 0; i < 13; i++ )
+
+            float ethres = 0.0;
+            float maxrange = 24.0;
+            float minrange = -24.0;
+            if( energy > ethres ){
+
+                totrhs++;
+                if( adjtime < maxrange && adjtime > minrange ) encrhs++;
+                hist2d[152]->Fill( untime, actdif );
+                hist2d[153]->Fill( untime, encdif );
+                hist2d[154]->Fill( untime, reso );
+                //hist2d[155]->Fill( encdif, energy );
+                //hist2d[156]->Fill( actdif, energy );
+
+            }//<<>>if( energy > ethres )
+
+
+		}//for( int it=0; it < (*unrhJitter).size(); it++)
+
+		//------------------------------------------------------------------------------------------------
+		if( DEBUG ) std::cout << " - Rechit loop  " << std::endl;
+*/
+
 		if( DEBUG ) std::cout << " -- Looping rh info " << std::endl;
 		for( int it=0; it < (*rhEnergy).size(); it++){
 
+			//if( (*rhSwCross)[it] > 0.98 ) continue;
+			//if( (*rhisGS1)[it] == false ) continue;
+            //if( (*rhisGS6)[it] == false ) continue;
+
+			//if( (*rhEnergy)[it] < 2.0 ) continue;// Excludes less than 2 GeV
+			//if( (*rhCCTime)[it] == 0.0 ) continue;// checks that cc time not exactly zero ? 
 			if( DEBUG ) std::cout << " - Rechit Cali info" << std::endl;
 			auto rhIdInfo = DetIDMap[(*rhID)[it]];
 			if( doEBOnly && rhIdInfo.ecal != EB ) continue;
             if( DEBUG ) std::cout << " - Rechit Cali map info" << std::endl;
 			// icmap lookup only works with EB rhs !!!!!!
 			float rhRtCali = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
+            float rhCCCali = ( icmap[3] != NULL ) ? icmap[3]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
 			float caliRtTime = (*rhRtTime)[it]-rhRtCali;
+			//float caliRtTime = ((*rhRtTime)[it] != 0.0 ) ? (*rhRtTime)[it]-rhRtCali : -10.0-rhRtCali;
+            //float caliRtTime = (*rhRtTime)[it];
+            float caliCCTime = (*rhCCTime)[it]-rhCCCali;
+			//float caliCCTime = ((*rhCCTime)[it] != 0.0 ) ? (*rhCCTime)[it]-rhCCCali : -10.0-rhCCCali;
+            //float caliCCTime = (*rhCCTime)[it];
+
+			//if( not( (*rhisGS6)[it] == true && (*rhisGS1)[it] == false ) ) continue;
+			//if( not( caliCCTime < 0 && caliCCTime > -3 && caliRtTime < -3 && caliRtTime > -5  ) ) continue;
+            //if( not( caliCCTime < 0 && caliCCTime > -3 && caliRtTime < -3 ) ) continue;
+            //if( ( caliCCTime < 0 && caliCCTime > -3 && caliRtTime < -3 ) ) continue;
+            //if( caliCCTime < 3 ) continue;
+            //if( not( caliCCTime < -3 && caliRtTime < -8 ) ) continue;
+            //if( ( caliCCTime < -3 && caliRtTime < -8 ) ) continue;
 
 			if( DEBUG ) std::cout << " - Rechit loop  1" << std::endl;
         	hist1d[67]->Fill((*rhRtTime)[it]);
+        	hist1d[68]->Fill((*rhCCTime)[it]);
             hist1d[70]->Fill(caliRtTime);
+            hist1d[71]->Fill(caliCCTime);
+			hist2d[106]->Fill(rhRtCali,rhCCCali);
             if( DEBUG ) std::cout << " - Rechit loop  1a" << std::endl;
             hist1d[72]->Fill(rhRtCali);
+            hist1d[73]->Fill(rhCCCali);
         	hist2d[25]->Fill((*rhEnergy)[it],caliRtTime);
+        	hist2d[26]->Fill((*rhEnergy)[it],caliCCTime);
 			if( DEBUG ) std::cout << " - Rechit loop  1b" << std::endl;
 			if( (*rhEnergy)[it] > 4.0 ){// plot greater then 4 GeV
 				(*rhRtisOOT)[it] ? hist1d[127]->Fill(caliRtTime) : hist1d[129]->Fill(caliRtTime);
+				(*rhCCisOOT)[it] ? hist1d[128]->Fill(caliCCTime) : hist1d[130]->Fill(caliCCTime);
 			}//<<>>if( (*rhEnergy)[it] > 4.0 )
+            if( DEBUG ) std::cout << " - Rechit loop  1c" << std::endl;
+            if( (*rhEnergy)[it] > 2.0 ) hist2d[27]->Fill(caliCCTime,caliRtTime);
+            if( (*rhEnergy)[it] > 10.0 && (*rhEnergy)[it] < 120.0) hist2d[107]->Fill(caliCCTime,caliRtTime);
 
             if( DEBUG ) std::cout << " - Rechit loop  2" << std::endl;
             hist1d[83]->Fill((*rhEnergy)[it]);
             hist1d[84]->Fill((*rhRtisOOT)[it]);
+            hist1d[142]->Fill((*rhCCisOOT)[it]);
+			//hist2d[114]->Fill((*rhRtisOOT)[it],(*rhCCisOOT)[it]);
+		    hist2d[114]->Fill(caliRtTime,caliCCTime);
             if( DEBUG ) std::cout << " - Rechit loop  2a" << std::endl;
             hist1d[85]->Fill((*rhisWeird)[it]);
             hist1d[86]->Fill((*rhisDiWeird)[it]);
@@ -574,36 +752,53 @@ void makehists::eventLoop( Long64_t entry ){
 			if( DEBUG ) std::cout << " - Rechit loop  3" << std::endl;
 
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){ 
+				hist2d[138]->Fill(caliCCTime,caliRtTime);
 				hist2d[119]->Fill((*rhEnergy)[it],caliRtTime);
 				if( (*rhRtisOOT)[it] == false ) hist2d[118]->Fill((*rhEnergy)[it],caliRtTime);
+				hist2d[127]->Fill((*rhEnergy)[it],caliCCTime);
+				if( (*rhCCisOOT)[it] == false ) hist2d[126]->Fill((*rhEnergy)[it],caliCCTime);
 			}//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == false ){
+				hist2d[137]->Fill(caliCCTime,caliRtTime);
                 hist2d[121]->Fill((*rhEnergy)[it],caliRtTime);
                 if( (*rhRtisOOT)[it] == false ) hist2d[120]->Fill((*rhEnergy)[it],caliRtTime);
+                hist2d[129]->Fill((*rhEnergy)[it],caliCCTime);
+                if( (*rhCCisOOT)[it] == false ) hist2d[128]->Fill((*rhEnergy)[it],caliCCTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == false && (*rhisGS1)[it] ==true ){
+				hist2d[136]->Fill(caliCCTime,caliRtTime);
                 hist2d[123]->Fill((*rhEnergy)[it],caliRtTime);
                 if( (*rhRtisOOT)[it] == false ) hist2d[122]->Fill((*rhEnergy)[it],caliRtTime);
+                hist2d[131]->Fill((*rhEnergy)[it],caliCCTime);
+                if( (*rhCCisOOT)[it] == false ) hist2d[130]->Fill((*rhEnergy)[it],caliCCTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == false && (*rhisGS1)[it] ==false ){
+                hist2d[135]->Fill(caliCCTime,caliRtTime);
                 hist2d[125]->Fill((*rhEnergy)[it],caliRtTime);
                 if( (*rhRtisOOT)[it] == false ) hist2d[124]->Fill((*rhEnergy)[it],caliRtTime);
+                hist2d[133]->Fill((*rhEnergy)[it],caliCCTime);
+                if( (*rhCCisOOT)[it] == false ) hist2d[132]->Fill((*rhEnergy)[it],caliCCTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
 
 			if( (*rhEnergy)[it] > 10.0 ){// plot greater then 10 GeV 
 				hist2d[108]->Fill((*rhSwCross)[it],caliRtTime); 
 				hist2d[117]->Fill((*rhSwCross)[it],(*rhEnergy)[it]);
+				hist2d[109]->Fill((*rhSwCross)[it],caliCCTime); 
 				auto toposel = not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] );
-				if( toposel ){ hist2d[110]->Fill((*rhSwCross)[it],caliRtTime); hist2d[116]->Fill((*rhSwCross)[it],(*rhEnergy)[it]); }
+				if( toposel ){ hist2d[110]->Fill((*rhSwCross)[it],caliRtTime); hist2d[116]->Fill((*rhSwCross)[it],(*rhEnergy)[it]); hist2d[111]->Fill((*rhSwCross)[it],caliCCTime); }
 				auto rttimesel = not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhRtisOOT)[it] );
             	if( rttimesel ){ hist2d[112]->Fill((*rhSwCross)[it],caliRtTime); hist2d[115]->Fill((*rhSwCross)[it],(*rhEnergy)[it]); }
+                auto cctimesel = not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhCCisOOT)[it] );
+            	if( cctimesel ){ hist2d[113]->Fill((*rhSwCross)[it],caliCCTime); hist2d[134]->Fill((*rhSwCross)[it],(*rhEnergy)[it]); }
             }//<<>>if( (*rhEnergy)[it] > 10.0 )
 
 			auto isSpike = (*rhSwCross)[it] > 0.95;
 			auto isSpikeRtSel = (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhRtisOOT)[it];						
+            auto isSpikeCCSel = (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhCCisOOT)[it];
 			if( isSpike && (*rhEnergy)[it] > 10.0 ){
 				hist1d[131]->Fill((*rhEnergy)[it]);
 				if( isSpikeRtSel ) hist1d[132]->Fill((*rhEnergy)[it]);
+                if( isSpikeCCSel ) hist1d[134]->Fill((*rhEnergy)[it]);
 			}//<<>>if( isSpike )
 			if( DEBUG ) std::cout << " - Rechit loop  4" << std::endl;
 
@@ -619,16 +814,22 @@ void makehists::eventLoop( Long64_t entry ){
             auto idinfoL0 = DetIDMap[(*resRhID)[0]];
             auto idinfoL1 = DetIDMap[(*resRhID)[1]];
 			auto isSRU = (idinfoL0.TT == idinfoL1.TT); // true = same, fasle = different			
+            if( dooutl ) std::cout << " Fetching Local Cali values for CC : " << (*resCCTime)[0] << " & " << (*resCCTime)[1] << std::endl;
             if( dooutl ) std::cout << " Fetching Local Cali values with Rt : " << (*resRtTime)[0] << " & " << (*resRtTime)[1] << std::endl;
             if( dooutl ) std::cout << "  - for : " << (*resRhID)[0] << " && " << (*resRhID)[1] << std::endl;
             if( dooutl ) std::cout << "  - with : " << idinfoL0.i2 << " && " << idinfoL0.i1 << std::endl;
             if( dooutl ) std::cout << "  - with : " << idinfoL1.i2 << " && " << idinfoL1.i1 << std::endl;
             auto caliRtL0 = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(idinfoL0.i2 + 86, idinfoL0.i1) : 0.f;
             auto caliRtL1 = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(idinfoL1.i2 + 86, idinfoL1.i1) : 0.f;
+            auto caliCCL0 = ( icmap[3] != NULL ) ? icmap[3]->GetBinContent(idinfoL0.i2 + 86, idinfoL0.i1) : 0.f;
+            auto caliCCL1 = ( icmap[3] != NULL ) ? icmap[3]->GetBinContent(idinfoL1.i2 + 86, idinfoL1.i1) : 0.f;
+            if( dooutl ) std::cout << "  - and CC calis : " << caliRtL0 << " && " << caliRtL1 << std::endl;
+            if( dooutl ) std::cout << "  - and Rt calis : " << caliCCL0 << " && " << caliCCL1 << std::endl;
 
+			//auto caliCut = caliCCL0 > 1.7 && caliCCL0 < 2.2 && caliCCL1 > 1.7 && caliCCL1 < 2.2;
 			//auto caliSel = caliRtL0 > 0.7 && caliRtL0 < 1.25 && caliRtL1 > 0.7 && caliRtL1 < 1.25;
             auto caliSel = true;
-			if( caliSel ){ //------------- Cali Cut ( if/then stament )
+			if( caliSel ){ //-------------  CC Cali Cut ( if/then stament )
 
             auto ampl0a = (*resAmp)[0];//  same as resAmp->index(0);
             auto ampl1a = (*resAmp)[1];
@@ -640,6 +841,7 @@ void makehists::eventLoop( Long64_t entry ){
             auto doeAmpL = difAmpL/effAmpL;
 
             auto effampl = (ampl0*ampl1)/sqrt(sq2(ampl0)+sq2(ampl1));
+            auto dtccloc = ((*resCCTime)[0] - caliCCL0 ) - ((*resCCTime)[2] - caliCCL1 );
             auto dtrtloc = ((*resRtTime)[0] - caliRtL0 ) - ((*resRtTime)[2] - caliRtL1 );
 
             auto nlphrh = 0;//((*phoRhIds)[0]).size();
@@ -657,15 +859,41 @@ void makehists::eventLoop( Long64_t entry ){
 
 	            hist1d[47]->Fill(caliRtL0);
 	            hist1d[48]->Fill(caliRtL1);
+	            hist1d[49]->Fill(caliCCL0);
+	            hist1d[50]->Fill(caliCCL1);
 	
 	        	hist1d[1]->Fill(doeAmpL);
 	        	hist2d[0]->Fill(difAmpL,effAmpL);
 	        	hist2d[2]->Fill(ampl0,ampl1);
 
+                hist2d[53]->Fill(effampl,dtccloc);
                 hist2d[56]->Fill(effampl,dtrtloc);
-
+/*
+	            hist1d[6]->Fill((*phoEnergy)[locIdx]);
+	            hist1d[7]->Fill((*phoPt)[locIdx]);
+	            hist1d[8]->Fill((*phoEta)[locIdx]);
+	            hist1d[9]->Fill((*phoPhi)[locIdx]);
+	            hist1d[10]->Fill((*phoHadOverEM)[locIdx]);
+	            hist1d[11]->Fill((*phoSigmaIEtaIEta)[locIdx]);
+	            hist1d[74]->Fill((*phoCov2IEtaIEta)[locIdx]);
+	            hist1d[77]->Fill((*phoCov2IEtaIPhi)[locIdx]);
+	            hist1d[80]->Fill((*phoCov2IPhiIPhi)[locIdx]);
+	            hist1d[12]->Fill((*phoEcalRHSumEtConeDR04)[locIdx]);
+	            hist1d[13]->Fill((*phoHcalTwrSumEtConeDR04)[locIdx]);
+	            hist1d[14]->Fill((*phoTrkSumPtSolidConeDR04)[locIdx]);
+	            hist1d[15]->Fill((*phoTrkSumPtHollowConeDR04)[locIdx]);
+	            hist1d[16]->Fill((*phoR9)[locIdx]);
+	            hist1d[94]->Fill(nlphrh);
+	
+	            hist2d[6]->Fill((*phoEnergy)[locIdx],(*phoHadOverEM)[locIdx]);
+	            hist2d[9]->Fill((*phoEnergy)[locIdx],(*phoSigmaIEtaIEta)[locIdx]);
+				hist2d[47]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoR9)[locIdx]);
+	            hist2d[12]->Fill((*phoEnergy)[locIdx],(*phoR9)[locIdx]);
+*/	
 	            hist1d[39]->Fill((*resRtTime)[0]-caliRtL0);
 	            hist1d[40]->Fill((*resRtTime)[1]-caliRtL1);
+	            hist1d[41]->Fill((*resCCTime)[0]-caliCCL0);
+	            hist1d[42]->Fill((*resCCTime)[1]-caliCCL1);
 	
 	            hist1d[55]->Fill((*resTOF)[0]);
 	            hist1d[56]->Fill((*resTOF)[1]);
@@ -676,24 +904,69 @@ void makehists::eventLoop( Long64_t entry ){
 	
 				hist2d[13]->Fill((*resE)[0],ampl0a);
 	            hist2d[14]->Fill((*resE)[0],(*resRtTime)[0]-caliRtL0);
+	            hist2d[15]->Fill((*resE)[0],(*resCCTime)[0]-caliCCL0);
 	
 	            hist2d[16]->Fill((*resE)[1],ampl1a);
 	            hist2d[17]->Fill((*resE)[1],(*resRtTime)[1]-caliRtL1);
-
+	            hist2d[18]->Fill((*resE)[1],(*resCCTime)[1]-caliCCL1);
+/*
+				hist2d[58]->Fill((*phoEnergy)[locIdx],(*phoHadOverEM)[locIdx]);
+                hist2d[59]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoHadOverEM)[locIdx]);
+                hist2d[60]->Fill((*phoEnergy)[locIdx],(*phoCov2IEtaIEta)[locIdx]);
+                hist2d[61]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoCov2IEtaIEta)[locIdx]);
+                hist2d[62]->Fill((*phoEnergy)[locIdx],(*phoCov2IEtaIPhi)[locIdx]);
+                hist2d[63]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoCov2IEtaIPhi)[locIdx]);
+                hist2d[64]->Fill((*phoEnergy)[locIdx],(*phoCov2IPhiIPhi)[locIdx]);
+                hist2d[65]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoCov2IPhiIPhi)[locIdx]);
+                hist2d[66]->Fill((*phoEnergy)[locIdx],(*phoEcalRHSumEtConeDR04)[locIdx]);
+                hist2d[67]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoEcalRHSumEtConeDR04)[locIdx]);
+                hist2d[68]->Fill((*phoEnergy)[locIdx],(*phoHcalTwrSumEtConeDR04)[locIdx]);
+                hist2d[69]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoHcalTwrSumEtConeDR04)[locIdx]);
+                hist2d[70]->Fill((*phoEnergy)[locIdx],(*phoTrkSumPtSolidConeDR04)[locIdx]);
+                hist2d[71]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoTrkSumPtSolidConeDR04)[locIdx]);
+                hist2d[72]->Fill((*phoEnergy)[locIdx],(*phoTrkSumPtHollowConeDR04)[locIdx]);
+                hist2d[73]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoTrkSumPtHollowConeDR04)[locIdx]);
+*/
 			} else { //<<>>if( isSRU )
 				if( DEBUG ) std::cout << " -- DRU " << std::endl;
 			
                 hist1d[97]->Fill(caliRtL0);
                 hist1d[98]->Fill(caliRtL1);
+                hist1d[99]->Fill(caliCCL0);
+                hist1d[100]->Fill(caliCCL1);
     
                 hist1d[101]->Fill(doeAmpL);
                 hist2d[35]->Fill(difAmpL,effAmpL);
                 hist2d[36]->Fill(ampl0,ampl1);
     
+                hist2d[54]->Fill(effampl,dtccloc);
                 hist2d[57]->Fill(effampl,dtrtloc);
-
+/*
+                hist1d[102]->Fill((*phoEnergy)[locIdx]);
+                hist1d[103]->Fill((*phoPt)[locIdx]);
+                hist1d[104]->Fill((*phoEta)[locIdx]);
+                hist1d[105]->Fill((*phoPhi)[locIdx]);
+                hist1d[106]->Fill((*phoHadOverEM)[locIdx]);
+                hist1d[107]->Fill((*phoSigmaIEtaIEta)[locIdx]);
+                hist1d[108]->Fill((*phoCov2IEtaIEta)[locIdx]);
+                hist1d[109]->Fill((*phoCov2IEtaIPhi)[locIdx]);
+                hist1d[110]->Fill((*phoCov2IPhiIPhi)[locIdx]);
+                hist1d[111]->Fill((*phoEcalRHSumEtConeDR04)[locIdx]);
+                hist1d[112]->Fill((*phoHcalTwrSumEtConeDR04)[locIdx]);
+                hist1d[113]->Fill((*phoTrkSumPtSolidConeDR04)[locIdx]);
+                hist1d[114]->Fill((*phoTrkSumPtHollowConeDR04)[locIdx]);
+                hist1d[115]->Fill((*phoR9)[locIdx]);
+                hist1d[116]->Fill(nlphrh);
+    
+                hist2d[37]->Fill((*phoEnergy)[locIdx],(*phoHadOverEM)[locIdx]);
+                hist2d[38]->Fill((*phoEnergy)[locIdx],(*phoSigmaIEtaIEta)[locIdx]);
+                hist2d[48]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoR9)[locIdx]);
+                hist2d[39]->Fill((*phoEnergy)[locIdx],(*phoR9)[locIdx]);
+*/    
                 hist1d[117]->Fill((*resRtTime)[0]-caliRtL0);
                 hist1d[118]->Fill((*resRtTime)[1]-caliRtL1);
+                hist1d[119]->Fill((*resCCTime)[0]-caliCCL0);
+                hist1d[120]->Fill((*resCCTime)[1]-caliCCL1);
     
                 hist1d[121]->Fill((*resTOF)[0]);
                 hist1d[122]->Fill((*resTOF)[1]);
@@ -704,13 +977,32 @@ void makehists::eventLoop( Long64_t entry ){
     
                 hist2d[40]->Fill((*resE)[0],ampl0a);
                 hist2d[41]->Fill((*resE)[0],(*resRtTime)[0]-caliRtL0);
+                hist2d[42]->Fill((*resE)[0],(*resCCTime)[0]-caliCCL0);
     
                 hist2d[43]->Fill((*resE)[1],ampl1a);
                 hist2d[44]->Fill((*resE)[1],(*resRtTime)[1]-caliRtL1);
-
+                hist2d[45]->Fill((*resE)[1],(*resCCTime)[1]-caliCCL1);
+/*
+                hist2d[74]->Fill((*phoEnergy)[locIdx],(*phoHadOverEM)[locIdx]);
+                hist2d[75]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoHadOverEM)[locIdx]);
+                hist2d[76]->Fill((*phoEnergy)[locIdx],(*phoCov2IEtaIEta)[locIdx]);
+                hist2d[77]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoCov2IEtaIEta)[locIdx]);
+                hist2d[78]->Fill((*phoEnergy)[locIdx],(*phoCov2IEtaIPhi)[locIdx]);
+                hist2d[79]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoCov2IEtaIPhi)[locIdx]);
+                hist2d[80]->Fill((*phoEnergy)[locIdx],(*phoCov2IPhiIPhi)[locIdx]);
+                hist2d[81]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoCov2IPhiIPhi)[locIdx]);
+                hist2d[82]->Fill((*phoEnergy)[locIdx],(*phoEcalRHSumEtConeDR04)[locIdx]);
+                hist2d[83]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoEcalRHSumEtConeDR04)[locIdx]);
+                hist2d[84]->Fill((*phoEnergy)[locIdx],(*phoHcalTwrSumEtConeDR04)[locIdx]);
+                hist2d[85]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoHcalTwrSumEtConeDR04)[locIdx]);
+                hist2d[86]->Fill((*phoEnergy)[locIdx],(*phoTrkSumPtSolidConeDR04)[locIdx]);
+                hist2d[87]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoTrkSumPtSolidConeDR04)[locIdx]);
+                //hist2d[88]->Fill((*phoEnergy)[locIdx],(*phoTrkSumPtHollowConeDR04)[locIdx]);
+                hist2d[89]->Fill((*phoSigmaIEtaIEta)[locIdx],(*phoTrkSumPtHollowConeDR04)[locIdx]);
+*/
             }//<<>>if( isSRU )
 
-			}//<<>>if( caliselect cut //-------------  Cali Cut ( if/then stament )
+			}//<<>>if( caliCCL0 > 1.7 && caliCCL0 < 2.2 && caliCCL1 > 1.7 && caliCCL1 < 2.2 ){ //-------------  CC Cali Cut ( if/then stament )
 			//std::cout << " Finished Local" << std::endl;
 		}//<<>>if( goodLocRHs )
 
@@ -719,8 +1011,11 @@ void makehists::eventLoop( Long64_t entry ){
 
             int gloIdx0( -1 );
             int gloIdx1( -1 );
-            for( int idx = 0; idx < phoSelType->size(); idx++ ){ 
-				if( (*phoSelType)[idx] == 1 ) gloIdx0 = idx; if( (*phoSelType)[idx] == 2 ) gloIdx1 = idx; }
+            for( int idx = 0; idx < phoSelType->size(); idx++ ){ if( (*phoSelType)[idx] == 1 ) gloIdx0 = idx; if( (*phoSelType)[idx] == 2 ) gloIdx1 = idx; }
+			//if( gloIdx0 == -1 || gloIdx1 == -1 ) std::cout << " BAD GLOBAL PHO INDEX " << std::endl;
+
+			//hist2d[46]->Fill(event,(*phoSigmaIEtaIEta)[gloIdx0]);
+			//hist2d[46]->Fill(event,(*phoSigmaIEtaIEta)[gloIdx1]);
 
             auto dooutg = false; //(*resCCTime)[2] == 0 || (*resCCTime)[3] == 0 ;
 
@@ -735,9 +1030,16 @@ void makehists::eventLoop( Long64_t entry ){
             if( dooutg ) std::cout << "  - with : " << idinfoG1.i2 << " && " << idinfoG1.i1 << std::endl;
             auto caliRtG0 = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(idinfoG0.i2 + 86, idinfoG0.i1) : 0.f;// )
             auto caliRtG1 = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(idinfoG1.i2 + 86, idinfoG1.i1) : 0.f;// )
+            if( DEBUG ) std::cout << " --- glo a2 " << std::endl;
+            auto caliCCG0 = ( icmap[3] != NULL ) ? icmap[3]->GetBinContent(idinfoG0.i2 + 86, idinfoG0.i1) : 0.f;// )
+            auto caliCCG1 = ( icmap[3] != NULL ) ? icmap[3]->GetBinContent(idinfoG1.i2 + 86, idinfoG1.i1) : 0.f;// )
+            if( dooutg ) std::cout << "  - and CC calis : " << caliRtG0 << " && " << caliRtG1 << std::endl;
+            if( dooutg ) std::cout << "  - and Rt calis : " << caliCCG0 << " && " << caliCCG1 << std::endl;
 
 			if( DEBUG ) std::cout << " --- glo a " << std::endl;
 
+            //auto caliCut = caliCCG0 > 1.7 && caliCCG0 < 2.2 && caliCCG1 > 1.7 && caliCCG1 < 2.2;
+            //auto caliSel = caliRtG0 > 0.7 && caliRtG0 < 1.25 && caliRtG1 > 0.7 && caliRtG1 < 1.25;
 			auto caliSel = true;
             //auto caliSel = false;
             if( caliSel ){ //-------------  CC Cali Cut ( if/then stament )
@@ -751,6 +1053,7 @@ void makehists::eventLoop( Long64_t entry ){
             auto effAmpG = (ampg0 + ampg1)/2;
 			auto doeAmpG = difAmpG/effAmpG;
 			auto effampg = (ampg0*ampg1)/sqrt(sq2(ampg0)+sq2(ampg1)); 
+			auto dtccglo = ((*resCCTime)[2] - caliCCG0 ) - ((*resCCTime)[3] - caliCCG1 ); 		
             auto dtrtglo = ((*resRtTime)[2] - caliRtG0 ) - ((*resRtTime)[3] - caliRtG1 );
 
             auto ngphrh0 = ((*phoRhIds)[gloIdx0]).size();
@@ -765,6 +1068,7 @@ void makehists::eventLoop( Long64_t entry ){
         	hist2d[1]->Fill(difAmpG,effAmpG);
         	hist2d[3]->Fill(ampg0,ampg1);
 
+			hist2d[52]->Fill(effampg,dtccglo);
             hist2d[55]->Fill(effampg,dtrtglo);
 
         	hist1d[3]->Fill(phoDiMass);
@@ -834,9 +1138,13 @@ void makehists::eventLoop( Long64_t entry ){
 
             hist1d[43]->Fill((*resRtTime)[2]-caliRtG0);
             hist1d[44]->Fill((*resRtTime)[3]-caliRtG1);
+            hist1d[45]->Fill((*resCCTime)[2]-caliCCG0);
+            hist1d[46]->Fill((*resCCTime)[3]-caliCCG1);
 
             hist1d[51]->Fill(caliRtG0);
             hist1d[52]->Fill(caliRtG1);
+            hist1d[53]->Fill(caliCCG0);
+            hist1d[54]->Fill(caliCCG1);
 
             hist1d[57]->Fill((*resTOF)[2]);
             hist1d[58]->Fill((*resTOF)[3]);
@@ -847,9 +1155,11 @@ void makehists::eventLoop( Long64_t entry ){
 
             hist2d[19]->Fill((*resE)[2],ampg0a);
             hist2d[20]->Fill((*resE)[2],(*resRtTime)[2]-caliRtG0);
+            hist2d[21]->Fill((*resE)[2],(*resCCTime)[2]-caliCCG0);
 
             hist2d[22]->Fill((*resE)[3],ampg1a);
             hist2d[23]->Fill((*resE)[3],(*resRtTime)[3]-caliRtG1);
+            hist2d[24]->Fill((*resE)[3],(*resCCTime)[3]-caliCCG1);
 
             hist2d[90]->Fill((*phoEnergy)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
             hist2d[91]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
@@ -868,7 +1178,7 @@ void makehists::eventLoop( Long64_t entry ){
             hist2d[104]->Fill((*phoEnergy)[gloIdx0],(*phoTrkSumPtHollowConeDR04)[gloIdx0]);
             hist2d[105]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoTrkSumPtHollowConeDR04)[gloIdx0]);
 
-			}//-------------  Cali Cut ( if/then stament )
+			}//<<>>if( caliCCG0 > 1.7 && caliCCG0 < 2.2 && caliCCG1 > 1.7 && caliCCG1 < 2.2 ){ //-------------  CC Cali Cut ( if/then stament )
 
             //std::cout << " Finished Global" << std::endl;
 		}//<<>>if( goodGloRHs )
@@ -882,11 +1192,11 @@ void makehists::eventLoop( Long64_t entry ){
 
 void makehists::initCali( std::string califilename ){
 
-    int nAlgos(1);
+    int nAlgos(2);
 	bool setnull = false;
 	if( califilename == "none" ) setnull = true;
 	auto fCaliFile = ( not setnull ) ? TFile::Open(califilename.c_str(), "read") : NULL;
-    std::string calistring[nAlgos] = { "AveXtalRecHitTime"};	
+    std::string calistring[nAlgos] = { "AveXtalRatioRecTime", "AveXtalKuccRecTime" };	
 	for( int i = 0; i < nAlgos; i++ ){
 		std::string cmbs = calistring[i];
     	std::string ebmapstring(cmbs+"EBMap");
@@ -910,12 +1220,14 @@ void makehists::getBranches( Long64_t entry ){
     b_rhCaliID->GetEntry(entry);   //!
     b_rhCaliEnergy->GetEntry(entry);   //!
     b_rhCaliRtTime->GetEntry(entry);   //!
+    b_rhCaliCCTime->GetEntry(entry);   //!
 
     if( DEBUG ) std::cout << " -- getting Banches res " << std::endl;
     b_resRhID->GetEntry(entry);   //!
     b_resAmp->GetEntry(entry);   //!
     b_resE->GetEntry(entry);   //!
     b_resRtTime->GetEntry(entry);   //!
+    b_resCCTime->GetEntry(entry);   //!
     b_resTOF->GetEntry(entry);   //!
 
     if( DEBUG ) std::cout << " -- getting Banches rh " << std::endl;
@@ -926,6 +1238,7 @@ void makehists::getBranches( Long64_t entry ){
     b_rhCCTime->GetEntry(entry);   //!
     if( DEBUG ) std::cout << " -- getting Banches rh koot stuff" << std::endl;
     b_rhRtisOOT->GetEntry(entry);   //!
+    b_rhCCisOOT->GetEntry(entry);   //!
     b_rhisWeird->GetEntry(entry);   //!
     b_rhisDiWeird->GetEntry(entry);   //!
     b_rhSwCross->GetEntry(entry);   //!
@@ -964,6 +1277,13 @@ void makehists::getBranches( Long64_t entry ){
     b_phoDiPhi->GetEntry(entry);   //!
     b_phoDiEta->GetEntry(entry);   //!
 
+
+    //if( DEBUG ) std::cout << " -- getting Banches unrh " << std::endl;
+    //b_unrhJitter->GetEntry(entry);   //!
+    //b_unrhNonJitter->GetEntry(entry);   //!
+    //b_unrhEncNonJitter->GetEntry(entry);   //!
+    //b_unrhEnergy->GetEntry(entry);   //! 
+
 }//<<>>void makehists::getBranches( Long64_t entry )
 
 void makehists::endJobs(){
@@ -971,6 +1291,24 @@ void makehists::endJobs(){
     if( DEBUG ) std::cout << " Starting End jobs " << std::endl;
 
 	fillRatioHist(hist1d[132],hist1d[131],hist1d[133]);
+    fillRatioHist(hist1d[134],hist1d[131],hist1d[135]);
+
+/*
+	//if( DEBUG ) std::cout << " Making ratio hists " << std::endl;
+    for( int i = 0; i < nCrys; i++ ){
+    	fillMeanHist(hist1d136[i],hist1d137[i],hist1d143[i]);
+    	fillMeanHist(hist1d140[i],hist1d137[i],hist1d144[i]);
+    }//<<>>for( int i = 0; i < nCrys; i++ )
+
+	if( DEBUG ) std::cout << "Finished with End jobs " << std::endl;
+*/
+
+    //hist1d[150]->Scale(1/totrhs0);
+    //hist1d[151]->Scale(1/totrhs05);
+    //hist1d[152]->Scale(1/totrhs1);
+    //hist1d[153]->Scale(1/totrhs2);
+    //hist1d[154]->Scale(1/totrhs5);
+    //hist1d[155]->Scale(1/totrhs10);
 
 }//<<>>void makehists::endJobs()
 
@@ -997,6 +1335,26 @@ void makehists::initHists( std::string fHTitle ){
         ebeeMapR[it] = new TH2D( stt3.c_str(), (stt3+label).c_str(), 361, -90, 90, 721, 0, 360);
     }//<<>>for(int it=0; it<nEBEEMaps; it++)
 
+/*
+    std::vector<std::string> fHRTitle{"22x130","-19x207","59x115","-68x64"};
+    for( int i = 0; i < nCrys; i++ ){
+        hist1d136[i] = new TH1D(addstr("rhcalCCTimeby100k_",fHRTitle[i]).c_str(),addstr(fHRTitle[i]," cry CC Time by 100k").c_str(),2000,0,2000);
+        hist1d140[i] = new TH1D(addstr("rhcalRtTimeby100k_",fHRTitle[i]).c_str(),addstr(fHRTitle[i]," cry Rt Time by 100k").c_str(),2000,0,2000);
+        hist1d137[i] = new TH1D(addstr("rhcalCntby100k_",fHRTitle[i]).c_str(),addstr(fHRTitle[i]," cry Cnt by 100k").c_str(),2000,0,2000);
+        hist1d138[i] = new TH1D(addstr("rhcalRtTimeDist_",fHRTitle[i]).c_str(),addstr(fHRTitle[i]," cry rhcalRtTimeDist").c_str(),500,-25,25);
+        hist1d139[i] = new TH1D(addstr("rhcalCCTimeDist_",fHRTitle[i]).c_str(),addstr(fHRTitle[i],"cry rhcalCCTimeDist").c_str(),500,-25,25);
+        hist1d143[i] = new TH1D(addstr("rhcalCCAveby100k_",fHRTitle[i]).c_str(),addstr(fHRTitle[i]," cry CC Ave by 100k").c_str(),2000,0,2000);
+        hist1d144[i] = new TH1D(addstr("rhcalRtAveby100k_",fHRTitle[i]).c_str(),addstr(fHRTitle[i]," cry Rt Ave by 100k").c_str(),2000,0,2000);
+        hist1d136[i]->Sumw2();
+        hist1d140[i]->Sumw2();
+        hist1d137[i]->Sumw2();
+        hist1d138[i]->Sumw2();
+        hist1d139[i]->Sumw2();
+        hist1d143[i]->Sumw2();
+        hist1d144[i]->Sumw2();
+    }//<<>>for( int i = 0; i < nCrys; i++ )
+*/
+
     for( int it = 0; it < n1dHists; it++ ){ hist1d[it] = NULL; }
     for( int it = 0; it < n2dHists; it++ ){ hist2d[it] = NULL; }
     for( int it = 0; it < n3dHists; it++ ){ hist3d[it] = NULL; }
@@ -1004,6 +1362,7 @@ void makehists::initHists( std::string fHTitle ){
 
     //------ 1D Hists --------------------------------------------------------------------------
 
+    //hist1d[0] = new TH1D("jetRHTime", 5, 2000, -100, 100);
 	hist1d[0] = new TH1D("run",addstr(fHTitle,"Run;Run").c_str(),88000,300000,400000); 
 	hist1d[69] = new TH1D("event",addstr(fHTitle,"Event;Run-Evt??").c_str(),10000,0,10000);
 
@@ -1014,48 +1373,67 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[4] = new TH1D("phoDiAngle",addstr(fHTitle,"phoDiAngle").c_str(),335,-0.1,3.25);
     hist1d[5] = new TH1D("phoDiDr",addstr(fHTitle,"phoDiDr").c_str(),300,0,6);
 
+    //hist1d[6] = new TH1D("phoEnergy_sruLoc",addstr(fHTitle,"phoEnergy SRU Loc").c_str(),1000,0,1000);
     hist1d[17] = new TH1D("phoEnergy_Glo0",addstr(fHTitle,"phoEnergy_Glo0").c_str(),1000,0,1000);
     hist1d[28] = new TH1D("phoEnergy_Glo1",addstr(fHTitle,"phoEnergy_Glo1").c_str(),1000,0,1000);
 
+    //hist1d[7] = new TH1D("phoPt_sruLoc",addstr(fHTitle,"phoPt SRU Loc").c_str(),500,0,500);
     hist1d[18] = new TH1D("phoPt_Glo0",addstr(fHTitle,"phoPt_Glo0").c_str(),500,0,500);
     hist1d[29] = new TH1D("phoPt_Glo1",addstr(fHTitle,"phoPt_Glo1").c_str(),500,0,500);
 
+    //hist1d[8] = new TH1D("phoEta_sruLoc",addstr(fHTitle,"phoEta SRU Loc").c_str(),700,-3.5,3.5);
     hist1d[19] = new TH1D("phoEta_Glo0",addstr(fHTitle,"phoEta_Glo0").c_str(),700,-3.5,3.5);
     hist1d[30] = new TH1D("phoEta_Glo1",addstr(fHTitle,"phoEta_Glo1").c_str(),700,-3.5,3.5);
 
+    //hist1d[9] = new TH1D("phoPhi_sruLoc",addstr(fHTitle,"phoPhi SRU Loc").c_str(),700,-3.5,3.5);
     hist1d[20] = new TH1D("phoPhi_Glo0",addstr(fHTitle,"phoPhi_Glo0").c_str(),700,-3.5,3.5);
     hist1d[31] = new TH1D("phoPhi_Glo1",addstr(fHTitle,"phoPhi_Glo1").c_str(),700,-3.5,3.5);
 
+    //hist1d[10] = new TH1D("phoHadOverEM_sruLoc",addstr(fHTitle,"phoHadOverEM SRU Loc").c_str(),100,0,1.0);
     hist1d[21] = new TH1D("phoHadOverEM_Glo0",addstr(fHTitle,"phoHadOverEM_Glo0").c_str(),100,0,1.0);
     hist1d[32] = new TH1D("phoHadOverEM_Glo1",addstr(fHTitle,"phoHadOverEM_Glo1").c_str(),100,0,1.0);
 
+    //hist1d[11] = new TH1D("phoSigmaIEtaIEta_sruLoc",addstr(fHTitle,"phoSigmaIEtaIEta SRU Loc").c_str(),1000,0,0.1);
     hist1d[22] = new TH1D("phoSigmaIEtaIEta_Glo0",addstr(fHTitle,"phoSigmaIEtaIEta_Glo0").c_str(),1000,0,0.1);
     hist1d[33] = new TH1D("phoSigmaIEtaIEta_Glo1",addstr(fHTitle,"phoSigmaIEtaIEta_Glo1").c_str(),1000,0,0.1);
 
+    //hist1d[12] = new TH1D("phoEcalRHSumEtConeDR04_sruLoc",addstr(fHTitle,"phoEcalRHSumEtConeDR04 SRU Loc").c_str(),350,0,350);
     hist1d[23] = new TH1D("phoEcalRHSumEtConeDR04_Glo0",addstr(fHTitle,"phoEcalRHSumEtConeDR04_Glo0").c_str(),350,0,350);
     hist1d[34] = new TH1D("phoEcalRHSumEtConeDR04_Glo1",addstr(fHTitle,"phoEcalRHSumEtConeDR04_Glo1").c_str(),350,0,350);
 
+    //hist1d[13] = new TH1D("phoHcalTwrSumEtConeDR04_sruLoc",addstr(fHTitle,"phoHcalTwrSumEtConeDR04 SRU Loc").c_str(),350,0,350);
     hist1d[24] = new TH1D("phoHcalTwrSumEtConeDR04_Glo0",addstr(fHTitle,"phoHcalTwrSumEtConeDR04_Glo0").c_str(),350,0,350);
     hist1d[35] = new TH1D("phoHcalTwrSumEtConeDR04_Glo1",addstr(fHTitle,"phoHcalTwrSumEtConeDR04_Glo1").c_str(),350,0,350);
 
+    //hist1d[14] = new TH1D("phoTrkSumPtSolidConeDR04_sruLoc",addstr(fHTitle,"phoTrkSumPtSolidConeDR04 SRU Loc").c_str(),350,0,350);
     hist1d[25] = new TH1D("phoTrkSumPtSolidConeDR04_Glo0",addstr(fHTitle,"phoTrkSumPtSolidConeDR04_Glo0").c_str(),350,0,350);
     hist1d[36] = new TH1D("phoTrkSumPtSolidConeDR04_Glo1",addstr(fHTitle,"phoTrkSumPtSolidConeDR04_Glo1").c_str(),350,0,350);
 
+    //hist1d[15] = new TH1D("phoTrkSumPtHollowConeDR04_sruLoc",addstr(fHTitle,"phoTrkSumPtHollowConeDR04 SRU Loc").c_str(),350,0,350);
     hist1d[26] = new TH1D("phoTrkSumPtHollowConeDR04_Glo0",addstr(fHTitle,"phoTrkSumPtHollowConeDR04_Glo0").c_str(),350,0,350);
     hist1d[37] = new TH1D("phoTrkSumPtHollowConeDR04_Glo1",addstr(fHTitle,"phoTrkSumPtHollowConeDR04_Glo1").c_str(),350,0,350);
 
+    //hist1d[16] = new TH1D("phoR9_sruLoc",addstr(fHTitle,"phoR9 SRU Loc").c_str(),100,0,1);
     hist1d[27] = new TH1D("phoR9_Glo0",addstr(fHTitle,"phoR9_Glo0").c_str(),100,0,1);
     hist1d[38] = new TH1D("phoR9_Glo1",addstr(fHTitle,"phoR9_Glo1").c_str(),100,0,1);
 
 	hist1d[39] = new TH1D("seedRtTime_sruLoc0",addstr(fHTitle,"seedRtTime SRU Loc0").c_str(),500,-25,25);
     hist1d[40] = new TH1D("seedRtTime_sruLoc1",addstr(fHTitle,"seedRtTime SRU Loc1").c_str(),500,-25,25);
+    hist1d[41] = new TH1D("seedCCTime_sruLoc0",addstr(fHTitle,"seedCCTime SRU Loc0").c_str(),500,-25,25);
+    hist1d[42] = new TH1D("seedCCTime_sruLoc1",addstr(fHTitle,"seedCCTime SRU Loc1").c_str(),500,-25,25);
     hist1d[43] = new TH1D("seedRtTime_Glo0",addstr(fHTitle,"seedRtTime_Glo0").c_str(),500,-25,25);
     hist1d[44] = new TH1D("seedRtTime_Glo1",addstr(fHTitle,"seedRtTime_Glo1").c_str(),500,-25,25);
+    hist1d[45] = new TH1D("seedCCTime_Glo0",addstr(fHTitle,"seedCCTime_Glo0").c_str(),500,-25,25);
+    hist1d[46] = new TH1D("seedCCTime_Glo1",addstr(fHTitle,"seedCCTime_Glo1").c_str(),500,-25,25);
 
     hist1d[47] = new TH1D("seedRtCali_sruLoc0",addstr(fHTitle,"seedRtCali SRU Loc0").c_str(),1000,-5,5);
     hist1d[48] = new TH1D("seedRtCali_sruLoc1",addstr(fHTitle,"seedRtCali SRU Loc1").c_str(),1000,-5,5);
+    hist1d[49] = new TH1D("seedCCCali_sruLoc0",addstr(fHTitle,"seedCCCali SRU Loc0").c_str(),1000,-5,5);
+    hist1d[50] = new TH1D("seedCCCali_sruLoc1",addstr(fHTitle,"seedCCCali SRU Loc1").c_str(),1000,-5,5);
     hist1d[51] = new TH1D("seedRtCali_Glo0",addstr(fHTitle,"seedRtCali_Glo0").c_str(),1000,-5,5);
     hist1d[52] = new TH1D("seedRtCali_Glo1",addstr(fHTitle,"seedRtCali_Glo1").c_str(),1000,-5,5);
+    hist1d[53] = new TH1D("seedCCCali_Glo0",addstr(fHTitle,"seedCCCali_Glo0").c_str(),1000,-5,5);
+    hist1d[54] = new TH1D("seedCCCali_Glo1",addstr(fHTitle,"seedCCCali_Glo1").c_str(),1000,-5,5);
 
     hist1d[55] = new TH1D("seedTOF_sruLoc0",addstr(fHTitle,"seedTOF SRU Loc0").c_str(),250,-1.25,1.25);
     hist1d[56] = new TH1D("seedTOF_sruLoc1",addstr(fHTitle,"seedTOF SRU Loc1").c_str(),250,-1.25,1.25);
@@ -1073,15 +1451,22 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[66] = new TH1D("seedAmplitude_Glo1",addstr(fHTitle,"seedAmplitude_Glo1").c_str(),1000,0,1000);
 
     hist1d[67] = new TH1D("rhRHTimeUnCali",addstr(fHTitle,"rhRHTimeUnCali").c_str(),500,-25,25);
+    hist1d[68] = new TH1D("rhCCTimeUnCali",addstr(fHTitle,"rhCCTimeUnCali").c_str(),500,-25,25);
+	//////hist1d[69] above with hist1d[0] ( run )
     hist1d[70] = new TH1D("rhRtTimeCali",addstr(fHTitle,"rhRtTimeCali").c_str(),500,-25,25);
+    hist1d[71] = new TH1D("rhCCTimeCali",addstr(fHTitle,"rhCCTimeCali").c_str(),500,-25,25);
     hist1d[72] = new TH1D("rhRtCali",addstr(fHTitle,"rhRtCali").c_str(),500,-25,25);
+    hist1d[73] = new TH1D("rhCCCali",addstr(fHTitle,"rhCCCali").c_str(),500,-25,25);
 
+    //hist1d[74] = new TH1D("phoCov2IEtaIEta_sruLoc",addstr(fHTitle,"phoCov2IEtaIEta SRU Loc").c_str(),1000,0,0.005);
     hist1d[75] = new TH1D("phoCov2IEtaIEta_Glo0",addstr(fHTitle,"phoCov2IEtaIEta_Glo0").c_str(),1000,0,0.005);
     hist1d[76] = new TH1D("phoCov2IEtaIEta_Glo1",addstr(fHTitle,"phoCov2IEtaIEta_Glo1").c_str(),1000,0,0.005);
 
+    //hist1d[77] = new TH1D("phoCov2IEtaIPhi_sruLoc",addstr(fHTitle,"phoCov2IEtaIPhi SRU Loc").c_str(),1000,0,0.005);
     hist1d[78] = new TH1D("phoCov2IEtaIPhi_Glo0",addstr(fHTitle,"phoCov2IEtaIPhi_Glo0").c_str(),1000,0,0.005);
     hist1d[79] = new TH1D("phoCov2IEtaIPhi_Glo1",addstr(fHTitle,"phoCov2IEtaIPhi_Glo1").c_str(),1000,0,0.005);
 
+    //hist1d[80] = new TH1D("phoCov2IPhiIPhi_sruLoc",addstr(fHTitle,"phoCov2IPhiIPhi SRU Loc").c_str(),1000,0,0.005);
     hist1d[81] = new TH1D("phoCov2IPhiIPhi_Glo0",addstr(fHTitle,"phoCov2IPhiIPhi_Glo0").c_str(),1000,0,0.005);
     hist1d[82] = new TH1D("phoCov2IPhiIPhi_Glo1",addstr(fHTitle,"phoCov2IPhiIPhi_Glo1").c_str(),1000,0,0.005);
 
@@ -1098,16 +1483,39 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[92] = new TH1D("phoDiEta",addstr(fHTitle,"phoDiEta").c_str(),180,-0.1,3.5);
     hist1d[93] = new TH1D("phoDiPhi",addstr(fHTitle,"phoDiPhi").c_str(),350,-3.5,3.5);
 
+    //hist1d[94] = new TH1D("phonrh_sruLoc",addstr(fHTitle,"pho nrh SRU Loc").c_str(),100,0,100);
     hist1d[95] = new TH1D("phonrh_Glo0",addstr(fHTitle,"pho nrh Glo0").c_str(),100,0,100);
     hist1d[96] = new TH1D("phonrh_Glo1",addstr(fHTitle,"pho nrh Glo1").c_str(),100,0,100);
 
     hist1d[97] = new TH1D("seedRHCali_druLoc0",addstr(fHTitle,"seedRHCali DRU Loc0").c_str(),1000,-5,5);
     hist1d[98] = new TH1D("seedRHCali_druLoc1",addstr(fHTitle,"seedRHCali DRU Loc1").c_str(),1000,-5,5);
+    hist1d[99] = new TH1D("seedCCCali_druLoc0",addstr(fHTitle,"seedCCCali DRU Loc0").c_str(),1000,-5,5);
+    hist1d[100] = new TH1D("seedCCCali_druLoc1",addstr(fHTitle,"seedCCCali DRU Loc1").c_str(),1000,-5,5);
 
 	hist1d[101] = new TH1D("difampoeffamp_druloc",addstr(fHTitle,"DRU Local Diff E / Ave E; DiffE/AveE").c_str(),300,-0.3,0.3);
+    //hist1d[102] = new TH1D("phoEnergy_druLoc",addstr(fHTitle,"phoEnergy DRU Loc").c_str(),1000,0,1000);
+    //hist1d[103] = new TH1D("phoPt_druLoc",addstr(fHTitle,"phoPt DRU Loc").c_str(),500,0,500);
+    //hist1d[104] = new TH1D("phoEta_druLoc",addstr(fHTitle,"phoEta DRU Loc").c_str(),700,-3.5,3.5);
+    //hist1d[105] = new TH1D("phoPhi_druLoc",addstr(fHTitle,"phoPhi DRU Loc").c_str(),700,-3.5,3.5);
+    //hist1d[106] = new TH1D("phoHadOverEM_druLoc",addstr(fHTitle,"phoHadOverEM DRU Loc").c_str(),100,0,1.0);
+    //hist1d[107] = new TH1D("phoSigmaIEtaIEta_druLoc",addstr(fHTitle,"phoSigmaIEtaIEta DRU Loc").c_str(),1000,0,0.1);
+
+    //hist1d[108] = new TH1D("phoCov2IEtaIEta_druLoc",addstr(fHTitle,"phoCov2IEtaIEta DRU Loc").c_str(),1000,0,0.005);
+    //hist1d[109] = new TH1D("phoCov2IEtaIPhi_druLoc",addstr(fHTitle,"phoCov2IEtaIPhi DRU Loc").c_str(),1000,0,0.005);
+    //hist1d[110] = new TH1D("phoCov2IPhiIPhi_druLoc",addstr(fHTitle,"phoCov2IPhiIPhi DRU Loc").c_str(),1000,0,0.005);
+
+    //hist1d[111] = new TH1D("phoEcalRHSumEtConeDR04_druLoc",addstr(fHTitle,"phoEcalRHSumEtConeDR04 DRU Loc").c_str(),350,0,350);
+    //hist1d[112] = new TH1D("phoHcalTwrSumEtConeDR04_fruLoc",addstr(fHTitle,"phoHcalTwrSumEtConeDR04 DRU Loc").c_str(),350,0,350);
+    //hist1d[113] = new TH1D("phoTrkSumPtSolidConeDR04_fruLoc",addstr(fHTitle,"phoTrkSumPtSolidConeDR04 DRU Loc").c_str(),350,0,350);
+    //hist1d[114] = new TH1D("phoTrkSumPtHollowConeDR04_druLoc",addstr(fHTitle,"phoTrkSumPtHollowConeDR04 DRU Loc").c_str(),350,0,350);
+    //hist1d[115] = new TH1D("phoR9_druLoc",addstr(fHTitle,"phoR9 DRU Loc").c_str(),100,0,1);
+
+    //hist1d[116] = new TH1D("phonrh_druLoc",addstr(fHTitle,"pho nrh DRU Loc").c_str(),100,0,100);
 
     hist1d[117] = new TH1D("seedRHTime_druLoc0",addstr(fHTitle,"seedRHTime DRU Loc0").c_str(),500,-25,25);
     hist1d[118] = new TH1D("seedRHTime_druLoc1",addstr(fHTitle,"seedRHTime DRU Loc1").c_str(),500,-25,25);
+    hist1d[119] = new TH1D("seedCCTime_druLoc0",addstr(fHTitle,"seedCCTime DRU Loc0").c_str(),500,-25,25);
+    hist1d[120] = new TH1D("seedCCTime_druLoc1",addstr(fHTitle,"seedCCTime DRU Loc1").c_str(),500,-25,25);
 
     hist1d[121] = new TH1D("seedTOF_druLoc0",addstr(fHTitle,"seedTOF DRU Loc0").c_str(),250,-1.25,1.25);
     hist1d[122] = new TH1D("seedTOF_druLoc1",addstr(fHTitle,"seedTOF DRU Loc1").c_str(),250,-1.25,1.25);
@@ -1118,13 +1526,37 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[126] = new TH1D("seedAmplitude_druLoc1",addstr(fHTitle,"seedAmplitude DRU Loc1").c_str(),1000,0,1000);
 
     hist1d[127] = new TH1D("rhRHTimeOOT1UnCali",addstr(fHTitle,"kOOT True rhRHTimeUnCali").c_str(),500,-25,25);
+    hist1d[128] = new TH1D("rhCCTimeOOT1UnCali",addstr(fHTitle,"kOOT True rhCCTimeUnCali").c_str(),500,-25,25);
     hist1d[129] = new TH1D("rhRHTimeOOT0UnCali",addstr(fHTitle,"kOOT False rhRHTimeUnCali").c_str(),500,-25,25);
+    hist1d[130] = new TH1D("rhCCTimeOOT0UnCali",addstr(fHTitle,"kOOT False rhCCTimeUnCali").c_str(),500,-25,25);
 
 	hist1d[131] = new TH1D("spikes",addstr(fHTitle,"spikes").c_str(),20,0,1000);
     hist1d[132] = new TH1D("spikesRHSel",addstr(fHTitle,"spikesRHSelect").c_str(),20,0,1000);
     hist1d[133] = new TH1D("spikesRHEff",addstr(fHTitle,"spikesRHEff").c_str(),20,0,1000);
+    hist1d[134] = new TH1D("spikesCCSel",addstr(fHTitle,"spikesCCSelect").c_str(),20,0,1000);
+    hist1d[135] = new TH1D("spikesCCEff",addstr(fHTitle,"spikesCCEff").c_str(),20,0,1000);
+
+	//hist1d[136] = new TH1D("rhcalCCTimeby100k",addstr(fHTitle,"rh 22x135 CC Time by 100k").c_str(),2000,0,2000);
+    //hist1d[137] = new TH1D("rhcalCntby100k",addstr(fHTitle,"rh 22x135 Cnt by 100k").c_str(),2000,0,2000);
+	//hist1d[138] = new TH1D("rhcalRtTimeDistCry1",addstr(fHTitle,"rhcalRtTimeDistCry1").c_str(),500,-25,25);
+	//hist1d[139] = new TH1D("rhcalCCTimeDistCry1",addstr(fHTitle,"rhcalCCTimeDistCry1").c_str(),500,-25,25);
+	//hist1d[140] = new TH1D("rhcalRtTimeDistCaliCry1",addstr(fHTitle,"rhcalRtTimeDistCaliCry1").c_str(),500,-25,25);
+	//hist1d[141] = new TH1D("rhcalRtTimeDistCaliCry1",addstr(fHTitle,"rhcalRtTimeDistCaliCry1").c_str(),500,-25,25);
+
+    hist1d[142] = new TH1D("rhCCisoot",addstr(fHTitle,"rhCCisOOT").c_str(),3,0,2);
+
+	//hist1d[143] = new TH1D("rhcalCCAveby100k",addstr(fHTitle,"rh 22x135 CC Ave by 100k").c_str(),2000,0,2000);
+
+    //hist1d[150] = new TH1D("wth_v_acc_all",addstr(fHTitle,"Width v Acc E > 0 GeV;Width/2 [ns];acc").c_str(),16,0,16);
+    //hist1d[151] = new TH1D("wth_v_acc_p5",addstr(fHTitle,"Width v Acc E > 0.5 GeV;Width/2 [ns];acc").c_str(),16,0,16);
+    //hist1d[152] = new TH1D("wth_v_acc_1",addstr(fHTitle,"Width v Acc E > 1 GeV;Width/2 [ns];acc").c_str(),16,0,16);
+    //hist1d[153] = new TH1D("wth_v_acc_2",addstr(fHTitle,"Width v Acc E > 2 GeV;Width/2 [ns];acc").c_str(),16,0,16);
+    //hist1d[154] = new TH1D("wth_v_acc_5",addstr(fHTitle,"Width v Acc E > 5 GeV;Width/2 [ns];acc").c_str(),16,0,16);
+    //hist1d[155] = new TH1D("wth_v_acc_10",addstr(fHTitle,"Width v Acc E > 10 GeV;Width/2 [ns];acc").c_str(),16,0,16);
 
 	for( int it = 0; it < n1dHists; it++ ){ if(hist1d[it]) hist1d[it]->Sumw2();}
+	//hist1d[] = new TH1D("",addstr(fHTitle,"").c_str(),1,2,3);
+
 
     //------ 2D Hists --------------------------------------------------------------------------
     hist2d[0] = new TH2D("srudifampveffampl",addstr(fHTitle,"SRU Local Diff E V Ave E; DiffE; AveE").c_str(),101,-1,100,100,0,100);
@@ -1134,9 +1566,11 @@ void makehists::initHists( std::string fHTitle ){
 
     hist2d[4] = new TH2D("phoEnergyVHadOverEM_Glo0",addstr(fHTitle,"phoEnergy V HadOverEM Glo0;E;HOEM").c_str(),500,0,250,100,0,0.5);
     hist2d[5] = new TH2D("phoEnergyVHadOverEM_Glo1",addstr(fHTitle,"phoEnergy V HadOverEM Glo1;E;HOEM").c_str(),500,0,250,100,0,0.5);
+    //hist2d[6] = new TH2D("phoEnergyVHadOverEM_sruLoc",addstr(fHTitle,"phoEnergy V HadOverEM SRU Loc;E;HOEM").c_str(),500,0,250,100,0,0.5);
 
-    hist2d[7] = new TH2D("phoEnergyVSigIEtaIEta_Glo0",addstr(fHTitle,"phoEnergy V SigmaIEtaIEta Glo0;E;sIEIE").c_str(),500,0,250,200,0,0.05);
-    hist2d[8] = new TH2D("phoEnergyVSigIEtaIEta_Glo1",addstr(fHTitle,"phoEnergy V SigmaIEtaIEta Glo1;E;sIEIE").c_str(),500,0,250,200,0,0.05);
+    hist2d[7] = new TH2D("phoEnergyVSigmaIEtaIEta_Glo0",addstr(fHTitle,"phoEnergy V SigmaIEtaIEta Glo0;E;sIEIE").c_str(),500,0,250,200,0,0.05);
+    hist2d[8] = new TH2D("phoEnergyVSigmaIEtaIEta_Glo1",addstr(fHTitle,"phoEnergy V SigmaIEtaIEta Glo1;E;sIEIE").c_str(),500,0,250,200,0,0.05);
+    //hist2d[9] = new TH2D("phoEnergyVSigmaIEtaIEta_sruLoc",addstr(fHTitle,"phoEnergy V SigmaIEtaIEta SRU Loc;E;sIEIE").c_str(),500,0,250,200,0,0.05);
 
     hist2d[10] = new TH2D("phoEnergyVR9_Glo0",addstr(fHTitle,"phoEnergy V R9 Glo0;E;R9").c_str(),500,0,250,100,0,1);
     hist2d[11] = new TH2D("phoEnergyVR9_Glo1",addstr(fHTitle,"phoEnergy V R9 Glo1;E;R9").c_str(),500,0,250,100,0,1);
@@ -1144,17 +1578,23 @@ void makehists::initHists( std::string fHTitle ){
 
     hist2d[13] = new TH2D("scEnergyVAmp_sruLoc0",addstr(fHTitle,"scEnergy V Amp SRU Loc0;E;Amp").c_str(),500,0,250,1000,0,1000);
     hist2d[14] = new TH2D("scEnergyVRtTime_sruLoc0",addstr(fHTitle,"scEnergy V RtTime SRU Loc0;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[15] = new TH2D("scEnergyVCCTime_sruLoc0",addstr(fHTitle,"scEnergy V CCTime SRU Loc0;E;CCTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[16] = new TH2D("scEnergyVAmp_sruLoc1",addstr(fHTitle,"scEnergy V Amp SRU Loc1;E;Amp").c_str(),500,0,250,1000,0,1000);
     hist2d[17] = new TH2D("scEnergyVRtTime_sruLoc1",addstr(fHTitle,"scEnergy V RtTime SRU Loc1;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[18] = new TH2D("scEnergyVCCTime_sruLoc1",addstr(fHTitle,"scEnergy V CCTime SRU Loc1;E;CCTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[19] = new TH2D("scEnergyVAmp_Glo0",addstr(fHTitle,"scEnergy V Amp Glo0;E;Amp").c_str(),500,0,250,1000,0,1000);
     hist2d[20] = new TH2D("scEnergyVRtTime_Glo0",addstr(fHTitle,"scEnergy V RtTime Glo0;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[21] = new TH2D("scEnergyVCCTime_Glo0",addstr(fHTitle,"scEnergy V CCTime Glo0;E;CCTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[22] = new TH2D("scEnergyVAmp_Glo1",addstr(fHTitle,"scEnergy V Amp Glo1;E;Amp").c_str(),500,0,250,1000,0,1000);
     hist2d[23] = new TH2D("scEnergyVRtTime_Glo1",addstr(fHTitle,"scEnergy V RtTime Glo1;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[24] = new TH2D("scEnergyVCCTime_Glo1",addstr(fHTitle,"scEnergy V CCTime Glo1;E;CCTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[25] = new TH2D("rhEnergyVrhRtTime",addstr(fHTitle,"rhEnergy V rhRtTime;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[26] = new TH2D("rhEnergyVrhCCTime",addstr(fHTitle,"rhEnergy V rhCCTime;E;CCTime").c_str(),500,0,250,600,-15,15);
+    hist2d[27] = new TH2D("rhRtTimeVrhCCTime",addstr(fHTitle,"rhRtTime V rhCCTime;RtTime;CCTime").c_str(),600,-15,15,600,-15,15);
 
     hist2d[28] = new TH2D("phoDiMassvPt0",addstr(fHTitle,"phoDiMass V Pt Pho0;Mass;Pt").c_str(),140,55,125,500,0,500);
     hist2d[29] = new TH2D("phoDiMassvPt1",addstr(fHTitle,"phoDiMass V Pt Pho1;Mass;Pt").c_str(),140,55,125,500,0,500);
@@ -1167,11 +1607,18 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[35] = new TH2D("drudifampveffampl",addstr(fHTitle,"DRU Local Diff E V Ave E; DiffE; AveE").c_str(),420,-1,20,100,0,100);
     hist2d[36] = new TH2D("druamp0vamp1l",addstr(fHTitle,"DRU Local E 0 V E 1;E0;E1").c_str(),500,0,250,250,0,250);
 
+    //hist2d[37] = new TH2D("phoEnergyVHadOverEM_druLoc",addstr(fHTitle,"phoEnergy V HadOverEM DRU Loc;E;HOEM").c_str(),500,0,250,100,0,1);
+    //hist2d[38] = new TH2D("phoEnergyVSigmaIEtaIEta_druLoc",addstr(fHTitle,"phoEnergy V SigmaIEtaIEta DRU Loc;E;sIEIE").c_str(),500,0,250,200,0,0.05);
+    //hist2d[39] = new TH2D("phoEnergyVR9_druLoc",addstr(fHTitle,"phoEnergy V R9 DRU Loc;E;R9").c_str(),500,0,250,100,0,1);
+
     hist2d[40] = new TH2D("scEnergyVAmp_druLoc0",addstr(fHTitle,"scEnergy V Amp DRU Loc0;E;Amp").c_str(),500,0,250,1000,0,1000);
     hist2d[41] = new TH2D("scEnergyVRtTime_druLoc0",addstr(fHTitle,"scEnergy V RtTime DRU Loc0;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[42] = new TH2D("scEnergyVCCTime_druLoc0",addstr(fHTitle,"scEnergy V CCTime DRU Loc0;E;CCTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[43] = new TH2D("scEnergyVAmp_druLoc1",addstr(fHTitle,"scEnergy V Amp DRU Loc1;E;Amp").c_str(),500,0,250,1000,0,1000);
     hist2d[44] = new TH2D("scEnergyVRtTime_druLoc1",addstr(fHTitle,"scEnergy V RtTime DRU Loc1;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[45] = new TH2D("scEnergyVCCTime_druLoc1",addstr(fHTitle,"scEnergy V CCTime DRU Loc1;E;CCTime").c_str(),500,0,250,600,-15,15);
+
 
     hist2d[46] = new TH2D("evntvsieie",addstr(fHTitle,"Evnt V phoSigmaIEtaIEta;Event;Sieie").c_str(),24000,0,2400,400,0,0.04);
     hist2d[47] = new TH2D("sieievr9sruloc",addstr(fHTitle,"SigmaIEtaIeta V R9 SRU Loc;Sieie;r9").c_str(),400,0,0.04,100,0,1);
@@ -1180,9 +1627,47 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[50] = new TH2D("sieievr9glo1",addstr(fHTitle,"SigmaIEtaIeta V R9 Glo1;Sieie;r9").c_str(),400,0,0.04,100,0,1);
     hist2d[51] = new TH2D("sieieglo1v2",addstr(fHTitle,"SigmaIEtaIeta Glo0 V Glo1;Glo0;Glo1").c_str(),400,0,0.04,400,0,0.04);
 
+    hist2d[52] = new TH2D("phoEnergyVccdt_Glo",addstr(fHTitle,"phoEnergy V CC dT Glo;E;dt").c_str(),150,0,150,800,-4,4);
+    hist2d[53] = new TH2D("phoEnergyVccdt_sruLoc",addstr(fHTitle,"phoEnergy V CC dT SRU Loc;E;dt").c_str(),150,0,150,800,-4,4);
+    hist2d[54] = new TH2D("phoEnergyVccdt_druLoc",addstr(fHTitle,"phoEnergy V CC dT DRU Loc;E;dt").c_str(),150,0,150,800,-4,4);
+
     hist2d[55] = new TH2D("scEfAmpVrtdt_Glo",addstr(fHTitle,"sc Eff Amp V Rt dT Glo;EffAmp;dt").c_str(),150,0,150,800,-4,4);
     hist2d[56] = new TH2D("scEfAmpVrtdt_sruLoc",addstr(fHTitle,"sc Eff Amp V Rt dT SRU Loc;EffAmp;dt").c_str(),150,0,150,800,-4,4);
     hist2d[57] = new TH2D("scEfAmpVtrdt_druLoc",addstr(fHTitle,"sc Eff Amp V Rt dT DRU Loc;EffAmp;dt").c_str(),150,0,150,800,-4,4);
+
+	//hist2d[58] = new TH2D("phoEVHOEM_sruLoc",addstr(fHTitle,"Energy V HadOverEM SRU Loc").c_str(),1500,0,750,250,0,0.25);
+	//hist2d[59] = new TH2D("phoSieieVHOEM_sruLoc",addstr(fHTitle,"SIeIe V HadOverEM SRU Loc").c_str(),400,0,0.04,250,0,0.25);
+	//hist2d[60] = new TH2D("phoEVCieie_sruLoc",addstr(fHTitle,"Energy V CovIEtaIEta SRU Loc").c_str(),1500,0,750,250,0,0.0025);
+	//hist2d[61] = new TH2D("phoSieieVCieie_sruLoc",addstr(fHTitle,"SIeIe V CovIEtaIEta SRU Loc").c_str(),400,0,0.04,250,0,0.0025);
+	//hist2d[62] = new TH2D("phoEVCieip_sruLoc",addstr(fHTitle,"Energy V CovIEtaIPhi SRU Loc").c_str(),1500,0,750,250,0,0.0025);
+	//hist2d[63] = new TH2D("phoSieieVCieip_sruLoc",addstr(fHTitle,"SIeIe V CovIEtaIPhi SRU Loc").c_str(),400,0,0.04,250,0,0.0025);
+	//hist2d[64] = new TH2D("phoEVCipip_sruLoc",addstr(fHTitle,"Energy V CovIPhiIPhi SRU Loc").c_str(),1500,0,750,250,0,0.0025);
+	//hist2d[65] = new TH2D("phoSieieVCipip_sruLoc",addstr(fHTitle,"SIeIe V CovIPhiIPhi SRU Loc").c_str(),400,0,0.04,250,0,0.0025);
+	//hist2d[66] = new TH2D("phoEVERHSEtCDR04_sruLoc",addstr(fHTitle,"Energy V EcalRHSumEtConeDR04 SRU Loc").c_str(),1500,0,750,100,0,50);
+	//hist2d[67] = new TH2D("phoSieieVERHSEtCDR04_sruLoc",addstr(fHTitle,"SIeIe V EcalRHSumEtConeDR04 SRU Loc").c_str(),400,0,0.04,100,0,50);
+	//hist2d[68] = new TH2D("phoEVHTSEtCDR04_sruLoc",addstr(fHTitle,"Energy V HcalTwrSumEtConeDR04 SRU Loc").c_str(),1500,0,750,100,0,50);
+	//hist2d[69] = new TH2D("phoSieieVHTSEtCDR04_sruLoc",addstr(fHTitle,"SIeIe V HcalTwrSumEtConeDR04 SRU Loc").c_str(),400,0,0.04,100,0,50);
+	//hist2d[70] = new TH2D("phoEVTSPtSCDR04_sruLoc",addstr(fHTitle,"Energy V TrkSumPtSolidConeDR04 SRU Loc").c_str(),1500,0,750,100,0,50);
+	//hist2d[71] = new TH2D("phoSieieVTSPtSCDR04_sruLoc",addstr(fHTitle,"SIeIe V TrkSumPtSolidConeDR04 SRU Loc").c_str(),400,0,0.04,100,0,50);
+	//hist2d[72] = new TH2D("phoEVTSPtHCDR04_sruLoc",addstr(fHTitle,"Energy V TrkSumPtHallowConeDR04 SRU Loc").c_str(),1500,0,750,100,0,50);
+	//hist2d[73] = new TH2D("phoSieieVTSPtHCDR04_sruLoc",addstr(fHTitle,"SIeIe V TrkSumPtHallowConeDR04 SRU Loc").c_str(),400,0,0.04,100,0,50);
+
+    //hist2d[74] = new TH2D("phoEVHOEM_druLoc",addstr(fHTitle,"Energy V HadOverEM DRU Loc").c_str(),1500,0,750,250,0,0.25);
+    //hist2d[75] = new TH2D("phoSieieVHOEM_druLoc",addstr(fHTitle,"SIeIe V HadOverEM DRU Loc").c_str(),400,0,0.04,250,0,0.25);
+    //hist2d[76] = new TH2D("phoEVCieie_druLoc",addstr(fHTitle,"Energy V CovIEtaIEta DRU Loc").c_str(),1500,0,750,250,0,0.0025);
+    //hist2d[77] = new TH2D("phoSieieVCieie_druLoc",addstr(fHTitle,"SIeIe V CovIEtaIEta DRU Loc").c_str(),400,0,0.04,250,0,0.0025);
+    //hist2d[78] = new TH2D("phoEVCieip_druLoc",addstr(fHTitle,"Energy V CovIEtaIPhi DRU Loc").c_str(),1500,0,750,250,0,0.0025);
+    //hist2d[79] = new TH2D("phoSieieVCieip_druLoc",addstr(fHTitle,"SIeIe V CovIEtaIPhi DRU Loc").c_str(),400,0,0.04,250,0,0.0025);
+    //hist2d[80] = new TH2D("phoEVCipip_druLoc",addstr(fHTitle,"Energy V CovIPhiIPhi DRU Loc").c_str(),1500,0,750,250,0,0.0025);
+    //hist2d[81] = new TH2D("phoSieieVCipip_druLoc",addstr(fHTitle,"SIeIe V CovIPhiIPhi DRU Loc").c_str(),400,0,0.04,250,0,0.0025);
+    //hist2d[82] = new TH2D("phoEVERHSEtCDR04_druLoc",addstr(fHTitle,"Energy V EcalRHSumEtConeDR04 DRU Loc").c_str(),1500,0,750,100,0,50);
+    //hist2d[83] = new TH2D("phoSieieVERHSEtCDR04_druLoc",addstr(fHTitle,"SIeIe V EcalRHSumEtConeDR04 DRU Loc").c_str(),400,0,0.04,100,0,50);
+    //hist2d[84] = new TH2D("phoEVHTSEtCDR04_druLoc",addstr(fHTitle,"Energy V HcalTwrSumEtConeDR04 DRU Loc").c_str(),1500,0,750,100,0,50);
+    //hist2d[85] = new TH2D("phoSieieVHTSEtCDR04_druLoc",addstr(fHTitle,"SIeIe V HcalTwrSumEtConeDR04 DRU Loc").c_str(),400,0,0.04,100,0,50);
+    //hist2d[86] = new TH2D("phoEVTSPtSCDR04_druLoc",addstr(fHTitle,"Energy V TrkSumPtSolidConeDR04 DRU Loc").c_str(),1500,0,750,100,0,50);
+    //hist2d[87] = new TH2D("phoSieieVTSPtSCDR04_druLoc",addstr(fHTitle,"SIeIe V TrkSumPtSolidConeDR04 DRU Loc").c_str(),400,0,0.04,100,0,50);
+    //hist2d[88] = new TH2D("phoEVTSPtHCDR04_druLoc",addstr(fHTitle,"Energy V TrkSumPtHallowConeDR04 DRU Loc").c_str(),1500,0,750,100,0,50);
+    //hist2d[89] = new TH2D("phoSieieVTSPtHCDR04_druLoc",addstr(fHTitle,"SIeIe V TrkSumPtHallowConeDR04 DRU Loc").c_str(),400,0,0.04,100,0,50);
 
     hist2d[90] = new TH2D("phoEVHOEM_gloLoc",addstr(fHTitle,"Energy V HadOverEM GLO Loc").c_str(),1500,0,750,250,0,0.25);
     hist2d[91] = new TH2D("phoSieieVHOEM_gloLoc",addstr(fHTitle,"SIeIe V HadOverEM GLO Loc").c_str(),400,0,0.04,250,0,0.25);
@@ -1199,13 +1684,26 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[102] = new TH2D("phoEVTSPtSCDR04_gloLoc",addstr(fHTitle,"Energy V TrkSumPtSolidConeDR04 GLO Loc").c_str(),1500,0,750,100,0,50);
     hist2d[103] = new TH2D("phoSieieVTSPtSCDR04_gloLoc",addstr(fHTitle,"SIeIe V TrkSumPtSolidConeDR04 GLO Loc").c_str(),400,0,0.04,100,0,50);
     hist2d[104] = new TH2D("phoEVTSPtHCDR04_gloLoc",addstr(fHTitle,"Energy V TrkSumPtHallowConeDR04 GLO Loc").c_str(),1500,0,750,100,0,50);
-    hist2d[105] = new TH2D("phoSieieVTSPHCDR04_gloLoc",addstr(fHTitle,"SIeIe V TrkSumPtHallowConeDR04 GLO Loc").c_str(),400,0,0.04,100,0,50);
+    hist2d[105] = new TH2D("phoSieieVTSPtHCDR04_gloLoc",addstr(fHTitle,"SIeIe V TrkSumPtHallowConeDR04 GLO Loc").c_str(),400,0,0.04,100,0,50);
+
+	hist2d[106] = new TH2D("rhRtCaliVCCCali",addstr(fHTitle,"RH CC Cali V Rt Cali;CC [ns];Rt [ns]").c_str(),400,-20,20,400,-20,20);
+    hist2d[107] = new TH2D("rhRtTimeVrhCCTime10120",addstr(fHTitle,"rhCCTime V rhRtTime 10-120;CC [ns];Rt [ns]").c_str(),600,-15,15,600,-15,15);
 
 	hist2d[108] = new TH2D("SwcrVRtTime",addstr(fHTitle,"SwissCross V RH Time;SwCrs;Rt [ns]").c_str(),400,0.1,1.1,300,-15,15);
+    hist2d[109] = new TH2D("SwcrVCCTime",addstr(fHTitle,"SwissCross V CC Time;SwCrs;CC [ns]").c_str(),400,0.1,1.1,300,-15,15);
     hist2d[110] = new TH2D("SwcrVRtTimeTopo",addstr(fHTitle,"SwissCross V RH Time +Topo Cuts;SwCrs;Rt [ns]").c_str(),400,0.1,1.1,300,-15,15);
+    hist2d[111] = new TH2D("SwcrVCCTimeTopo",addstr(fHTitle,"SwissCross V CC Time +Topo Cuts;SwCrs;CC [ns]").c_str(),400,0.1,1.1,300,-15,15);
     hist2d[112] = new TH2D("SwcrVRtTimeOOT",addstr(fHTitle,"SwissCross V RH Time +kOOT Cut;SwCrs;Rt [ns]").c_str(),400,0.1,1.1,300,-15,15);
+    hist2d[113] = new TH2D("SwcrVCCTimeOOT",addstr(fHTitle,"SwissCross V CC Time +kOOT Cut;SwCrs;CC [ns]").c_str(),400,0.1,1.1,300,-15,15);
 
+    hist2d[114] = new TH2D("rhRtkOOTVCCkOOT",addstr(fHTitle,"RH Rt kOOT Cali V CC kOOT;Rt kOOT;CC kOOT").c_str(),2,0,2,2,0,2);
 
+    hist2d[135] = new TH2D("rhRtCaliVCCCali_gs0",addstr(fHTitle,"RH CC Cali V Rt Cali hasNoGS;CC [ns];Rt [ns]").c_str(),600,-30,30,600,-30,30);
+    hist2d[136] = new TH2D("rhRtCaliVCCCali_gs1",addstr(fHTitle,"RH CC Cali V Rt Cali hasGS1;CC [ns];Rt [ns]").c_str(),600,-30,30,600,-30,30);
+    hist2d[137] = new TH2D("rhRtCaliVCCCali_gs6",addstr(fHTitle,"RH CC Cali V Rt Cali hasGS6;CC [ns];Rt [ns]").c_str(),600,-30,30,600,-30,30);
+    hist2d[138] = new TH2D("rhRtCaliVCCCali_gs16",addstr(fHTitle,"RH CC Cali V Rt Cali hasGS1&GS6;CC [ns];Rt [ns]").c_str(),600,-30,30,600,-30,30);
+
+    hist2d[134] = new TH2D("SwcrVRhEnergyCCOOT",addstr(fHTitle,"SwissCross V RH Energy +CCkOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
     hist2d[115] = new TH2D("SwcrVRhEnergyRtOOT",addstr(fHTitle,"SwissCross V RH Energy +RtkOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
     hist2d[116] = new TH2D("SwcrVRhEnergyTopo",addstr(fHTitle,"SwissCross V RH Energy +kOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
     hist2d[117] = new TH2D("SwcrVRhEnergy",addstr(fHTitle,"SwissCross V RH Energy +kOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
@@ -1218,6 +1716,28 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[123] = new TH2D("EnergyVRtTimeG1",addstr(fHTitle,"Energy V RtTime;Energy [GeV] hasGS1;Time [ns]").c_str(),250,0,1000,600,-30,30);
     hist2d[124] = new TH2D("EnergyVRtTimeKfG0",addstr(fHTitle,"Energy V RtTime kOOT False noGS;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
     hist2d[125] = new TH2D("EnergyVRtTimeG0",addstr(fHTitle,"Energy V RtTime;Energy [GeV] noGS;Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[126] = new TH2D("EnergyVCCTimeKfG16",addstr(fHTitle,"Energy V CCTime kOOT False hasGS1&6;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[127] = new TH2D("EnergyVCCTimeG16",addstr(fHTitle,"Energy V CCTime;Energy [GeV] hasGS1&6;Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[128] = new TH2D("EnergyVCCTimeKfG6",addstr(fHTitle,"Energy V CCTime kOOT False hasGS6;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[129] = new TH2D("EnergyVCCTimeG6",addstr(fHTitle,"Energy V CCTime;Energy [GeV] hasGS6;Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[130] = new TH2D("EnergyVCCTimeKfG1",addstr(fHTitle,"Energy V CCTime kOOT False hasGS1;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[131] = new TH2D("EnergyVCCTimeG1",addstr(fHTitle,"Energy V CCTime;Energy [GeV] hasGS1;Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[132] = new TH2D("EnergyVCCTimeKfG0",addstr(fHTitle,"Energy V CCTime kOOT False noGS;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[133] = new TH2D("EnergyVCCTimeG0",addstr(fHTitle,"Energy V CCTime;Energy [GeV] noGS;Time [ns]").c_str(),250,0,1000,600,-30,30);
+    //hist2d[134] used above
+
+
+    //hist2d[150] = new TH2D("amp_v_e_unrh",addstr(fHTitle,"UnCaliRH Amp v Energy;amplitude;energy [GeV]").c_str(),4000,0,400,200,0,20);
+    //hist2d[151] = new TH2D("amp_v_e_rh",addstr(fHTitle,"RH Amp v Energy;amplitude;energy [GeV]").c_str(),4000,0,400,200,0,20);
+    //hist2d[152] = new TH2D("untime_v_actdif",addstr(fHTitle,"untime_v_actdif;nocorrtime [ns]; actdiff [ns]").c_str(),500,-25,25,500,-25,25);
+    //hist2d[153] = new TH2D("untime_v_encdif",addstr(fHTitle,"untime_v_encdif;nocorrtime [ns]; encdiff [ns]").c_str(),500,-25,25,500,-25,25);
+    //hist2d[154] = new TH2D("untime_v_resd",addstr(fHTitle,"untime_v_resd;nocorrtime [ns]; residual [ns]").c_str(),500,-25,25,3000,-1.5,1.5);
+    //hist2d[155] = new TH2D("encdif_v_amp",addstr(fHTitle,"encdif_v_amp;encdiff [ns]; amplitude").c_str(),500,-25,25,400,0,400);
+    //hist2d[156] = new TH2D("actdif_v_amp",addstr(fHTitle,"encdif_v_amp;actdiff [ns]; amplitude" ).c_str(),500,-25,25,400,0,400);
+    //hist2d[157] = new TH2D("encdif_v_energy",addstr(fHTitle,"encdif_v_energy;encdiff [ns]; energy [GeV]").c_str(),500,-25,25,200,0,100);
+
+    //hist2d[0] = new TH2D("jt_pt", "jt", jtdiv, -1*jtran, jtran, 500, 0, 500);
+	//hist2d[] = new TH2D("",addstr(fHTitle,"").c_str(),1,2,3,4,5,6);
 
 }//<<>>void makehists::initHists()
 
@@ -1230,29 +1750,127 @@ int main ( int argc, char *argv[] ){
 
     //if( argc != 4 ) { std::cout << "Insufficent arguments." << std::endl; }
     //else {
+                //auto indir = "LLPGamma/llpga_GMSB_AOD_v59/"; //argv[1];
+                //auto indir = "LLPGamma/llpga_GJets_AOD_v58/";
+                //auto indir = "ecalTiming/gammares_tt_kucc_126_v6_diag/EGamma/";
+                //auto indir = "ecalTiming/gammares_tt_kucc_126_v11_diag/EGamma/";
+                //auto indir = "ecalTiming/gammares_tt_kucc_126_v7_diag_unclean/EGamma/";
+                //auto indir = "/uscms/home/jaking/nobackup/ecaltiming/CMSSW_12_6_0_pre4/src/GammaResTool/gammaResTool/test/";
+                //auto indir = "ecalTiming/gammares_tt_kucc_126_v11_ccEncDiag/EGamma/";
+                //auto indir = "ecalTiming/gammares_ttcc_1307_v11_diag/EGamma1/";
+                //auto indir = "ecalTiming/gammares_ttcc_131_v11_diag/";
+                //auto indir = "ecalTiming/gammares_ttcc_140_v11_test/EGamma1/";
+                //auto indir = "ecalTiming/EGamma0/";
+                //auto indir = "../test/";
+                //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1/EGamma1/";
+                //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_punt/EGamma1/";
+                //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_fix1/EGamma1/";
+                //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_ebsf/EGamma1/";
+				//auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_nosf/EGamma1/";
+                //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/EGamma1/";
                 //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/";
-                //auto indir = "ecalTiming/gammares_mc/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/";
-                auto indir = "ecalTiming/gammares_mc/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/";
+                auto indir = "ecalTiming/gammares_ttcc_140_v11_mod1_pr_test2/EGamma1/";
 
-                //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
-                //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
-                auto infilename = "list_files/egammares_gammares_mc_ZprimeToEE_M-6000_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
+                //auto infilename = "llpgana_mc_AODSIM_GMSB_AOD_v59_Full.txt"; //argv[2];
+                //auto infilename = "llpgana_mc_AODSIM_GJets_AOD_v58_Full.txt";
+                //auto infilename = "tt_run3_2022C_prompt_355794_357486_126_gammares_diag_filelist.txt";
+                //auto infilename = "tt_run3_2022E_prompt_359022-362760_126_gammares_diag_filelist.txt";
+                //auto infilename = "tt_run3_2022G_prompt_359022-362760_126_gammares_v5_filelist.txt";
 
-				int brun = 0;
-            	int erun = 999999;
-                auto califilename = "none";
-                
+            	//auto infilename = "tt_run3_2022E_prompt_359022_362760_126_gammares_v7_diag_filelist.txt";
+                //auto infilename = "tt_run3_2018A_17Sep2018_Full_126_gammares_v7_diag_filelist.txt";
+				//auto infilename = "tt_run3_2022E_prompt_unclean_359022_362760_126_gammares_v7_diag_filelist.txt";
+                //auto infilename = "tt_run3_2022E_prompt_359022_362760_126_gammares_v10_diag_filelist.txt";
+        		//auto infilename = "tt_run3_2018A_17Sep2018_v2_315257-316993_126_gammares_v10_diag_filelist.txt";
+                //auto infilename = "tt_run3_2022G_Prompt_359022-362760_126_gammares_v11_diag_filelist.txt";
+                //auto infilename = "ku_KUCC_tt_R2022C_126_gammares_v11_filelist.txt";
+                //auto infilename = "tt_run3_2022C_Prompt_355890-355895_126_gammares_v12_ccenc_filelist.txt";
+                //auto infilename = "ku_23D_eg0_diag_126_gammares_v10_reso_filelist.txt";
+                //auto infilename = "kuntuple_gammares_cc_140_v2_EGamma0_MINIAOD_Run2024B-PromptReco-v1_378927-379349_dispho_v6.txt";
+                //auto infilename = "kuntuple_gammares_cc_140_v2_EGamma1_MINIAOD_Run2024B-PromptReco-v1_378981-379349_dispho_v6.txt";
+				//auto infilename = "kuntuple_gammares_cc_140_v2_EGamma01_MINIAOD_Run2024B-PromptReco-v1_378981-379349_dispho_v6.txt";
+                //auto infilename = "egammares_gammares_cc_140_v2_EGamma0_MINIAOD_Run2024C-PromptReco-v1_378981-379349_dispho_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_cc_140_json_v2_EGamma0_MINIAOD_Run2024C-PromptReco-v1_379415-380238_dispho_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_cc_140_v2_EGamma1_MINIAOD_Run2024D-PromptReco-v1_380306-380947_dispho_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_cc_140_test.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_EGamma1_MINIAOD_Run2023D-PromptReco-v1_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370293-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_punt_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370293-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_slewb_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370293-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_slewc_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370570-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_dslew_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370570-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_fix1_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370570-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_ebsf_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370496-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_nosf_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370496-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_ebsf_ccgt_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370293-370580_v2.txt";
+                //auto infilename = "list_files/egammares_gammares_ttcc_140_v11_diag_mod1_exp3_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370496-370580_v2.txt";
+                auto infilename = "list_files/egammares_gammares_ttcc_140_v11_mod1_pr_test2_EGamma1_MINIAOD_Run2023D-PromptReco-v1_370575-370580_v2.txt";
+
+				//int brun = 0;
+            	//int erun = 999999;
+                //auto califilename = "none";
+                auto califilename = "cali_root_files/tt_KUCCRes_1404_v12_run3_2024D_eg1_Prompt_370293_370580_Cali.root";
+                //auto califilename = "cali_root_files/tt_KUCCRes_1404_v12_run3_2024D_eg1_Prompt_370293_370580_punt_Cali.root";
+                //auto califilename = "cali_root_files/tt_KUCCRes_1404_v12_run3_2024D_eg1_Prompt_370293_370580_slewb_Cali.root";
+                int brun = 370293;
+                int erun = 370580;
+                //auto califilename = "cali_root_files/tt_KUCCRes_1404_v12_run3_2024C_eg0_Prompt_379415_380238_Cali.root";
+				//auto califilename = "tt_KUCCRes_126_v7_run3_2018A_Full_Cali.root";
+                //int brun = 315257;
+                //int erun = 316993;
+				//small test range 2018A
+				//int brun = 316241;
+				//int erun = 316245;
+				//auto califilename = "tt_KUCCRes_126_v3_run3_2022IOV3_357290_358883_Cali.root";
+				//int brun = 357290;
+                //int erun = 358883;
+                //auto califilename = "tt_KUCCRes_126_v3_run3_2022IOV5_359421_360089_Cali.root";
+            	//int brun = 359421;
+                //int erun = 360089;
+                //auto califilename = "tt_KUCCRes_126_v3_run3_2022IOV9_362523_362760_Cali.root";
+                //auto califilename = "tt_KUCCRes_126_v10diag_run3_2022IOV9_362523_362760_Cali.root";
+                //int brun = 362523;
+                //int erun = 362760;
+
+                //auto outfilename = "egammares_diag_2022IOV3_357290_358883.root";
+                //auto outfilename = "egammares_diag_2022IOV5_359421_360089_v2_cali.root";
+                //auto outfilename = "egammares_diag_2022IOV9_362523_362760_v2_cali.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v7_Cleaned.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v7_Unclean.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v7_EB_ECut_NoCali_Cleaned.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v7_EB_Cleaned.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v7_slt013lg_2_Cleaned.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v7_sgt013lg_Cleaned.root";
+                //auto outfilename = "egammares_diag_2018A_Full_v7_wp80_EB_E10.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v8_wp80_EB_E10.root";
+                //auto outfilename = "egammares_diag_2022IOV5_357290_358883_v10_IDCT_EB_E10.root";
+                //auto outfilename = "egammares_diag_2018A_315257_316993_v10a_IDCT_EB_E10.root";
+                //auto outfilename = "egammares_diag_2018A_315257_316993_v10c_IDCT_EB_E10.root";
+				//auto outfilename = "egammares_diag2_2022G_Prompt_359022-362760_v10_IDCT_EB_E10.root";
+                //auto outfilename = "egammares_diag_2022G_Prompt_359022-362760_v11_IDCT_EB_E10.root";
+                //auto outfilename = "egammares_diag_24C_EGamma0_v12_gold_cali_EB.root";
+                //auto outfilename = "egammares_diag_24E_test4_gs0_v12_EB.root";
+                //auto outfilename = "egammares_diag_23D_370496_370580_tt_sfeb_v12_EB.root";
                 //auto outfilename = "egammares_diag_23D_370496_370580_tt_exp3_v12_EB.root";
-                //auto outfilename = "egammares_diag_winter24_DYto2L-4Jets_MLL-50_1J_v12_EB.root";
-                auto outfilename = "egammares_diag_winter24_ZprimeToEE_M-6000_v12_EB_test.root";
+                auto outfilename = "egammares_diag_23D_370580_tt_prtest2_v12_EB.root";
 
+                //auto fhtitle = "IOV5 SIEIE < 0.013 LG ";
+				//auto fhtitle = "IOV5 SIEIE > 0.013 LG ";
+				//auto fhtitle = "IOV5 wp80 EB E10 RtCalCut ";
+                //auto fhtitle = "IOV5 wp80 EB E10 NoCali ";
+				//auto fhtitle = "IOV5 Unclean ";
+                //auto fhtitle = "Run2018A wp80 EB E10 ";
+                //auto fhtitle = "IOV5 IDCT EB E10 ";
+                //auto fhtitle = "Run2022G IDCT EB ";
+                //auto fhtitle = "Run2023D 13.2.3 EB ";
+                auto fhtitle = "Run2023D PR Test EB ";
                 //auto fhtitle = "Run2024E 14_0_4 EB ";
-				//auto fhtitle = "Winter24 DY EB";
-                auto fhtitle = "Winter24 ZprimeToEE_M-6000 EB";
 
 				makehists base;				
                 base.llpgana_hist_maker( indir, infilename, outfilename, califilename, brun, erun, fhtitle );
     //}
     return 1;
 }//<<>>int main ( int argc, char *argv[] )
+
+
 

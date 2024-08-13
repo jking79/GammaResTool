@@ -227,7 +227,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
    	run   = iEvent.id().run();
    	lumi  = iEvent.luminosityBlock();
    	event = iEvent.id().event();
-    if( DEBUG ) std::cout << "******************************************************************************************************" << std::endl;
+    if( DEBUG ) std::cout << "***********************************************************************************************" << std::endl;
 	if( DEBUG ) std::cout << "Processing event: " << event << " in run: " << run << " and lumiblock: " << lumi << std::endl;
 
 // -- Process Prime Vertix
@@ -244,8 +244,8 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<pat::Photon>        fphotons;
     std::vector<pat::Electron>  	felectrons;
 
-	float minRecHitEnergy = 0.01;
-    float minRecHitAmp = 5;	
+	float minRecHitEnergy = 0.2;
+    float minRecHitAmp = 1;	
 	if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
 	for (const auto & recHit : *recHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); }
     for (const auto & recHit : *recHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); }
@@ -654,8 +654,8 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<int> selPhoType;
     std::vector<uInt> locSeedRHs{0,0};
     std::vector<uInt> gloSeedRHs{0,0};
-    std::vector<uInt> gloAllSeedRHs;
-	float gloDiMass(-1), gloDiAngle(-1), gloDiDr(-1), gloDiPhi(-1), gloDiEta(-1);
+    //std::vector<uInt> gloAllSeedRHs;
+	//float gloDiMass(-1), gloDiAngle(-1), gloDiDr(-1), gloDiPhi(-1), gloDiEta(-1);
 	//std::vector<int> selPhoIndx{-1,-1,-1};
 	vector<vector<int>> offsets{{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
     for (const auto & photon : fphotons ){
@@ -719,12 +719,23 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	if( DEBUG ) std::cout << " Selected " << gloPhotons.size() << " global photons and " << locRHCands.size() << " local rechits. " << std::endl;
 
 	// select rhs for global
-	gloAllSeedRHs.clear();
+	//gloAllSeedRHs.clear();
+    std::vector<uInt> gloAllSeedRHs;
+    std::vector<float> zMassDiff;
+    std::vector<int> phoIndx1;
+    std::vector<int> phoIndx2;
+    std::vector<float> gloDiMass;
+    std::vector<float> gloDiAngle;
+    std::vector<float> gloDiDr;
+    std::vector<float> gloDiPhi;
+    std::vector<float> gloDiEta;
+    int bestMatch( -10 );
 	int nGloPhos = gloPhotons.size();
 	if( nGloPhos > 1 ){
 		float zMassMatch(35.00);
 		float zMass(91.1876);
 		vector<int> phoIndx{0,0};
+		int nMatch = -1;
 		for( int first(0); first < nGloPhos; first++ ){
             auto pho1Eta = gloPhotons[first].eta();
             auto pho1Phi = gloPhotons[first].phi();
@@ -746,36 +757,51 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                 const auto deta12 = std::abs(pho1Eta - pho2Eta);
 				pho1vec += pho2vec;
 				auto pairMass = pho1vec.M();
-				if( pairMass > 60.0 && pairMass < 120.0 ){ 
-					auto zMassDiff = std::abs(pairMass-zMass); 
-					if( zMassDiff < zMassMatch ){ 
-						phoIndx[0] = first; phoIndx[1] = second; zMassMatch = zMassDiff; 
-						gloDiMass = pairMass; gloDiAngle = ang12; gloDiDr = dr12; gloDiPhi = dphi12; gloDiEta = deta12;
-						if( DEBUG ) std::cout << " Matching glo pho pair with " << zMassDiff << " mass diff" << std::endl;	
+				if( pairMass > 60.0 && pairMass < 120.0 ){
+					nMatch++; 
+					auto diff = std::abs(pairMass-zMass); 
+					if( diff < zMassMatch ){ 
+						bestMatch = nMatch;
+						//	phoIndx[0] = first; phoIndx[1] = second; zMassMatch = zMassDiff; 
+						//	gloDiMass = pairMass; gloDiAngle = ang12; gloDiDr = dr12; gloDiPhi = dphi12; gloDiEta = deta12;
+						//	if( DEBUG ) std::cout << " Matching glo pho pair with " << zMassDiff << " mass diff" << std::endl;	
 					}//<<>>if( zMassDiff < zMassMatch )}
+					gloDiMass.push_back(pairMass);
+					gloDiAngle.push_back(ang12);
+					gloDiDr.push_back(dr12);
+					gloDiPhi.push_back(dphi12);
+					gloDiEta.push_back(deta12);
+					zMassDiff.push_back(diff);
+                    phoIndx1.push_back(first);
+                    phoIndx2.push_back(second);
 				}//<<>>if( pairMass > 60.0 && pairMass < 120.0 )
 			}//<<>>for( int second(first+1); second < nGloPhos; second++ )
 		}//<<>>for( int first(0); first < nGloPhos; first++ )
-		if( zMassMatch < 35.00 ){
+        int nMassMatches = zMassDiff.size();
+        for( int idx = 0; idx < nMassMatches; idx++ ){
+			if( zMassDiff[idx] < 35.00 ){
 			
 			//selPhoIndx[1] = phoIndx[0];
-			auto pho0 = gloPhotons[phoIndx[0]];
+			auto pho0 = gloPhotons[phoIndx1[idx]];
 			selPhotons.push_back(pho0);
 			selPhoType.push_back(1);
 			//selPhoIndx[2] = phoIndx[1];
-			auto pho1 = gloPhotons[phoIndx[1]];
+			auto pho1 = gloPhotons[phoIndx2[idx]];
             selPhotons.push_back(pho1);
             selPhoType.push_back(2);
         	const auto &phosc0 = pho0.superCluster().isNonnull() ? pho0.superCluster() : pho0.parentSuperCluster();
             const auto &phosc1 = pho1.superCluster().isNonnull() ? pho1.superCluster() : pho1.parentSuperCluster();
-			gloSeedRHs[0] = ((phosc0.get())->seed()->seed()).rawId();
-			gloAllSeedRHs.push_back(((phosc0.get())->seed()->seed()).rawId());
-			gloSeedRHs[1] = ((phosc1.get())->seed()->seed()).rawId();
-            gloAllSeedRHs.push_back(((phosc1.get())->seed()->seed()).rawId());
+			const uInt id1 = ((phosc0.get())->seed()->seed()).rawId();
+			if( idx == bestMatch ) gloSeedRHs[0] = id1;
+			gloAllSeedRHs.push_back(id1);
+            const uInt id2 = ((phosc1.get())->seed()->seed()).rawId();
+			if( idx == bestMatch ) gloSeedRHs[1] = id2;
+            gloAllSeedRHs.push_back(id2);
 			if( DEBUG ) std::cout << " Selecting matching glo photon pair with : " << gloSeedRHs[0] << " & " << gloSeedRHs[1];
             if( DEBUG ) std::cout << " and dZmass : " << zMassMatch << std::endl;
 			
-		}//<<>>if( zMassMatch < 35.00 )
+			}//<<>>if( zMassMatch < 35.00 )
+		}//<<>>for( int idx = 0; idx < nMassMatches; idx++ )
 	}//<<>>if( gloPhotons.size() > 1 )i
 
 	if( DEBUG ) std::cout << "Sorting Local RecHits " << std::endl;
@@ -911,11 +937,24 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	if( DEBUG ) std::cout << "Skimming Selected Photons " << std::endl;
 
-	phoDiMass = gloDiMass;
-	phoDiAngle = gloDiAngle;
-	phoDiDr = gloDiDr;
-    phoDiPhi = gloDiPhi;
-    phoDiEta = gloDiEta;
+	if( bestMatch > -1 ){
+
+		phoDiMass = gloDiMass[bestMatch];
+		phoDiAngle = gloDiAngle[bestMatch];
+		phoDiDr = gloDiDr[bestMatch];
+    	phoDiPhi = gloDiPhi[bestMatch];
+    	phoDiEta = gloDiEta[bestMatch];
+	
+	}//<<>>if( bestMatch > -1 )
+	else {
+
+        phoDiMass = -999;
+        phoDiAngle = -999;
+        phoDiDr = -999;
+        phoDiPhi = -999;
+        phoDiEta = -999;
+
+	}//<<>>//<<>>if( bestMatch > -1 ) else
 
 	phoEnergy.clear();
 	phoRhIds.clear();

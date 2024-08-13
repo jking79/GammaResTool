@@ -443,7 +443,6 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 		auto srun = std::stoi(srunstr);
         auto erun = std::stoi(erunstr);
         std::cout << "For Run " << srun << " to Run " << erun << std::endl;
-        std::cout << "Subdir: " << subdir << std::endl;
 
 		//auto tfilename = indir+infilename;
         //auto fInFile = TFile::Open(tfilename.c_str(), "update");
@@ -460,7 +459,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
             //const std::string eosdir("/uscms/home/jaking/nobackup/el8/ecaltiming/CMSSW_14_0_4/src/GammaResTool/GammaResTool/");
             auto tfilename = eosdir + indir + subdir + str;
             //auto tfilename = indir + "/" + str;
-            std::cout << "--  adding file: " << tfilename << std::endl;
+            //std::cout << "--  adding file: " << tfilename << std::endl;
 			std::cout << "-";
         	fInTree->Add(tfilename.c_str());
         }//<<>>while (std::getline(infile,str))
@@ -565,7 +564,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 				if(debug) std::cout << "Run " << run << " id " << (*resRhID)[didx] << " Amp " << (*resAmp)[didx] << " E " << (*resE)[didx];
             	if(debug) std::cout << " Rt " << (*resRtTime)[didx]  << " CC " << (*resCCTime)[didx] << " TOF " << (*resTOF)[didx] << std::endl;
 			}//<<>>for( int didx = 0; didx < 4; didx++ ){
-			if( srun != 0 && ( run < srun || run > erun ) ) continue;
+			if( run < srun || run > erun ) continue;
 
 			if(debug) std::cout << " - Finshed Get Entry " << std::endl;
 
@@ -848,8 +847,7 @@ int main ( int argc, char *argv[] ){
         //else {
 
             //auto indir = "jaking/ecalTiming/";
-            //auto indir = "jaking/ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/";
-            auto indir = "jaking/ecalTiming/gammares_mc/";
+            auto indir = "jaking/ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/";
 
             //auto infilelistname = "tt_run3_2022E_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
             //auto infilelistname = "tt_run3_2022F_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
@@ -866,8 +864,8 @@ int main ( int argc, char *argv[] ){
 			//auto infilelistname = "list_files/ku_24D_eg01_cali_140_gammares_v12_plotfilelist.txt";
             //auto infilelistname = "list_files/ku_24CD_eg01_mixed_cali_140_gammares_v12_plotfilelist.txt";
             //auto infilelistname = "list_files/ku_24CE_test_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_23D_eg1_sfeb_ccgt_140_gammares_v12_plotfilelist.txt";
-            auto infilelistname = "list_files/ku_W24_dy_eb_st_14011_gammares_v12_plotfilelist.txt";
+            auto infilelistname = "list_files/ku_23D_eg1_sfeb_ccgt_140_gammares_v12_plotfilelist.txt";
+
 
             //std::string outfilename = "egres_Run2018E_359022_362760_126_v10_resplots";
             //std::string outfilename = "egres_Run2018F_360332_362180_126_v10_resplots";
@@ -880,8 +878,7 @@ int main ( int argc, char *argv[] ){
             //std::string outfilename = "egres_Run2024C_goldjson_eg01_380066_380238_140_v10_resplots";
             //std::string outfilename = "egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots";
             //std::string outfilename = "egres_Run2024CD_mixed_eg01_Full_cali_140_v10_resplots";
-            //std::string outfilename = "egres_Run2023D_SF_140_v10_resplots";
-            std::string outfilename = "egres_Winter24_DY_14011_v10_resplots";
+            std::string outfilename = "egres_Run2023D_SF_140_v10_resplots";
 
             auto tvarname = ""; //argv[4];
 			auto calimapname = "infile"; //argv[5];
