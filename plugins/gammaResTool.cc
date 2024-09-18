@@ -37,7 +37,7 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
     doDiag(iConfig.existsAs<bool>("doDiag")  ? iConfig.getParameter<bool>("doDiag")  : false),
 
 	// tracks
-	tracksTag(iConfig.getParameter<edm::InputTag>("tracks")),
+	//tracksTag(iConfig.getParameter<edm::InputTag>("tracks")),
 
     // vertices
     verticesTag(iConfig.getParameter<edm::InputTag>("vertices")),
@@ -83,7 +83,7 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 	if( DEBUG ) std::cout << "In constructor for GammaResTool - tag and tokens" << std::endl;
 
 	// tracks 
-	tracksToken_ = consumes<std::vector<reco::Track>>(tracksTag);
+	//tracksToken_ = consumes<std::vector<reco::Track>>(tracksTag);
 
 	// vertices
 	verticesToken_ = consumes<std::vector<reco::Vertex>>(verticesTag);
@@ -166,7 +166,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	if( DEBUG ) std::cout << "Consume Tokens -------------------------------------------- " << std::endl;
 
 	// TRACKS
-	iEvent.getByToken(tracksToken_, tracks_);
+	//iEvent.getByToken(tracksToken_, tracks_);
 
 	// VERTICES
 	iEvent.getByToken(verticesToken_, vertices_);
@@ -702,8 +702,9 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 					auto neighborEnergy = recHitE( nbDetId, phoRecHits );
 					auto ordered = lrhEnergy > neighborEnergy;
 					auto close = lrhEnergy < 1.20*neighborEnergy;
+					bool minRhE = ( lrhEnergy > 0.5 ) && ( neighborEnergy > 0.5 );
 					//if( DEBUG ) std::cout << " Examining rechit pair with " << lrhEnergy << " & " << neighborEnergy << " energies" << std::endl;
-					if( ordered && close ){  // need to be within 20% of energy
+					if( ordered && close && minRhE ){  // need to be within 20% of energy
 						if( DEBUG ) std::cout << " Matching loc rechit pair with e: " << lrhEnergy << " : " << neighborEnergy;
                         if( DEBUG ) std::cout << " (" << lrhEnergy/neighborEnergy << ")"<< " for lead rh id: " << rhDetId.rawId() <<std::endl;
 						locPhotons.push_back( photon );

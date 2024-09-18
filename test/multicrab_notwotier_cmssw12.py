@@ -60,8 +60,8 @@ def subcrab( runs, events, reqmem ):
 
         # External files needed by CRAB
         inputDir     = ''
-        #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
-        inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
+        inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+        #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
         #inputJSON    = 'Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
         #inputJSON    = ''
         #--------------------------------------------------------
@@ -86,12 +86,12 @@ def subcrab( runs, events, reqmem ):
         #config.Data.useParent      = True
 	#config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
-        #config.Data.lumiMask     = inputDir+inputJSON
+        config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
 
-        config.Data.unitsPerJob  =  5000 # for auto job splitting
+        config.Data.unitsPerJob  =  100000 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
 
@@ -122,7 +122,7 @@ def subcrab( runs, events, reqmem ):
             #['/DYto2L-4Jets_MLL-50_3J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
             #['/DYto2L-4Jets_MLL-50_4J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
 
-            ['/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v8-v2/MINIAODSIM'], #
+            #['/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v8-v2/MINIAODSIM'], #
 
             #['/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
             #['/DYto2L-4Jets_MLL-50_2J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
@@ -141,6 +141,9 @@ def subcrab( runs, events, reqmem ):
             #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #						    360389 - 362167
             #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   	    362399 - 362760
 
+            #['/MET/Run2017E-17Nov2017-v1/MINIAOD']
+            ['/EGamma/Run2018D-22Jan2019-v2/MINIAOD']
+
 	    ]
  
         for inDO in inputDataAndOpts:
@@ -156,8 +159,8 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_ratio_126_v2'
             #trial          = 'gammares_cc_140_v2'
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
-            trial          = 'gammares_mc'
-            #trial          = 'gammares_llpana'
+            #trial          = 'gammares_mc'
+            trial          = 'gammares_llpana'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
@@ -166,6 +169,11 @@ def subcrab( runs, events, reqmem ):
             config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_request"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra
 
+#>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
+            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v6', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+#>>>>>>>>>>>>>  2018 EOY
+            config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+#>>>>>>>>>>>> 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4','doTwoTier=False','doDiag=False']  
@@ -175,7 +183,8 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # G
             #config.JobType.pyCfgParams   = ['globalTag=130X_mcRun3_2023_realistic_v14', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] # R3 DY summer23
             #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] # R3 DY winter24
-            config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
+            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
+            config.JobType.pyCfgParams   = ['globalTag=102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
 
             config.Data.inputDataset     = inDO[0]
             # Submit.

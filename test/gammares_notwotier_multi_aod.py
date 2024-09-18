@@ -10,16 +10,17 @@ options = VarParsing('python')
 #options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','140X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','133X_mcRun3_2024_realistic_v10',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 options.register('globalTag','94X_mc2017_realistic_v11',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_24E_diag_140_gammares_v11.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_QCD_AOD_diag_140_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 options.register('doTwoTier',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to do twotier processing');
-options.register('doDiag',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to store diagnostic info');
+options.register('doDiag',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to store diagnostic info');
 
 ## parsing command line arguments
 options.parseArguments()
@@ -62,12 +63,11 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## Define the input source
 #eventList = open(options.rlelist,'r')
-lpcpath_GMSB = 'file:/eos/uscms/store/mc/RunIIFall17DRPremix/'
-gmsbaodsim = '_TuneCP5_13TeV-pythia8/AODSIM/PU2017_94X_mc2017_realistic_v11-v1/'
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 
-        lpcpath_GMSB+'GMSB_L-100TeV_Ctau-200cm'+gmsbaodsim+'120000/44485BE6-E2D7-E811-9916-1866DA89095D.root',
+        'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17DRPremix/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/AODSIM/PU2017_94X_mc2017_realistic_v11-v1/110000/1E29BF8B-5F60-E811-AD1D-0663CE00010C.root',
+        #'root://cms-xrd-global.cern.ch//store/mc/Run3Winter24MiniAOD/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v10-v2/2830000/000a0b08-4970-4a08-bbd1-69c4ae918e66.root',
         #'file:967aebe0-e567-4139-9f91-d9e67f6b2ace.root'
         #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/43f9417c-f2bc-4e2c-a114-ac6d5c5b7052.root',
         #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/444fe16d-0217-4915-92ca-101fdad77998.root',
@@ -98,7 +98,6 @@ process.source = cms.Source("PoolSource",
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
-
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
@@ -116,11 +115,11 @@ process.TFileService = cms.Service("TFileService", fileName = cms.string(options
 triggerFlagsProcess = "RECO"
 
 ## generate track collection at miniAOD
-from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
-process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
+#from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
+#process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
 
 # Make the tree 
-process.tree = cms.EDAnalyzer("GammaResTool",
+process.tree = cms.EDAnalyzer("GammaResToolAod",
    ## additional collections
    #triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
    #triggerObjects = cms.InputTag("slimmedPatTrigger"),
@@ -129,27 +128,33 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #triggerFlags     = cms.InputTag("TriggerResults", "", triggerFlagsProcess),
    #ecalBadCalibFlag = cms.InputTag("ecalBadCalibReducedMINIAODFilter"),			      
    ## tracks
-   tracks = cms.InputTag("unpackedTracksAndVertices"),
+   #tracks = cms.InputTag("unpackedTracksAndVertices"),
    ## vertices
-   vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+   #vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+   vertices = cms.InputTag("offlinePrimaryVertices"),#AOD
    ## rho
-   rho = cms.InputTag("fixedGridRhoFastjetAll"), #fixedGridRhoAll
+   #rho = cms.InputTag("fixedGridRhoFastjetAll"), #fixedGridRhoAll
    ## METs
    #mets = cms.InputTag("slimmedMETsModifiedMET"),
-   mets = cms.InputTag("slimmedMETs"),
+   #mets = cms.InputTag("slimmedMETs"),
    ## jets
    #jets = cms.InputTag("updatedPatJetsUpdatedJEC"),
-   jets = cms.InputTag("slimmedJets"),
+   #jets = cms.InputTag("slimmedJets"),
    ## electrons
-   electrons = cms.InputTag("slimmedElectrons"),
+   #electrons = cms.InputTag("slimmedElectrons"),
+   electrons = cms.InputTag("gedGsfElectrons"),#AOD
    ## muons
-   muons = cms.InputTag("slimmedMuons"),
+   #muons = cms.InputTag("slimmedMuons"),
    ## photons
-   gedPhotons = cms.InputTag("slimmedPhotons"),
-   ootPhotons = cms.InputTag("slimmedOOTPhotons"),
+   #gedPhotons = cms.InputTag("slimmedPhotons"),
+   #ootPhotons = cms.InputTag("slimmedOOTPhotons"),
+   gedPhotons = cms.InputTag("gedPhotons"),#AOD
+   ootPhotons = cms.InputTag("ootPhotons"),#AOD
    ## ecal recHits
-   recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
-   recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   #recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
+   #recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   recHitsEB = cms.InputTag("reducedEcalRecHitsEB"),#AOD
+   recHitsEE = cms.InputTag("reducedEcalRecHitsEE"),#AOD
 
    ## do two tier reconstruction of second rechit collection
    doTwoTier = cms.bool(options.doTwoTier), 
@@ -203,7 +208,7 @@ process.tree = cms.EDAnalyzer("GammaResTool",
 # Set up the path
 #process.treePath = cms.Path(
 process.tree_step = cms.EndPath(
-	process.unpackedTracksAndVertices +
+	#process.unpackedTracksAndVertices +
 	process.tree
 )
 

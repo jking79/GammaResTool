@@ -43,12 +43,17 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'ecalTiming/gammares_ttcc_140_v11_diag_mod1_nosf/EGamma1/'
 #command = eosll+mspc+'ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/EGamma1/'
 #command = eosll+mspc+'ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/'
-command = eosll+mspc+'ecalTiming/gammares_ttcc_140_v11_mod1_pr_test2/EGamma1/'
+#command = eosll+mspc+'ecalTiming/gammares_ttcc_140_v11_mod1_pr_test2/EGamma1/'
+#command = eosll+mspc+'ecalTiming/gammares_llpana/'
+#command = eosll+mspc+'/ecalTiming/gammares_llpana_qcd/'
+#command = eosll+mspc+'/ecalTiming/gammares_llpana/MET/'
+command = eosll+mspc+'/ecalTiming/gammares_llpana_mc/'
 
 version = ''
 #version = '_v11_'
 #version = '_noOOTAmp_'
 #version = '_wthOOTAmp_'
+#version = 'DYJetsToLL_M-50'
 
 rootfile = '.root'
 
@@ -66,13 +71,16 @@ rootfile = '.root'
 #dirselect = 'WJetsToLNu_HT-800'
 #dirselect = 'QCD_HT100to200'
 #dirselect = 'GMSB_L-400TeV'
-#dirselect = 'DYJetsToLL_M-50'
+dirselect = 'DY1JetsToLL_M-50'
 #dirselect = 'TTJets'
 #dirselect = 'v2_EGamma'
 #dirselect = 'ecaltiming_dqm_132r3prompt3'
 #dirselect = 'cc_140_json_v2_EGamma1_MINIAOD_Run2024C-PromptReco-v1'
 #dirselect = 'MINIAOD_Run2024D-PromptReco-v1'
-dirselect = 'Run2023D-PromptReco'
+#dirselect = 'Run2023D-PromptReco'
+#dirselect = 'QCD'
+#dirselect = 'AOD_Run2017E-17Nov2017-v1'
+#dirselect = 'MINIAOD'
 
 #dirselect = ''
 
@@ -97,6 +105,7 @@ for line2 in targdirs :
     subdirlist1 = []
     subdirlist2 = []
     subdirlist3 = []
+    subdirlist4 = []
     filelist = []
     theFileList = ''
 
@@ -116,7 +125,7 @@ for line2 in targdirs :
     	command3 = command+thesubdir+'/'+subdir+'/'
     	subdir3 = bashout( command3 ).rstrip().splitlines()
     	for subsubdir in subdir3 : 
-    		subdirlist2.append(thesubdir+'/'+subdir+'/'+subsubdir)
+    	    subdirlist2.append(thesubdir+'/'+subdir+'/'+subsubdir)
    
     if debug : print( subdirlist2 ) 
     for thesubdir2 in subdirlist2 :
@@ -131,13 +140,23 @@ for line2 in targdirs :
                 #subdirlist3.append(thesubdir+subdir+'/'+subsubdir+'/')
 
     if debug : print( subdirlist3 )
-    for subdir3 in subdirlist3:
-    	lists = bashout( command+subdir3 ).rstrip().splitlines()
+    for thesubdir3 in subdirlist3 :
+        command5 = command+thesubdir3+'/'
+        subdir5 = bashout( command5 ).rstrip().splitlines()
+        #print( thesubdir+subdir2+'/0000/' )
+        for subdir in subdir5 :
+            subdirlist4.append(thesubdir3+'/'+subdir)
+
+
+    if debug : print( subdirlist4 )
+    for subdir4 in subdirlist4:
+    	lists = bashout( command+subdir4 ).rstrip().splitlines()
     	for lline in lists :
-    		if rootfile in lline : filelist.append(subdir3+lline)
+    	    if rootfile in lline : filelist.append(subdir4+lline)
+
 
     select =  line2.split("Tune")
-    outfile = 'egammares_' + select[0] + '_v2.txt'
+    outfile = 'egammares_' + select[0] + 'v2.txt'
     print( outfile )
     outf = open( outfile, 'w' )
     filelist = subdirlist3

@@ -1,0 +1,9 @@
+list_files/egres_QCD_HT_1000to1500_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_100to200_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_1500to2000_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_2000toInf_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_200to300_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_300to500_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_500to700_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_50to100_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /
+list_files/egres_QCD_HT_700to1000_R17.txt KURes_14011_v12_QCD_AODSIM_Met75_R17_Cali_FilterFit.root 0 999999 /

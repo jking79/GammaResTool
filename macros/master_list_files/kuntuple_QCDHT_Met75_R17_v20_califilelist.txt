@@ -1,0 +1,9 @@
+list_files/kuntuple_QCD_HT1000to1500_R17_v20.txt 0 999999 
+list_files/kuntuple_QCD_HT100to200_R17_v20.txt 0 999999 
+list_files/kuntuple_QCD_HT1500to2000_R17_v20.txt 0 999999 
+list_files/kuntuple_QCD_HT2000toInf_R17_v20.txt 0 999999
+list_files/kuntuple_QCD_HT200to300_R17_v20.txt 0 999999
+list_files/kuntuple_QCD_HT300to500_R17_v20.txt 0 999999
+list_files/kuntuple_QCD_HT500to700_R17_v20.txt 0 999999
+list_files/kuntuple_QCD_HT50to100_R17_v20.txt 0 999999
+list_files/kuntuple_QCD_HT700to1000_R17_v20.txt 0 999999

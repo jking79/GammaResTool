@@ -1,0 +1,1 @@
+list_files/egammares_gammares_mc_ZprimeToEE_M-6000_MINIAODSIM_Run3Winter24MiniAOD_v2.txt 0 999999

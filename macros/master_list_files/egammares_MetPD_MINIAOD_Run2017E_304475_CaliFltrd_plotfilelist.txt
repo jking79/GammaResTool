@@ -1,0 +1,1 @@
+list_files/kuntuple_MET_MINIAOD_R17_v20.txt KURes_14011_v12_MetPD_MINIAOD_Run2017E_Cali_Filtered_304475.root 301487 304475 /

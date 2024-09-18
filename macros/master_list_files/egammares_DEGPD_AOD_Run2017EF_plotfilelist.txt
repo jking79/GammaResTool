@@ -1,0 +1,2 @@
+list_files/kuntuple_DoubleEG_AOD_R17_v21.txt KURes_14011_v12_DEGPD_AOD_Run2017F_Cali_FilterFit_305040_305365.root 305040 305365 /
+list_files/kuntuple_DoubleEG2_AOD_R17_v21.txt KURes_14011_v12_DEGPD_AOD_Run2017E_Cali_FilterFit_301487_304475.root 301487 304475 /

@@ -328,8 +328,7 @@ class makehists : egammares_hist_base {
 
 	public:
 
-	void llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string califilename, 
-								int brun, int erun, std::string fhtitle  );	
+	void llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string fhtitle );	
 	void initHists( std::string fHTitle );
 	void getBranches( Long64_t entry );
 	void eventLoop( Long64_t entry );
@@ -341,7 +340,7 @@ class makehists : egammares_hist_base {
 
 	std::map<UInt_t,DetIDStruct> DetIDMap;
 
-	TH2F *icmap[6];
+	TH2F *icmap[3];
 	int startRun, endRun;
     float totrhs, totrhs0, totrhs05, totrhs1, totrhs2, totrhs5, totrhs10, encrhs;
 
@@ -391,7 +390,7 @@ void makehists::makeEBEEMaps( std::vector<unsigned int> rhcol ){
 			//auto res = (*rhEnergy)[rhIDX];
             ebeeMapP[nMaps]->Fill( rhEtaPos, rhPhiPos,1);
             ebeeMapP[nMaps]->Fill( nMaps, 1,1);
-            ebeeMapT[nMaps]->Fill( rhEtaPos, rhPhiPos,(*rhCaliCCTime)[rhIDX]);
+            ebeeMapT[nMaps]->Fill( rhEtaPos, rhPhiPos,(*rhCaliRtTime)[rhIDX]);
             ebeeMapR[nMaps]->Fill( rhEtaPos, rhPhiPos,(*rhEnergy)[rhIDX]);
         }//<<>>for( idx = 0; idx < nRecHits; idx++ )
         nMaps++;
@@ -415,8 +414,7 @@ void makehists::makeEBEEMaps( int phoit ){
 ////----------------------------------------  Make Hists function call  ---------------------------------------------------------------
 ////-----------------------------------------------------------------------------------------------------------------------------
 
-void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string califilename, 
-										int brun, int erun, std::string fhtitle ){
+void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string fhtitle ){
 
     //bool debug = true; // this is for main loop only
 	bool debug = false;
@@ -426,43 +424,61 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
     const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
     //const std::string listdir("llpgana_list_files/");
 
-    std::cout << "Producing Histograms for : " << outfilename << std::endl;
-    std::ifstream infile(infilelist);
-    auto fInTree = new TChain(disphotreename.c_str());
-    std::cout << "Adding files to TChain." << std::endl;
-    std::cout << " - With : " << infilelist << " >> " << fInTree << std::endl;
-    std::string str;
-    while (std::getline(infile,str)){
-        auto tfilename = eosdir + indir + str;
-        if(debug) std::cout << "--  adding file: " << tfilename << std::endl;
-        fInTree->Add(tfilename.c_str());
-    }
-
-	Init(fInTree);
-	initHists(fhtitle);
-
-	startRun = brun;
-	endRun = erun;
-
+    initHists(fhtitle);
     SetupDetIDsEB(DetIDMap);
     SetupDetIDsEE(DetIDMap);
 
-	initCali(califilename);
+    std::cout << "Producing Histograms for : " << outfilename << std::endl;
 
-    std::cout << "Setting up For Main Loop." << std::endl;
-    auto nEntries = fInTree->GetEntries();
-    if(debug) nEntries = 1000;
-    std::cout << "Proccessing " << nEntries << " entries." << std::endl;
-    int npace = nEntries/20;
-    for (Long64_t centry = 0; centry < nEntries; centry++){
-        if( centry%npace == 0 ) std::cout << "Proccessed " << centry << " of " << nEntries << " (" << static_cast<float>((10000*centry)/nEntries)/(100) << "%)" << std::endl;
-        if(debug) std::cout << "*****************************************************************************" << std::endl;
-        auto entry = fInTree->LoadTree(centry);
-		if(debug) std::cout << " - getBranches " << std::endl;
-		getBranches(entry);
-		if(debug) std::cout << " - eventLoop " << std::endl;
-		eventLoop(entry);
-    }//<<>>for (Long64_t centry = 0; centry < nEntries; centry++)  end entry loop
+    std::ifstream iflstream(infilelist);
+    std::string infilestr;
+    while (std::getline(iflstream,infilestr)){
+
+        std::stringstream ss(infilestr);
+        std::string infilename;
+        std::string califilename;
+        std::string srunstr;
+        std::string erunstr;
+        ss >> infilename >> califilename >> srunstr >> erunstr;
+        std::cout << "open input file : " << infilename << " with califile : " << califilename << std::endl;
+        std::cout << "For Run " << srunstr << " to Run " << erunstr << std::endl;
+        startRun = std::stoi(srunstr);
+        endRun = std::stoi(erunstr);
+		initCali(califilename);
+
+        std::ifstream infile(infilename);
+        auto fInTree = new TChain(disphotreename.c_str());
+        std::cout << "Adding files to TChain." << std::endl;
+        std::cout << " - With : " << infilename << " >> " << fInTree << std::endl;
+        std::string rootfilestr;
+        while(std::getline(infile,rootfilestr)){
+            auto tfilename = eosdir + indir + rootfilestr;
+            if(debug) std::cout << "--  adding file: " << tfilename << std::endl;
+            fInTree->Add(tfilename.c_str());
+            std::cout << "-";
+        }//<<>>while (std::getline(infile,str))
+        std::cout << std::endl;
+		Init(fInTree);
+
+        std::cout << "Setting up For Main Loop." << std::endl;
+        auto nEntries = fInTree->GetEntries();
+        if(debug) nEntries = 1000;
+        std::cout << "Proccessing " << nEntries << " entries." << std::endl;
+        int npace = nEntries/20;
+        for (Long64_t centry = 0; centry < nEntries; centry++){
+            if( centry%npace == 0 ){ 
+				std::cout << "Proccessed " << centry << " of " << nEntries << " ("; 
+                std::cout << static_cast<float>((10000*centry)/nEntries)/(100) << "%)" << std::endl;
+			}//<<>>if( centry%npace == 0 )
+        	if(debug) std::cout << "*****************************************************************************" << std::endl;
+        	auto entry = fInTree->LoadTree(centry);
+			if(debug) std::cout << " - getBranches " << std::endl;
+			getBranches(entry);
+			if(debug) std::cout << " - eventLoop " << std::endl;
+			eventLoop(entry);
+        }//<<>>for (Long64_t centry = 0; centry < nEntries; centry++)  end entry loop
+
+    } // while (std::getline(infilelist,infiles))
 
     TFile* fOutFile = new TFile( outfilename.c_str(), "RECREATE" );
     fOutFile->cd();
@@ -571,6 +587,19 @@ void makehists::eventLoop( Long64_t entry ){
             hist1d[90]->Fill((*rhadcToGeV)[it]);
             hist1d[91]->Fill((*rhpedrms12)[it]);
 
+            bool underMinEnergy = (*rhEnergy)[it] < 5.0;
+            bool rhTimeZero = (*rhRtTime)[it] == 0.0;
+            bool timeOutOfRange = std::abs((*rhRtTime)[it]) > 25.0;
+            bool isOOT = (*rhRtisOOT)[it];
+            bool isWeird = (*rhisWeird)[it];
+            bool isDiWeird = (*rhisDiWeird)[it];
+            bool hasHighSwissCross = (*rhSwCross)[it] > 0.96;
+            if( not underMinEnergy ){ 	
+				if( rhTimeZero or isOOT or isWeird or isDiWeird or hasHighSwissCross) hist2d[126]->Fill((*rhEnergy)[it],(*rhRtTime)[it]);
+				else hist2d[128]->Fill((*rhEnergy)[it],(*rhRtTime)[it]);
+				hist2d[127]->Fill((*rhEnergy)[it],(*rhRtTime)[it]);
+			}//<<>>if( not underMinEnergy )
+
 			if( DEBUG ) std::cout << " - Rechit loop  3" << std::endl;
 
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){ 
@@ -630,85 +659,86 @@ void makehists::eventLoop( Long64_t entry ){
             auto caliSel = true;
 			if( caliSel ){ //------------- Cali Cut ( if/then stament )
 
-            auto ampl0a = (*resAmp)[0];//  same as resAmp->index(0);
-            auto ampl1a = (*resAmp)[1];
-            auto ampl0 = (*resE)[0];//  same as resAmp->index(0);
-            auto ampl1 = (*resE)[1];
-            auto difAmpL = ampl0 - ampl1;
-            //auto effAmpL = (ampl0*ampl1)/sqrt(sq2(ampl0)+sq2(ampl1));
-            auto effAmpL = (ampl0 + ampl1)/2;
-            auto doeAmpL = difAmpL/effAmpL;
-
-            auto effampl = (ampl0*ampl1)/sqrt(sq2(ampl0)+sq2(ampl1));
-            auto dtrtloc = ((*resRtTime)[0] - caliRtL0 ) - ((*resRtTime)[2] - caliRtL1 );
-
-            auto nlphrh = 0;//((*phoRhIds)[0]).size();
-
-			//hist2d[46]->Fill(event/EVPHR,(*phoSigmaIEtaIEta)[0]);
-			if( mapLocal ) makeEBEEMaps(0);
-
-			//int locIdx( -1 );
-			//for( int idx = 0; idx < phoSelType->size(); idx++ ){ if( (*phoSelType)[idx] == 0 ){ locIdx = idx; break; }} 
-			//if( locIdx == -1 ) std::cout << " BAD LOCAL PHO INDEX " << std::endl;
-
-			if( DEBUG ) std::cout << " - TT0 : " << idinfoL0.TT << " TT1 : " << idinfoL1.TT << std::endl;
-			if( isSRU ){
-				if( DEBUG ) std::cout << " -- SRU " << std::endl;
-
-	            hist1d[47]->Fill(caliRtL0);
-	            hist1d[48]->Fill(caliRtL1);
+	            auto ampl0a = (*resAmp)[0];//  same as resAmp->index(0);
+	            auto ampl1a = (*resAmp)[1];
+	            auto ampl0 = (*resE)[0];//  same as resAmp->index(0);
+	            auto ampl1 = (*resE)[1];
+	            auto difAmpL = ampl0 - ampl1;
+	            //auto effAmpL = (ampl0*ampl1)/sqrt(sq2(ampl0)+sq2(ampl1));
+	            auto effAmpL = (ampl0 + ampl1)/2;
+	            auto doeAmpL = difAmpL/effAmpL;
 	
-	        	hist1d[1]->Fill(doeAmpL);
-	        	hist2d[0]->Fill(difAmpL,effAmpL);
-	        	hist2d[2]->Fill(ampl0,ampl1);
-
-                hist2d[56]->Fill(effampl,dtrtloc);
-
-	            hist1d[39]->Fill((*resRtTime)[0]-caliRtL0);
-	            hist1d[40]->Fill((*resRtTime)[1]-caliRtL1);
+	            auto effampl = (ampl0*ampl1)/sqrt(sq2(ampl0)+sq2(ampl1));
+	            auto dtrtloc = ((*resRtTime)[0] - caliRtL0 ) - ((*resRtTime)[1] - caliRtL1 );
 	
-	            hist1d[55]->Fill((*resTOF)[0]);
-	            hist1d[56]->Fill((*resTOF)[1]);
-	            hist1d[59]->Fill((*resE)[0]);
-	            hist1d[60]->Fill((*resE)[1]);
-	            hist1d[63]->Fill(ampl0a);
-	            hist1d[64]->Fill(ampl1a);
+	            auto nlphrh = 0;//((*phoRhIds)[0]).size();
 	
-				hist2d[13]->Fill((*resE)[0],ampl0a);
-	            hist2d[14]->Fill((*resE)[0],(*resRtTime)[0]-caliRtL0);
+				//hist2d[46]->Fill(event/EVPHR,(*phoSigmaIEtaIEta)[0]);
+				if( mapLocal ) makeEBEEMaps(0);
 	
-	            hist2d[16]->Fill((*resE)[1],ampl1a);
-	            hist2d[17]->Fill((*resE)[1],(*resRtTime)[1]-caliRtL1);
-
-			} else { //<<>>if( isSRU )
-				if( DEBUG ) std::cout << " -- DRU " << std::endl;
-			
-                hist1d[97]->Fill(caliRtL0);
-                hist1d[98]->Fill(caliRtL1);
-    
-                hist1d[101]->Fill(doeAmpL);
-                hist2d[35]->Fill(difAmpL,effAmpL);
-                hist2d[36]->Fill(ampl0,ampl1);
-    
-                hist2d[57]->Fill(effampl,dtrtloc);
-
-                hist1d[117]->Fill((*resRtTime)[0]-caliRtL0);
-                hist1d[118]->Fill((*resRtTime)[1]-caliRtL1);
-    
-                hist1d[121]->Fill((*resTOF)[0]);
-                hist1d[122]->Fill((*resTOF)[1]);
-                hist1d[123]->Fill((*resE)[0]);
-                hist1d[124]->Fill((*resE)[1]);
-                hist1d[125]->Fill(ampl0a);
-                hist1d[126]->Fill(ampl1a);
-    
-                hist2d[40]->Fill((*resE)[0],ampl0a);
-                hist2d[41]->Fill((*resE)[0],(*resRtTime)[0]-caliRtL0);
-    
-                hist2d[43]->Fill((*resE)[1],ampl1a);
-                hist2d[44]->Fill((*resE)[1],(*resRtTime)[1]-caliRtL1);
-
-            }//<<>>if( isSRU )
+				//int locIdx( -1 );
+				//for( int idx = 0; idx < phoSelType->size(); idx++ ){ if( (*phoSelType)[idx] == 0 ){ locIdx = idx; break; }} 
+				//if( locIdx == -1 ) std::cout << " BAD LOCAL PHO INDEX " << std::endl;
+	
+				if( DEBUG ) std::cout << " - TT0 : " << idinfoL0.TT << " TT1 : " << idinfoL1.TT << std::endl;
+				if( isSRU ){
+					if( DEBUG ) std::cout << " -- SRU " << std::endl;
+	
+		            hist1d[47]->Fill(caliRtL0);
+		            hist1d[48]->Fill(caliRtL1);
+		
+		        	hist1d[1]->Fill(doeAmpL);
+		        	hist2d[0]->Fill(difAmpL,effAmpL);
+		        	hist2d[2]->Fill(ampl0,ampl1);
+	
+	                hist2d[56]->Fill(effampl,dtrtloc);
+	
+		            hist1d[39]->Fill((*resRtTime)[0]-caliRtL0);
+		            hist1d[40]->Fill((*resRtTime)[1]-caliRtL1);
+	                hist1d[45]->Fill((*resRtTime)[0]-caliRtL0-((*resRtTime)[1]-caliRtL1));
+		
+		            hist1d[55]->Fill((*resTOF)[0]);
+		            hist1d[56]->Fill((*resTOF)[1]);
+		            hist1d[59]->Fill((*resE)[0]);
+		            hist1d[60]->Fill((*resE)[1]);
+		            hist1d[63]->Fill(ampl0a);
+		            hist1d[64]->Fill(ampl1a);
+		
+					hist2d[13]->Fill((*resE)[0],ampl0a);
+		            hist2d[14]->Fill((*resE)[0],(*resRtTime)[0]-caliRtL0);
+		
+		            hist2d[16]->Fill((*resE)[1],ampl1a);
+		            hist2d[17]->Fill((*resE)[1],(*resRtTime)[1]-caliRtL1);
+	
+				} else { //<<>>if( isSRU )
+					if( DEBUG ) std::cout << " -- DRU " << std::endl;
+				
+	                hist1d[97]->Fill(caliRtL0);
+	                hist1d[98]->Fill(caliRtL1);
+	    
+	                hist1d[101]->Fill(doeAmpL);
+	                hist2d[35]->Fill(difAmpL,effAmpL);
+	                hist2d[36]->Fill(ampl0,ampl1);
+	    
+	                hist2d[57]->Fill(effampl,dtrtloc);
+	
+	                hist1d[117]->Fill((*resRtTime)[0]-caliRtL0);
+	                hist1d[118]->Fill((*resRtTime)[1]-caliRtL1);
+	    
+	                hist1d[121]->Fill((*resTOF)[0]);
+	                hist1d[122]->Fill((*resTOF)[1]);
+	                hist1d[123]->Fill((*resE)[0]);
+	                hist1d[124]->Fill((*resE)[1]);
+	                hist1d[125]->Fill(ampl0a);
+	                hist1d[126]->Fill(ampl1a);
+	    
+	                hist2d[40]->Fill((*resE)[0],ampl0a);
+	                hist2d[41]->Fill((*resE)[0],(*resRtTime)[0]-caliRtL0);
+	    
+	                hist2d[43]->Fill((*resE)[1],ampl1a);
+	                hist2d[44]->Fill((*resE)[1],(*resRtTime)[1]-caliRtL1);
+	
+	            }//<<>>if( isSRU )
 
 			}//<<>>if( caliselect cut //-------------  Cali Cut ( if/then stament )
 			//std::cout << " Finished Local" << std::endl;
@@ -725,7 +755,7 @@ void makehists::eventLoop( Long64_t entry ){
             auto dooutg = false; //(*resCCTime)[2] == 0 || (*resCCTime)[3] == 0 ;
 
 			if( DEBUG ) std::cout << " --- glo a0 " << std::endl;
-            if( dooutg ) std::cout << " Fetching Global Cali values for CC : " << (*resCCTime)[2] << " & " << (*resCCTime)[3] << std::endl;
+            //if( dooutg ) std::cout << " Fetching Global Cali values for CC : " << (*resCCTime)[2] << " & " << (*resCCTime)[3] << std::endl;
             if( dooutg ) std::cout << " Fetching Global Cali values with Rt : " << (*resRtTime)[2] << " & " << (*resRtTime)[3] << std::endl;
             if( dooutg ) std::cout << "  - for : " << (*resRhID)[2] << " && " << (*resRhID)[3] << std::endl;
             auto idinfoG0 = DetIDMap[(*resRhID)[2]];
@@ -742,138 +772,136 @@ void makehists::eventLoop( Long64_t entry ){
             //auto caliSel = false;
             if( caliSel ){ //-------------  CC Cali Cut ( if/then stament )
 
-        	auto ampg0a = (*resAmp)[2];
-        	auto ampg1a = (*resAmp)[3];
-            auto ampg0 = (*resE)[2];
-            auto ampg1 = (*resE)[3];
-        	auto difAmpG = ampg0 - ampg1;
-        	//auto effAmpG = (ampg0*ampg1)/sqrt(sq2(ampg0)+sq2(ampg1));
-            auto effAmpG = (ampg0 + ampg1)/2;
-			auto doeAmpG = difAmpG/effAmpG;
-			auto effampg = (ampg0*ampg1)/sqrt(sq2(ampg0)+sq2(ampg1)); 
-            auto dtrtglo = ((*resRtTime)[2] - caliRtG0 ) - ((*resRtTime)[3] - caliRtG1 );
-
-            auto ngphrh0 = ((*phoRhIds)[gloIdx0]).size();
-            auto ngphrh1 = ((*phoRhIds)[gloIdx1]).size();
-
-            if( mapGlobal ) makeEBEEMaps(1);
-            if( mapGlobal ) makeEBEEMaps(2);
-
-			if( DEBUG ) std::cout << " --- glo b " << std::endl;
-
-			hist1d[2]->Fill(doeAmpG);
-        	hist2d[1]->Fill(difAmpG,effAmpG);
-        	hist2d[3]->Fill(ampg0,ampg1);
-
-            hist2d[55]->Fill(effampg,dtrtglo);
-
-        	hist1d[3]->Fill(phoDiMass);
-        	hist1d[4]->Fill(phoDiAngle);
-        	hist1d[5]->Fill(phoDiDr);
-            hist1d[92]->Fill(phoDiEta);
-            hist1d[93]->Fill(phoDiPhi);
-
-			hist1d[32]->Fill((*phoPt)[gloIdx0],(*phoPt)[gloIdx1]);
-            hist1d[33]->Fill((*phoEnergy)[gloIdx0],(*phoEnergy)[gloIdx1]);
-
-            hist1d[17]->Fill((*phoEnergy)[gloIdx0]);
-            hist1d[18]->Fill((*phoPt)[gloIdx0]);
-            hist1d[19]->Fill((*phoEta)[gloIdx0]);
-            hist1d[20]->Fill((*phoPhi)[gloIdx0]);
-            hist1d[21]->Fill((*phoHadOverEM)[gloIdx0]);
-            hist1d[22]->Fill((*phoSigmaIEtaIEta)[gloIdx0]);
-            hist1d[75]->Fill((*phoCov2IEtaIEta)[gloIdx0]);
-            hist1d[78]->Fill((*phoCov2IEtaIPhi)[gloIdx0]);
-            hist1d[81]->Fill((*phoCov2IPhiIPhi)[gloIdx0]);
-            hist1d[23]->Fill((*phoEcalRHSumEtConeDR04)[gloIdx0]);
-            hist1d[24]->Fill((*phoHcalTwrSumEtConeDR04)[gloIdx0]);
-            hist1d[25]->Fill((*phoTrkSumPtSolidConeDR04)[gloIdx0]);
-            hist1d[26]->Fill((*phoTrkSumPtHollowConeDR04)[gloIdx0]);
-            hist1d[27]->Fill((*phoR9)[gloIdx0]);
-            hist1d[95]->Fill(ngphrh0);
-    		hist2d[28]->Fill(phoDiMass,(*phoEnergy)[gloIdx0]);
-            hist2d[30]->Fill(phoDiMass,(*phoPt)[gloIdx0]);
-
-			if( DEBUG ) std::cout << " --- glo c " << std::endl;
-
-			hist2d[4]->Fill((*phoEnergy)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
-            hist2d[7]->Fill((*phoEnergy)[gloIdx0],(*phoSigmaIEtaIEta)[gloIdx0]);
-            hist2d[10]->Fill((*phoEnergy)[gloIdx0],(*phoR9)[gloIdx0]);
-            hist2d[49]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoR9)[gloIdx0]);
-
-			hist2d[51]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoSigmaIEtaIEta)[gloIdx1]);
-
-            hist1d[28]->Fill((*phoEnergy)[gloIdx1]);
-            hist1d[29]->Fill((*phoPt)[gloIdx1]);
-            hist1d[30]->Fill((*phoEta)[gloIdx1]);
-            hist1d[31]->Fill((*phoPhi)[gloIdx1]);
-            hist1d[32]->Fill((*phoHadOverEM)[gloIdx1]);
-            hist1d[33]->Fill((*phoSigmaIEtaIEta)[gloIdx1]);
-            hist1d[76]->Fill((*phoCov2IEtaIEta)[gloIdx1]);
-            hist1d[79]->Fill((*phoCov2IEtaIPhi)[gloIdx1]);
-            hist1d[82]->Fill((*phoCov2IPhiIPhi)[gloIdx1]);
-            hist1d[34]->Fill((*phoEcalRHSumEtConeDR04)[gloIdx1]);
-            hist1d[35]->Fill((*phoHcalTwrSumEtConeDR04)[gloIdx1]);
-            hist1d[36]->Fill((*phoTrkSumPtSolidConeDR04)[gloIdx1]);
-            hist1d[37]->Fill((*phoTrkSumPtHollowConeDR04)[gloIdx1]);
-            hist1d[38]->Fill((*phoR9)[gloIdx1]);
-            hist1d[96]->Fill(ngphrh1);
-            hist2d[29]->Fill(phoDiMass,(*phoEnergy)[gloIdx1]);
-            hist2d[31]->Fill(phoDiMass,(*phoPt)[gloIdx1]);
-
-            hist2d[32]->Fill((*phoPt)[gloIdx0],(*phoPt)[gloIdx1]);
-            hist2d[33]->Fill((*phoEnergy)[gloIdx0],(*phoEnergy)[gloIdx1]);
-            hist2d[34]->Fill(phoDiMass,phoDiDr);
-
-            hist2d[5]->Fill((*phoEnergy)[gloIdx1],(*phoHadOverEM)[gloIdx1]);
-            hist2d[8]->Fill((*phoEnergy)[gloIdx1],(*phoSigmaIEtaIEta)[gloIdx1]);
-            hist2d[11]->Fill((*phoEnergy)[gloIdx1],(*phoR9)[gloIdx1]);
-            hist2d[50]->Fill((*phoSigmaIEtaIEta)[gloIdx1],(*phoR9)[gloIdx1]);
-
-			if( DEBUG ) std::cout << " --- glo d " << std::endl;
-
-            hist1d[43]->Fill((*resRtTime)[2]-caliRtG0);
-            hist1d[44]->Fill((*resRtTime)[3]-caliRtG1);
-
-            hist1d[51]->Fill(caliRtG0);
-            hist1d[52]->Fill(caliRtG1);
-
-            hist1d[57]->Fill((*resTOF)[2]);
-            hist1d[58]->Fill((*resTOF)[3]);
-            hist1d[61]->Fill((*resE)[2]);
-            hist1d[62]->Fill((*resE)[3]);
-            hist1d[65]->Fill(ampg0a);
-            hist1d[66]->Fill(ampg1a);
-
-            hist2d[19]->Fill((*resE)[2],ampg0a);
-            hist2d[20]->Fill((*resE)[2],(*resRtTime)[2]-caliRtG0);
-
-            hist2d[22]->Fill((*resE)[3],ampg1a);
-            hist2d[23]->Fill((*resE)[3],(*resRtTime)[3]-caliRtG1);
-
-            hist2d[90]->Fill((*phoEnergy)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
-            hist2d[91]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
-            hist2d[92]->Fill((*phoEnergy)[gloIdx0],(*phoCov2IEtaIEta)[gloIdx0]);
-            hist2d[93]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoCov2IEtaIEta)[gloIdx0]);
-            hist2d[94]->Fill((*phoEnergy)[gloIdx0],(*phoCov2IEtaIPhi)[gloIdx0]);
-            hist2d[95]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoCov2IEtaIPhi)[gloIdx0]);
-            hist2d[96]->Fill((*phoEnergy)[gloIdx0],(*phoCov2IPhiIPhi)[gloIdx0]);
-            hist2d[97]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoCov2IPhiIPhi)[gloIdx0]);
-            hist2d[98]->Fill((*phoEnergy)[gloIdx0],(*phoEcalRHSumEtConeDR04)[gloIdx0]);
-            hist2d[99]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoEcalRHSumEtConeDR04)[gloIdx0]);
-            hist2d[100]->Fill((*phoEnergy)[gloIdx0],(*phoHcalTwrSumEtConeDR04)[gloIdx0]);
-            hist2d[101]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoHcalTwrSumEtConeDR04)[gloIdx0]);
-            hist2d[102]->Fill((*phoEnergy)[gloIdx0],(*phoTrkSumPtSolidConeDR04)[gloIdx0]);
-            hist2d[103]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoTrkSumPtSolidConeDR04)[gloIdx0]);
-            hist2d[104]->Fill((*phoEnergy)[gloIdx0],(*phoTrkSumPtHollowConeDR04)[gloIdx0]);
-            hist2d[105]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoTrkSumPtHollowConeDR04)[gloIdx0]);
+	        	auto ampg0a = (*resAmp)[2];
+	        	auto ampg1a = (*resAmp)[3];
+	            auto ampg0 = (*resE)[2];
+	            auto ampg1 = (*resE)[3];
+	        	auto difAmpG = ampg0 - ampg1;
+	        	//auto effAmpG = (ampg0*ampg1)/sqrt(sq2(ampg0)+sq2(ampg1));
+	            auto effAmpG = (ampg0 + ampg1)/2;
+				auto doeAmpG = difAmpG/effAmpG;
+				auto effampg = (ampg0*ampg1)/sqrt(sq2(ampg0)+sq2(ampg1)); 
+	            auto dtrtglo = ((*resRtTime)[2] - caliRtG0 ) - ((*resRtTime)[3] - caliRtG1 );
+	
+	            auto ngphrh0 = ((*phoRhIds)[gloIdx0]).size();
+	            auto ngphrh1 = ((*phoRhIds)[gloIdx1]).size();
+	
+	            if( mapGlobal ) makeEBEEMaps(1);
+	            if( mapGlobal ) makeEBEEMaps(2);
+	
+				if( DEBUG ) std::cout << " --- glo b " << std::endl;
+	
+				hist1d[2]->Fill(doeAmpG);
+	        	hist2d[1]->Fill(difAmpG,effAmpG);
+	        	hist2d[3]->Fill(ampg0,ampg1);
+	
+	            hist2d[55]->Fill(effampg,dtrtglo);
+	
+	        	hist1d[3]->Fill(phoDiMass);
+	        	hist1d[4]->Fill(phoDiAngle);
+	        	hist1d[5]->Fill(phoDiDr);
+	            hist1d[92]->Fill(phoDiEta);
+	            hist1d[93]->Fill(phoDiPhi);
+	
+				hist1d[32]->Fill((*phoPt)[gloIdx0],(*phoPt)[gloIdx1]);
+	            hist1d[33]->Fill((*phoEnergy)[gloIdx0],(*phoEnergy)[gloIdx1]);
+	
+	            hist1d[17]->Fill((*phoEnergy)[gloIdx0]);
+	            hist1d[18]->Fill((*phoPt)[gloIdx0]);
+	            hist1d[19]->Fill((*phoEta)[gloIdx0]);
+	            hist1d[20]->Fill((*phoPhi)[gloIdx0]);
+	            hist1d[21]->Fill((*phoHadOverEM)[gloIdx0]);
+	            hist1d[22]->Fill((*phoSigmaIEtaIEta)[gloIdx0]);
+	            hist1d[75]->Fill((*phoCov2IEtaIEta)[gloIdx0]);
+	            hist1d[78]->Fill((*phoCov2IEtaIPhi)[gloIdx0]);
+	            hist1d[81]->Fill((*phoCov2IPhiIPhi)[gloIdx0]);
+	            hist1d[23]->Fill((*phoEcalRHSumEtConeDR04)[gloIdx0]);
+	            hist1d[24]->Fill((*phoHcalTwrSumEtConeDR04)[gloIdx0]);
+	            hist1d[25]->Fill((*phoTrkSumPtSolidConeDR04)[gloIdx0]);
+	            hist1d[26]->Fill((*phoTrkSumPtHollowConeDR04)[gloIdx0]);
+	            hist1d[27]->Fill((*phoR9)[gloIdx0]);
+	            hist1d[95]->Fill(ngphrh0);
+	    		hist2d[28]->Fill(phoDiMass,(*phoEnergy)[gloIdx0]);
+	            hist2d[30]->Fill(phoDiMass,(*phoPt)[gloIdx0]);
+	
+				if( DEBUG ) std::cout << " --- glo c " << std::endl;
+	
+				hist2d[4]->Fill((*phoEnergy)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
+	            hist2d[7]->Fill((*phoEnergy)[gloIdx0],(*phoSigmaIEtaIEta)[gloIdx0]);
+	            hist2d[10]->Fill((*phoEnergy)[gloIdx0],(*phoR9)[gloIdx0]);
+	            hist2d[49]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoR9)[gloIdx0]);
+	
+				hist2d[51]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoSigmaIEtaIEta)[gloIdx1]);
+	
+	            hist1d[28]->Fill((*phoEnergy)[gloIdx1]);
+	            hist1d[29]->Fill((*phoPt)[gloIdx1]);
+	            hist1d[30]->Fill((*phoEta)[gloIdx1]);
+	            hist1d[31]->Fill((*phoPhi)[gloIdx1]);
+	            hist1d[32]->Fill((*phoHadOverEM)[gloIdx1]);
+	            hist1d[33]->Fill((*phoSigmaIEtaIEta)[gloIdx1]);
+	            hist1d[76]->Fill((*phoCov2IEtaIEta)[gloIdx1]);
+	            hist1d[79]->Fill((*phoCov2IEtaIPhi)[gloIdx1]);
+	            hist1d[82]->Fill((*phoCov2IPhiIPhi)[gloIdx1]);
+	            hist1d[34]->Fill((*phoEcalRHSumEtConeDR04)[gloIdx1]);
+	            hist1d[35]->Fill((*phoHcalTwrSumEtConeDR04)[gloIdx1]);
+	            hist1d[36]->Fill((*phoTrkSumPtSolidConeDR04)[gloIdx1]);
+	            hist1d[37]->Fill((*phoTrkSumPtHollowConeDR04)[gloIdx1]);
+	            hist1d[38]->Fill((*phoR9)[gloIdx1]);
+	            hist1d[96]->Fill(ngphrh1);
+	            hist2d[29]->Fill(phoDiMass,(*phoEnergy)[gloIdx1]);
+	            hist2d[31]->Fill(phoDiMass,(*phoPt)[gloIdx1]);
+	
+	            hist2d[32]->Fill((*phoPt)[gloIdx0],(*phoPt)[gloIdx1]);
+	            hist2d[33]->Fill((*phoEnergy)[gloIdx0],(*phoEnergy)[gloIdx1]);
+	            hist2d[34]->Fill(phoDiMass,phoDiDr);
+	
+	            hist2d[5]->Fill((*phoEnergy)[gloIdx1],(*phoHadOverEM)[gloIdx1]);
+	            hist2d[8]->Fill((*phoEnergy)[gloIdx1],(*phoSigmaIEtaIEta)[gloIdx1]);
+	            hist2d[11]->Fill((*phoEnergy)[gloIdx1],(*phoR9)[gloIdx1]);
+	            hist2d[50]->Fill((*phoSigmaIEtaIEta)[gloIdx1],(*phoR9)[gloIdx1]);
+	
+				if( DEBUG ) std::cout << " --- glo d " << std::endl;
+	
+	            hist1d[43]->Fill((*resRtTime)[2]-caliRtG0);
+	            hist1d[44]->Fill((*resRtTime)[3]-caliRtG1);
+	            hist1d[46]->Fill((*resRtTime)[2]-caliRtG0-((*resRtTime)[3]-caliRtG1));
+	
+	            hist1d[51]->Fill(caliRtG0);
+	            hist1d[52]->Fill(caliRtG1);
+	
+	            hist1d[57]->Fill((*resTOF)[2]);
+	            hist1d[58]->Fill((*resTOF)[3]);
+	            hist1d[61]->Fill((*resE)[2]);
+	            hist1d[62]->Fill((*resE)[3]);
+	            hist1d[65]->Fill(ampg0a);
+	            hist1d[66]->Fill(ampg1a);
+	
+	            hist2d[19]->Fill((*resE)[2],ampg0a);
+	            hist2d[20]->Fill((*resE)[2],(*resRtTime)[2]-caliRtG0);
+	
+	            hist2d[22]->Fill((*resE)[3],ampg1a);
+	            hist2d[23]->Fill((*resE)[3],(*resRtTime)[3]-caliRtG1);
+	
+	            hist2d[90]->Fill((*phoEnergy)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
+	            hist2d[91]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoHadOverEM)[gloIdx0]);
+	            hist2d[92]->Fill((*phoEnergy)[gloIdx0],(*phoCov2IEtaIEta)[gloIdx0]);
+	            hist2d[93]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoCov2IEtaIEta)[gloIdx0]);
+	            hist2d[94]->Fill((*phoEnergy)[gloIdx0],(*phoCov2IEtaIPhi)[gloIdx0]);
+	            hist2d[95]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoCov2IEtaIPhi)[gloIdx0]);
+	            hist2d[96]->Fill((*phoEnergy)[gloIdx0],(*phoCov2IPhiIPhi)[gloIdx0]);
+	            hist2d[97]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoCov2IPhiIPhi)[gloIdx0]);
+	            hist2d[98]->Fill((*phoEnergy)[gloIdx0],(*phoEcalRHSumEtConeDR04)[gloIdx0]);
+	            hist2d[99]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoEcalRHSumEtConeDR04)[gloIdx0]);
+	            hist2d[100]->Fill((*phoEnergy)[gloIdx0],(*phoHcalTwrSumEtConeDR04)[gloIdx0]);
+	            hist2d[101]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoHcalTwrSumEtConeDR04)[gloIdx0]);
+	            hist2d[102]->Fill((*phoEnergy)[gloIdx0],(*phoTrkSumPtSolidConeDR04)[gloIdx0]);
+	            hist2d[103]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoTrkSumPtSolidConeDR04)[gloIdx0]);
+	            hist2d[104]->Fill((*phoEnergy)[gloIdx0],(*phoTrkSumPtHollowConeDR04)[gloIdx0]);
+	            hist2d[105]->Fill((*phoSigmaIEtaIEta)[gloIdx0],(*phoTrkSumPtHollowConeDR04)[gloIdx0]);
 
 			}//-------------  Cali Cut ( if/then stament )
-
             //std::cout << " Finished Global" << std::endl;
 		}//<<>>if( goodGloRHs )
-
-
 	}//<<>>if( run > startRun && run < endRun )
 }//<<>>void makehists::eventLoop( Long64_t entry )
 
@@ -896,7 +924,7 @@ void makehists::initCali( std::string califilename ){
     	icmap[i*3+1] = setnull ? NULL : (TH2F*)fCaliFile->Get(epmapstring.c_str());
     	icmap[i*3+2] = setnull ? NULL : (TH2F*)fCaliFile->Get(emmapstring.c_str());
 	}//<<>>for( int i = 0; i < 2; i++ )
-	std::cout << "Getting Cali maps : " << icmap[0] << " && " << icmap[3] << std::endl;
+	std::cout << "Getting Cali maps : " << icmap[0] << " && " << icmap[1] << " && " << icmap[2] << std::endl;
 
 }//<<>>void makehists::initCali( TFile* fCaliFile )
 
@@ -923,7 +951,7 @@ void makehists::getBranches( Long64_t entry ){
     b_rhID->GetEntry(entry);   //!
     if( DEBUG ) std::cout << " -- getting Banches rh 1" << std::endl;
     b_rhRtTime->GetEntry(entry);   //!
-    b_rhCCTime->GetEntry(entry);   //!
+    //b_rhCCTime->GetEntry(entry);   //!
     if( DEBUG ) std::cout << " -- getting Banches rh koot stuff" << std::endl;
     b_rhRtisOOT->GetEntry(entry);   //!
     b_rhisWeird->GetEntry(entry);   //!
@@ -1051,6 +1079,9 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[40] = new TH1D("seedRtTime_sruLoc1",addstr(fHTitle,"seedRtTime SRU Loc1").c_str(),500,-25,25);
     hist1d[43] = new TH1D("seedRtTime_Glo0",addstr(fHTitle,"seedRtTime_Glo0").c_str(),500,-25,25);
     hist1d[44] = new TH1D("seedRtTime_Glo1",addstr(fHTitle,"seedRtTime_Glo1").c_str(),500,-25,25);
+
+    hist1d[45] = new TH1D("seedRtTimeDiff_sruLoc",addstr(fHTitle,"seedRtTimeDiff SRU Loc").c_str(),500,-25,25);
+    hist1d[46] = new TH1D("seedRtTimeDiff_Glo",addstr(fHTitle,"seedRtTimeDiff_Glo").c_str(),500,-25,25);
 
     hist1d[47] = new TH1D("seedRtCali_sruLoc0",addstr(fHTitle,"seedRtCali SRU Loc0").c_str(),1000,-5,5);
     hist1d[48] = new TH1D("seedRtCali_sruLoc1",addstr(fHTitle,"seedRtCali SRU Loc1").c_str(),1000,-5,5);
@@ -1219,6 +1250,11 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[124] = new TH2D("EnergyVRtTimeKfG0",addstr(fHTitle,"Energy V RtTime kOOT False noGS;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
     hist2d[125] = new TH2D("EnergyVRtTimeG0",addstr(fHTitle,"Energy V RtTime;Energy [GeV] noGS;Time [ns]").c_str(),250,0,1000,600,-30,30);
 
+    hist2d[126] = new TH2D("EnergyVRtTimeInvFiltered",addstr(fHTitle,"Energy V RtTime InvFiltered;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[127] = new TH2D("EnergyVRtTimeUnfiltered",addstr(fHTitle,"Energy V RtTime unFiltered;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[128] = new TH2D("EnergyVRtTimeFiltered",addstr(fHTitle,"Energy V RtTime Filtered;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+
+
 }//<<>>void makehists::initHists()
 
 //----------------------------------------------------------------------------------------------------------------
@@ -1230,29 +1266,49 @@ int main ( int argc, char *argv[] ){
 
     //if( argc != 4 ) { std::cout << "Insufficent arguments." << std::endl; }
     //else {
-                //auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/";
-                //auto indir = "ecalTiming/gammares_mc/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/";
-                auto indir = "ecalTiming/gammares_mc/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/";
 
-                //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
-                //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
-                auto infilename = "list_files/egammares_gammares_mc_ZprimeToEE_M-6000_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
+    	//auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/";
+        //auto indir = "ecalTiming/gammares_mc/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/";
+        //auto indir = "ecalTiming/gammares_mc/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/";
+        auto indir = "ecalTiming/gammares_llpana/";
+        //auto indir = "/ecalTiming/gammares_llpana_pd/MET/";
+        //auto indir = "/ecalTiming/gammares_llpana_qcd/";
+		//auto indir = "ecalTiming/gammares_llpana/MET/";
+        //auto indir = "/ecalTiming/gammares_llpana_pd/";
 
-				int brun = 0;
-            	int erun = 999999;
-                auto califilename = "none";
-                
-                //auto outfilename = "egammares_diag_23D_370496_370580_tt_exp3_v12_EB.root";
-                //auto outfilename = "egammares_diag_winter24_DYto2L-4Jets_MLL-50_1J_v12_EB.root";
-                auto outfilename = "egammares_diag_winter24_ZprimeToEE_M-6000_v12_EB_test.root";
+        //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
+        //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
+        //auto infilename = "list_files/egammares_gammares_mc_ZprimeToEE_M-6000_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
+        //auto infilename = "list_files/egres_QCD_HT_1000to1500_R17.txt";
+        //auto infilename = "list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_v20_infileslist.txt";
+		//auto infilename = "list_files/kuntuple_QCDHT_Met75_R17_v20_infileslist.txt";
+        //auto infilename = "list_files/egammares_MetPD_MINIAOD_Run2017E_reso_plotfilelist.txt";
+        //auto infilename = "master_list_files/egammares_DEGPD_AOD_Run2017F_v2_304475_noCali_plotfilelist.txt";
+        auto infilename = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_noCali_plotfilelist.txt";
 
-                //auto fhtitle = "Run2024E 14_0_4 EB ";
-				//auto fhtitle = "Winter24 DY EB";
-                auto fhtitle = "Winter24 ZprimeToEE_M-6000 EB";
+        //auto outfilename = "egammares_diag_23D_370496_370580_tt_exp3_v12_EB.root";
+        //auto outfilename = "egammares_diag_winter24_DYto2L-4Jets_MLL-50_1J_v12_EB.root";
+        //auto outfilename = "egammares_diag_winter24_ZprimeToEE_M-6000_v12_EB_test.root";
+        //auto outfilename = "egammares_diag_llpana_qcd_mc_diag.root";
+        //auto outfilename = "egammares_llpana_metpd_v2_diag.root";
+        //auto outfilename = "egammares_llpana_qcdht_r17_v20_diag.root";
+        //auto outfilename = "egammares_llpana_metpd_miniaod_diag.root";
+        //auto outfilename = "egammares_llpana_deg_aod_r17_v20_diag.root";
+        auto outfilename = "egammares_llpana_egm_miniaod_r18_v20_diag.root";
 
-				makehists base;				
-                base.llpgana_hist_maker( indir, infilename, outfilename, califilename, brun, erun, fhtitle );
-    //}
+        //auto fhtitle = "Run2024E 14_0_4 EB ";
+		//auto fhtitle = "Winter24 DY EB";
+        //auto fhtitle = "QCD MC R17";
+        //auto fhtitle = "MET AOD 2017E";
+        //auto fhtitle = "MET MINIAOD 2017E";
+        //auto fhtitle = "DEG AOD R17";
+        auto fhtitle = "EGM MINIAOD R18";
+
+		makehists base;				
+        base.llpgana_hist_maker( indir, infilename, outfilename, fhtitle );
+
+    //}//<<>>if( argc != 4 ) 
     return 1;
+
 }//<<>>int main ( int argc, char *argv[] )
 

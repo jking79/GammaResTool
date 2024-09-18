@@ -39,7 +39,10 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'/ecalTiming/gammares_ttcc_1307_v11_diag/EGamma1/'
 #command = eosll+mspc+'/ecalTiming/gammares_ttcc_140_v11_test/EGamma1/'
 #command = eosll+mspc+'/ecalTiming/EGamma0/'
-command = eosll+mspc+'/ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/'
+#command = eosll+mspc+'/ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/'
+#command = eosll+mspc+'/ecalTiming/gammares_llpana/'
+#command = eosll+mspc+'/ecalTiming/gammares_llpana_pd/MET/'
+command = eosll+mspc+'/ecalTiming/gammares_llpana_qcd/'
 
 version = ''
 #version = '_v11_'
@@ -79,7 +82,9 @@ rootfile = '.root'
 #dirselect = 'gammares_tt_kucc_126_v11_ccEncDiag_EGamma_MINIAOD_Run2022C-PromptReco-v1_355890-355895'
 #dirselect = 'gammares_ttcc_1307_v11_diag_EGamma1_MINIAOD_Run2023B-PromptReco-v1_366323-367065'
 #dirselect = 'Run2024C-PromptReco'
-dirselect = 'Run2023D-PromptReco'
+#dirselect = 'Run2023D-PromptReco'
+dirselect = 'QCD'
+#dirselect = 'AOD_Run2017E-17Nov2017-v1'
 
 #debug = True
 debug = False
@@ -137,8 +142,20 @@ for subdir2 in subdirlist2:
 			#print( subdir2+line )
 			filelist.append(subdir2+line)
 
+#for thefile in filelist:
+#	print( thefile )
+
+#select =  line2.split("Tune")
+select = 'Met_PD_AOD_Run2017E-17Nov2017'
+
+outfile = 'egammares_' + select + 'v2.txt'
+print( outfile )
+outf = open( outfile, 'w' )
+#filelist = subdirlist3
 for thefile in filelist:
-	print( thefile )
+    outf.write( thefile + '\n' )
+outf.close()
+
 
 	#filename = 'tmp_'+subdir2.split('/')[1]+'.root '
 	#print( filename )

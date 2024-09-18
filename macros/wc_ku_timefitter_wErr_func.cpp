@@ -34,9 +34,12 @@
 //#include "Common.cpp"  --  still used for SetUpBins :(
 //#include "CommonTimeFit.cpp"
 #include "wc_ku_gausTimeFit.cpp"
+#include "KUCMSRootHelperFunctions.hh"
+#include "KUCMSHelperFunctions.hh"
 
 // set bins helper function
 
+/*
 std::string RemoveDelim(std::string tmp, const std::string & delim){return tmp.erase(tmp.find(delim),delim.length());}
 
 void setBins(std::string & str, std::vector<Double_t> & bins, Bool_t & var_bins){
@@ -77,6 +80,7 @@ void setBins(std::string & str, std::vector<Double_t> & bins, Bool_t & var_bins)
     }//<<>>if      (str.find("CONSTANT") != std::string::npos)
 
 }//<<>>void setBins(std::string & str, std::vector<Double_t> & bins, Bool_t & var_bins)
+*/
 
 // fit struct
 struct FitStruct{
@@ -239,17 +243,16 @@ void DumpFitInfo(FitStruct & DataInfo, const std::string & outfiletext, std::vec
 }//<<>>void DumpFitInfo(FitStruct & DataInfo, const std::string & outfiletext, std::vector<Double_t> fXBins )
 
 //************** Primary function *************************************************************************************
-void runTimeFitter(const std::string & infilename, const std::string & plotconfig, const std::string & miscconfig,
-		   const std::string & timefitconfig, const std::string & era, const std::string & outfiletext, const std::string & inplotname, std::string xbinstr ){
+void runTimeFitter(const std::string & infilename, const std::string & outfiletext, const std::string & inplotname, std::string xbinstr, float noise, float constant ){
 
 //----header------------------------------------------
 
   // settings
   const std::string fInFileName(infilename);
-  const std::string fPlotConfig(plotconfig);
-  const std::string fMiscConfig(miscconfig);
-  const std::string fTimeFitConfig(timefitconfig);
-  const std::string fEra(era);
+  //const std::string fPlotConfig(plotconfig);
+  //const std::string fMiscConfig(miscconfig);
+  //const std::string fTimeFitConfig(timefitconfig);
+  //const std::string fEra(era);
   const std::string fOutFileText(outfiletext);
 
   //bool doEstTOF = true;
@@ -519,8 +522,13 @@ void runTimeFitter(const std::string & infilename, const std::string & plotconfi
     ResultsMap["mu"]      ->SetBinError  (ibinX,result.emu);
     //GResultsMap["mu"]      ->SetBinContent(ibinX,gresult.mu);
     //GResultsMap["mu"]      ->SetBinError  (ibinX,gresult.emu);
-    ResultsMap["sigma"]   ->SetBinContent(ibinX,result.sigma-estTOF);
-    ResultsMap["sigma"]   ->SetBinError  (ibinX,result.esigma);
+    float effamp = Hist2D->GetXaxis()->GetBinCenter(ibinX);
+    float smear = ( effamp > 25 ) ? ((noise/effamp)*(noise/effamp))+(2*constant*constant) : 0;
+    float smearer = result.esigma;//todo
+    float smsig  = smear ? std::sqrt(((result.sigma)*(result.sigma))+smear) : result.sigma;
+    float smsigerr = smear ? smearer : result.esigma;
+    ResultsMap["sigma"]   ->SetBinContent(ibinX,smsig);
+    ResultsMap["sigma"]   ->SetBinError  (ibinX,smsigerr);
     //GResultsMap["sigma"]   ->SetBinContent(ibinX,gresult.sigma-estTOF);
     //GResultsMap["sigma"]   ->SetBinError  (ibinX,fserr);
     ResultsMap["occ"]   ->SetBinContent(ibinX,result.occ);

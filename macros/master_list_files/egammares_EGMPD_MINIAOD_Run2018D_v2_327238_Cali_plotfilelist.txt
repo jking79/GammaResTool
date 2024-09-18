@@ -1,0 +1,1 @@
+list_files/kuntuple_EGamma_R18D_v21.txt KURes_14011_v12_EGMPD_MINIAOD_Run2018D_Cali_Filter_324305_327239.root 324305 327239 /

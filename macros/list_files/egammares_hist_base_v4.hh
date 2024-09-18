@@ -30,23 +30,23 @@ public :
    std::vector<unsigned int> *rhCaliID;
    std::vector<float>   *rhCaliEnergy;
    std::vector<float>   *rhCaliRtTime;
-   std::vector<float>   *rhCaliCCTime;
+   //std::vector<float>   *rhCaliCCTime;
 
    std::vector<unsigned int> *resRhID;
    std::vector<float>   *resAmp;
    std::vector<float>   *resE;
    std::vector<float>   *resRtTime;
-   std::vector<float>   *resCCTime;
+   //std::vector<float>   *resCCTime;
    std::vector<float>   *resTOF;
 
    std::vector<unsigned int> *rhID;
    std::vector<float>   *rhRtTime;
-   std::vector<float>   *rhCCTime;
+   //std::vector<float>   *rhCCTime;
    std::vector<float>   *rhTOF;
    std::vector<float>   *rhEnergy;
    std::vector<bool>    *rhRtisOOT;
    std::vector<float>   *rhAmp;
-   std::vector<bool>    *rhCCisOOT;
+   //std::vector<bool>    *rhCCisOOT;
    std::vector<bool>    *rhisWeird;
    std::vector<bool>    *rhisDiWeird;
    std::vector<float>   *rhSwCross;
@@ -90,7 +90,7 @@ public :
    TBranch        *b_rhCaliID;   //!
    TBranch        *b_rhCaliEnergy;   //!
    TBranch        *b_rhCaliRtTime;   //!
-   TBranch        *b_rhCaliCCTime;   //!
+   //TBranch        *b_rhCaliCCTime;   //!
    TBranch        *b_resRhID;   //!
    TBranch        *b_resAmp;   //!
 
@@ -101,14 +101,14 @@ public :
 
    TBranch        *b_resE;   //!
    TBranch        *b_resRtTime;   //!
-   TBranch        *b_resCCTime;   //!
+   //TBranch        *b_resCCTime;   //!
    TBranch        *b_resTOF;   //!
    TBranch        *b_rhID;   //!
    TBranch        *b_rhRtTime;   //!
-   TBranch        *b_rhCCTime;   //!
+   //TBranch        *b_rhCCTime;   //!
    TBranch        *b_rhEnergy;   //!
    TBranch        *b_rhRtisOOT;   //!
-   TBranch        *b_rhCCisOOT;   //!
+   //TBranch        *b_rhCCisOOT;   //!
    TBranch        *b_rhisWeird;   //!
    TBranch        *b_rhisDiWeird;   //!
    TBranch        *b_rhSwCross;   //!
@@ -130,10 +130,10 @@ public :
    TBranch        *b_phoR9;   //!
    TBranch        *b_phoSelType;   //!
 
-   TBranch        *b_unrhJitter;   //!
-   TBranch        *b_unrhNonJitter;   //!
-   TBranch        *b_unrhEncNonJitter;   //!
-   TBranch        *b_unrhEnergy;   //!  
+   //TBranch        *b_unrhJitter;   //!
+   //TBranch        *b_unrhNonJitter;   //!
+   //TBranch        *b_unrhEncNonJitter;   //!
+   //TBranch        *b_unrhEnergy;   //!  
 
    TBranch        *b_phoDiMass;   //!
    TBranch        *b_phoDiAngle;   //!
@@ -212,7 +212,7 @@ void egammares_hist_base::Init(TTree *tree)
    rhCaliID = 0;
    rhCaliEnergy = 0;
    rhCaliRtTime = 0;
-   rhCaliCCTime = 0;
+   //rhCaliCCTime = 0;
    resRhID = 0;
    resAmp = 0;
 
@@ -223,14 +223,14 @@ void egammares_hist_base::Init(TTree *tree)
 
    resE = 0;
    resRtTime = 0;
-   resCCTime = 0;
+   //resCCTime = 0;
    resTOF = 0;
    rhID = 0;
    rhRtTime = 0;
-   rhCCTime = 0;
+   //rhCCTime = 0;
    rhEnergy = 0;
    rhRtisOOT = 0;
-   rhCCisOOT = 0;
+   //rhCCisOOT = 0;
    rhisWeird = 0;
    rhisDiWeird = 0;
    rhSwCross = 0;
@@ -252,10 +252,10 @@ void egammares_hist_base::Init(TTree *tree)
    phoR9 = 0;
    phoSelType = 0;
 
-   unrhJitter = 0;
-   unrhNonJitter = 0;
-   unrhEncNonJitter = 0;
-   unrhEnergy = 0;
+   //unrhJitter = 0;
+   //unrhNonJitter = 0;
+   //unrhEncNonJitter = 0;
+   //unrhEnergy = 0;
    // Set branch addresses and branch pointers
    //if (!tree) return;
    fChain = tree;
@@ -269,7 +269,7 @@ void egammares_hist_base::Init(TTree *tree)
    fChain->SetBranchAddress("rhCaliID", &rhCaliID, &b_rhCaliID);
    fChain->SetBranchAddress("rhCaliEnergy", &rhCaliEnergy, &b_rhCaliEnergy);
    fChain->SetBranchAddress("rhCaliRtTime", &rhCaliRtTime, &b_rhCaliRtTime);
-   fChain->SetBranchAddress("rhCaliCCTime", &rhCaliCCTime, &b_rhCaliCCTime);
+   //fChain->SetBranchAddress("rhCaliCCTime", &rhCaliCCTime, &b_rhCaliCCTime);
 
    fChain->SetBranchAddress("resRhID", &resRhID, &b_resRhID);
    fChain->SetBranchAddress("resAmp", &resAmp, &b_resAmp);
@@ -281,16 +281,16 @@ void egammares_hist_base::Init(TTree *tree)
 
    fChain->SetBranchAddress("resE", &resE, &b_resE);
    fChain->SetBranchAddress("resRtTime", &resRtTime, &b_resRtTime);
-   fChain->SetBranchAddress("resCCTime", &resCCTime, &b_resCCTime);
+   //fChain->SetBranchAddress("resCCTime", &resCCTime, &b_resCCTime);
    fChain->SetBranchAddress("resTOF", &resTOF, &b_resTOF);
 
 
    fChain->SetBranchAddress("rhID", &rhID, &b_rhID);
    fChain->SetBranchAddress("rhRtTime", &rhRtTime, &b_rhRtTime);
-   fChain->SetBranchAddress("rhCCTime", &rhCCTime, &b_rhCCTime);
+   //fChain->SetBranchAddress("rhCCTime", &rhCCTime, &b_rhCCTime);
    fChain->SetBranchAddress("rhEnergy", &rhEnergy, &b_rhEnergy);
    fChain->SetBranchAddress("rhRtisOOT", &rhRtisOOT, &b_rhRtisOOT);
-   fChain->SetBranchAddress("rhCCisOOT", &rhCCisOOT, &b_rhCCisOOT);
+   //fChain->SetBranchAddress("rhCCisOOT", &rhCCisOOT, &b_rhCCisOOT);
    fChain->SetBranchAddress("rhisWeird", &rhisWeird, &b_rhisWeird);
    fChain->SetBranchAddress("rhisDiWeird", &rhisDiWeird, &b_rhisDiWeird);
    fChain->SetBranchAddress("rhSwCross", &rhSwCross, &b_rhSwCross);

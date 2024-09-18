@@ -31,9 +31,13 @@
 #include <sys/stat.h>
 
 #include "wc_ku_timefitter_wErr_func.cpp"
+//#include "wc_ku_timefitter_wErr_func_new.cpp"
+#include "KUCMSRootHelperFunctions.hh"
+#include "KUCMSHelperFunctions.hh"
 
 using namespace std;
 
+/*
 typedef unsigned int uInt;
 
 enum ECAL {EB, EM, EP, NONE};
@@ -125,50 +129,6 @@ void NormX(TH2F *& hist){ 	//, const Bool_t isUp, const Bool_t varBinsX, const B
 	}
 }
 
-/* //  defined in wc_ku_timefitter_wErr_func.cpp so commented out hee
-
-std::string RemoveDelim(std::string tmp, const std::string & delim){return tmp.erase(tmp.find(delim),delim.length());}
-
-void setBins(std::string & str, std::vector<Double_t> & bins, Bool_t & var_bins){
-
-  	if(str.find("CONSTANT") != std::string::npos){
-
-    	var_bins = false;
-    	str = RemoveDelim(str,"CONSTANT");
-    	Int_t nbins = 0; Double_t low = 0.f, high = 0.f;
-    	std::stringstream ss(str);
-    	ss >> nbins >> low >> high;
-    	Double_t bin_width = (high-low)/nbins;
-      	//std::cout << "Setting Const bins : ";
-    	for (Int_t ibin = 0; ibin <= nbins; ibin++){
-    		//std::cout << low+ibin*bin_width << " ";
-    		bins.push_back(low+ibin*bin_width);
-    	}//<<>.for (Int_t ibin = 0; ibin <= nbins; ibin++)
-    	//std::cout << std::endl;
-
-	} else if(str.find("VARIABLE") != std::string::npos) {
-
-    	var_bins = true;
-    	str = RemoveDelim(str,"VARIABLE");
-    	Float_t bin_edge;
-    	std::stringstream ss(str);
-    	//std::cout << "Setting Var bins : ";
-    	while(ss >> bin_edge){
-    		//std::cout << bin_edge << " ";
-    		bins.push_back(bin_edge);
-    	}//<<>>while (ss >> bin_edge)
-    	//std::cout << std::endl;
-
-  	} else {
-
-    	std::cerr << "Aye... bins are either VARIABLE or CONSTANT! Exiting..." << std::endl;
-    	exit(1);
-
-	}//<<>>if      (str.find("CONSTANT") != std::string::npos)
-
-}//<<>>void setBins(std::string & str, std::vector<Double_t> & bins, Bool_t & var_bins)
-*/
-
 void scaleHist(TH2F *& hist, const Bool_t isUp, const Bool_t varBinsX, const Bool_t varBinsY){
 
 	std::cout << "Scaling " << (isUp?"up":"down") << " hist: " << hist->GetName() << std::endl;
@@ -194,14 +154,17 @@ void scaleHist(TH2F *& hist, const Bool_t isUp, const Bool_t varBinsX, const Boo
         }//<<>>for (auto ibinY = 1; ibinY <= hist->GetYaxis()->GetNbins(); ibinY++)
 	}//<<>>for (auto ibinX = 1; ibinX <= hist->GetXaxis()->GetNbins(); ibinX++)
 
+//-------------------------------------------------------------------------------------------------------------------------------
+
 }//<<>>void scaleHist(TH2D *& hist, const Bool_t isUp, const Bool_t varBinsX, const Bool_t varBinsY)
+*/
 
 //void plot2dResolution( string indir, string infilelistname, string outfilename, string tvarname, string calimapname, string isd_type, int brun, int erun, int leta, int heta  ){
-void plot2dResolution( std::string indir, std::string infilelistname, std::string outfilename, std::string tvarname, std::string calimapname, 
-						std::string isd_type, bool useAmp, std::string xbinstr ){
+void plot2dResolution( std::string indir, std::string infilelistname, std::string outfilename, std::string tvarname, std::string calimapname, std::string isd_type, bool useAmp, std::string xbinstr, double noise, double constant ){
 
 	bool debug = false;
     //bool debug = true;
+
 	TRandom* getRandom = new TRandom();
 	getRandom->SetSeed(0);
 	unsigned int nRand(100);
@@ -218,28 +181,18 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 
     // Declaration of leaf types
     UInt_t          run;
-    //UInt_t          lumi;
-    //vector<unsigned int> *rhCaliID;
-    //vector<float>   *rhCaliRtTime;
-    //vector<float>   *rhCaliCCTime;
     vector<unsigned int> *resRhID;
     vector<float>   *resAmp;
     vector<float>   *resE;
     vector<float>   *resRtTime;
-    vector<float>   *resCCTime;
     vector<float>   *resTOF;
 
     // List of branches
     TBranch        *b_run;   //!
-    //TBranch        *b_lumi;   //!
-    //TBranch        *b_rhCaliID;   //!
-    ///TBranch        *b_rhCaliRtTime;   //!
-    //TBranch        *b_rhCaliCCTime;   //!
     TBranch        *b_resRhID;   //!
     TBranch        *b_resAmp;   //!
     TBranch        *b_resE;   //!
     TBranch        *b_resRtTime;   //!
-    TBranch        *b_resCCTime;   //!
     TBranch        *b_resTOF;   //!
 
 
@@ -271,37 +224,26 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     string fXTitle("A_{eff}/#sigma_{n} (EBEB)");
     std::vector<Double_t> fXBins;
     Bool_t fXVarBins = false;//dummy not used
-    //string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 750 950 1275 1700 2250");
-    //string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 950 2250");
-    //int nMyBins = 13;
-    //std::vector<TString> fXLabels;
     string fYTitle("#Delta(Photon Seed Time) [ns] (EBEB)");
     std::vector<Double_t> fYBins;
-    Bool_t fYVarBins = false;//diummy not used;
+    Bool_t fYVarBins = false;//dummy not used;
     //string ybinstr("CONSTANT 1920 -3 3");
     string ybinstr("CONSTANT 600 -3 3");
-    //std::vector<TString> fYLabels;
     string fZTitle("");
-    //string yetabinstr("CONSTANT 800 -4 4");
-    //string xetabinstr("CONSTANT 181 -90.5 90.5");
-    //string xphibinstr("CONSTANT 362 -0.5 361.5");
-    std::vector<Double_t> fXetaBins;
-    std::vector<Double_t> fYetaBins;
-
 
     setBins(xbinstr,fXBins,fXVarBins);
     setBins(ybinstr,fYBins,fYVarBins);
-
-    //Common::SetupBins(xetabinstr,fXetaBins,fXVarBins);
-    //Common::SetupBins(yetabinstr,fYetaBins,fYVarBins);
 
     const auto xbins = &fXBins[0];
     const auto ybins = &fYBins[0];
     int nMyBins = fXBins.size()-1;
 
-    int tdiv = 600;
+    int tdiv = 240;
     float tstart = -3.0;
     float tend = 3.0;
+
+    int ediv = 720;
+    float eend = 3600;
 
     std::string tehistname = "timeErrHist";
 	auto timeErrBinHist = new TH1F(tehistname.c_str(), tehistname.c_str(),1000,0,1);
@@ -313,7 +255,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 		auto binhistname = "bin" + to_string(ibin) + "ErrHist";
 		caliErrBinHist[ibin] = new TH1F(binhistname.c_str(),binhistname.c_str(),500,0,0.5);
         caliErrBinHist[ibin]->Sumw2();
-    }
+    }//<<>>for( auto ibin = 1; ibin < nMyBins+1; ibin++ )
 
 	// local same
 	auto lochist = locsname+histname;
@@ -321,9 +263,9 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     auto lochistg = locsname+histnameg;
     auto theGHistLS = new TH2F(lochistg.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
     auto lochists = locsname+histnames;
-    auto theSHistLS = new TH2F(lochists.c_str(),fTitle.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
+    auto theSHistLS = new TH2F(lochists.c_str(),fTitle.c_str(), ediv, 0, eend, tdiv, tstart, tend);
     auto lochist0 = locsname+histname0;
-    auto theOthHistLS = new TH2F(lochist0.c_str(),fTitle0.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
+    auto theOthHistLS = new TH2F(lochist0.c_str(),fTitle0.c_str(), ediv, 0, eend, tdiv, tstart, tend);
     auto lochist1 = locsname+histname1;
     auto thetdHistLS = new TH1F(lochist1.c_str(),fTitle1.c_str(),tdiv,tstart,tend);
     auto lochist2 = locsname+histname2;
@@ -331,7 +273,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 
     //auto thetdfcHist = new TH1F(histname4.c_str(),fTitle4.c_str(),tdiv,tstart,tend);
     auto lochist3 = locsname+histname3;
-    auto theEffaHistLS = new TH2F(lochist3.c_str(),fTitle3.c_str(),2250,0,2250,2250,0,2250);
+    auto theEffaHistLS = new TH2F(lochist3.c_str(),fTitle3.c_str(),ediv,0,eend,ediv,0,eend);
     auto lochist5 = locsname+histname5;
     auto theetaHistLS = new TH2F(lochist5.c_str(),fTitle5.c_str(),182,-90.5,90.5,tdiv,tstart,tend);
     auto lochist6 = locsname+histname6;
@@ -344,73 +286,19 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     theGHistLS->GetYaxis()->SetTitle(fYTitle.c_str());
     theGHistLS->GetZaxis()->SetTitle(fZTitle.c_str());
 
-    auto lochistcc = locsname+"CC_"+histname;
-    auto theHistCCLS = new TH2F(lochistcc.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-    theHistCCLS->GetXaxis()->SetTitle(fXTitle.c_str());
-    theHistCCLS->GetYaxis()->SetTitle(fYTitle.c_str());
-    theHistCCLS->GetZaxis()->SetTitle(fZTitle.c_str());
-    auto lochistscc = locsname+"CC_"+histnames;
-    auto theSHistCCLS = new TH2F(lochistscc.c_str(),fTitle.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
-    theSHistCCLS->GetXaxis()->SetTitle(fXTitle.c_str());
-    theSHistCCLS->GetYaxis()->SetTitle(fYTitle.c_str());
-    theSHistCCLS->GetZaxis()->SetTitle(fZTitle.c_str());
-
 	// local diffrnent
     auto locdhist = locdname+histname;
     auto theHistLD = new TH2F(locdhist.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-//    auto theGHistLD = new TH2F((locdname+histnameg).c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-//    auto theSHistLD = new TH2F((locdname+histnames).c_str(),fTitle.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
-
-//    auto theOthHistLD = new TH2F((locdname+histname0).c_str(),fTitle0.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
-//    auto thetdHistLD = new TH1F((locdname+histname1).c_str(),fTitle1.c_str(),tdiv,tstart,tend);\
-//    auto thetdcHistLD = new TH1F((locdname+histname2).c_str(),fTitle2.c_str(),tdiv,tstart,tend);
-    //auto thetdfcHist = new TH1F(histname4.c_str(),fTitle4.c_str(),tdiv,tstart,tend);
-//    auto theEffaHistLD = new TH2F((locdname+histname3).c_str(),fTitle3.c_str(),2250,0,2250,2250,0,2250);
-//    auto theetaHistLD = new TH2F((locdname+histname5).c_str(),fTitle5.c_str(),182,-90.5,90.5,tdiv,tstart,tend);
-//    auto thephiHistLD = new TH2F((locdname+histname6).c_str(),fTitle6.c_str(),363,-1.5,361.5,tdiv,tstart,tend);
-
     theHistLD->GetXaxis()->SetTitle(fXTitle.c_str());
     theHistLD->GetYaxis()->SetTitle(fYTitle.c_str());
     theHistLD->GetZaxis()->SetTitle(fZTitle.c_str());
-//    theGHistLD->GetXaxis()->SetTitle(fXTitle.c_str());
-//    theGHistLD->GetYaxis()->SetTitle(fYTitle.c_str());
-//    theGHistLD->GetZaxis()->SetTitle(fZTitle.c_str());
-
-    auto locdhistcc = locdname+"CC_"+histname;
-    auto theHistCCLD = new TH2F(locdhistcc.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-    theHistCCLD->GetXaxis()->SetTitle(fXTitle.c_str());
-    theHistCCLD->GetYaxis()->SetTitle(fYTitle.c_str());
-    theHistCCLD->GetZaxis()->SetTitle(fZTitle.c_str());
 
 	// global
-
     auto globhist = globname+histname;
     auto theHistGB = new TH2F(globhist.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-
-//    auto theGHistGB = new TH2F((globname+histnameg).c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-//    auto theSHistGB = new TH2F((globname+histnames).c_str(),fTitle.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
-//    auto theOthHistGB = new TH2F((globname+histname0).c_str(),fTitle0.c_str(), 2250, 0, 2250, tdiv, tstart, tend);
-//    auto thetdHistGB = new TH1F((globname+histname1).c_str(),fTitle1.c_str(),tdiv,tstart,tend);
-//    auto thetdcHistGB = new TH1F((globname+histname2).c_str(),fTitle2.c_str(),tdiv,tstart,tend);
-
-    //auto thetdfcHist = new TH1F(histname4.c_str(),fTitle4.c_str(),tdiv,tstart,tend);
-//    auto theEffaHistGB = new TH2F((globname+histname3).c_str(),fTitle3.c_str(),2250,0,2250,2250,0,2250);
-
-//    auto theetaHistGB = new TH2F((globname+histname5).c_str(),fTitle5.c_str(),182,-90.5,90.5,tdiv,tstart,tend);
-//    auto thephiHistGB = new TH2F((globname+histname6).c_str(),fTitle6.c_str(),363,-1.5,361.5,tdiv,tstart,tend);
-
     theHistGB->GetXaxis()->SetTitle(fXTitle.c_str());
     theHistGB->GetYaxis()->SetTitle(fYTitle.c_str());
     theHistGB->GetZaxis()->SetTitle(fZTitle.c_str());
-//    theGHistGB->GetXaxis()->SetTitle(fXTitle.c_str());
-//    theGHistGB->GetYaxis()->SetTitle(fYTitle.c_str());
-//    theGHistGB->GetZaxis()->SetTitle(fZTitle.c_str());
-
-    auto globhistcc = globname+"CC_"+histname;
-    auto theHistCCGB = new TH2F(globhistcc.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
-    theHistCCGB->GetXaxis()->SetTitle(fXTitle.c_str());
-    theHistCCGB->GetYaxis()->SetTitle(fYTitle.c_str());
-    theHistCCGB->GetZaxis()->SetTitle(fZTitle.c_str());
 
     std::cout << "Setting up DetIDs." << std::endl;
     std::map<UInt_t,DetIDStruct> DetIDMap;
@@ -439,16 +327,10 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
         ss >> infilename >> califilename >> srunstr >> erunstr >> subdir;
         std::cout << "open input file : " << infilename << std::endl;
         std::cout << "open input cali : " << califilename << std::endl;
-        //std::cout << "For Run " << srunstr << " to Run " << erunstr << std::endl;
 		auto srun = std::stoi(srunstr);
         auto erun = std::stoi(erunstr);
         std::cout << "For Run " << srun << " to Run " << erun << std::endl;
         std::cout << "Subdir: " << subdir << std::endl;
-
-		//auto tfilename = indir+infilename;
-        //auto fInFile = TFile::Open(tfilename.c_str(), "update");
-        //fInFile->cd();
-        //auto fInTree = (TTree*)fInFile->Get(disphotreename.c_str());
 
         std::ifstream infile( infilename );
         std::string str;
@@ -460,7 +342,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
             //const std::string eosdir("/uscms/home/jaking/nobackup/el8/ecaltiming/CMSSW_14_0_4/src/GammaResTool/GammaResTool/");
             auto tfilename = eosdir + indir + subdir + str;
             //auto tfilename = indir + "/" + str;
-            std::cout << "--  adding file: " << tfilename << std::endl;
+            //std::cout << "--  adding file: " << tfilename << std::endl;
 			std::cout << "-";
         	fInTree->Add(tfilename.c_str());
         }//<<>>while (std::getline(infile,str))
@@ -484,7 +366,6 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 		resAmp = 0;
 		resE = 0;
 		resRtTime = 0;
-		resCCTime = 0;
 		resTOF = 0;
 
         fInTree->SetBranchAddress( "run", &run, &b_run );   //!
@@ -492,63 +373,39 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
         fInTree->SetBranchAddress( "resAmp", &resAmp, &b_resAmp);   //!
         fInTree->SetBranchAddress( "resE", &resE, &b_resE);   //!
         fInTree->SetBranchAddress( "resRtTime", &resRtTime, &b_resRtTime);   //!
-        fInTree->SetBranchAddress( "resCCTime" , &resCCTime, &b_resCCTime);   //!
         fInTree->SetBranchAddress( "resTOF" , &resTOF, &b_resTOF);   //!
 
-//         get maps from fCaliFile
-
 		vector<TH2F*> calimaps{0,0,0,0,0,0,0,0};
-
-
         std::cout << "get maps from fCaliFile" << std::endl;
         if( fCaliFile ){
-		fCaliFile->cd();
-        //string cmbs("AveXtalRtOOTStcPhoIcRecTime");
-        //string cmbs("AveXtalRtStcRecTimeE5");
-        string cmbsrt("AveXtalRatioRecTime");
-        string cmbscc("AveXtalKuccRecTime");
-        //string cmbs(calimapname);
-        //string itcnt("_i95");
-        string itcnt("");
-        string ebmaprt(cmbsrt+"EBMap"+itcnt);
-        string eberrmaprt(cmbsrt+"ErrEBMap"+itcnt);
-        string epmaprt(cmbsrt+"EPMap"+itcnt);
-        string emmaprt(cmbsrt+"EMMap"+itcnt);
-        calimaps[0] = (TH2F*)fCaliFile->Get(ebmaprt.c_str());
-        calimaps[1] = (TH2F*)fCaliFile->Get(eberrmaprt.c_str());
-        calimaps[2] = (TH2F*)fCaliFile->Get(epmaprt.c_str());
-        calimaps[3] = (TH2F*)fCaliFile->Get(emmaprt.c_str());
-        string ebmapcc(cmbscc+"EBMap"+itcnt);
-        string eberrmapcc(cmbscc+"ErrEBMap"+itcnt);
-        string epmapcc(cmbscc+"EPMap"+itcnt);
-        string emmapcc(cmbscc+"EMMap"+itcnt);
-        calimaps[4] = (TH2F*)fCaliFile->Get(ebmapcc.c_str());
-        calimaps[5] = (TH2F*)fCaliFile->Get(eberrmapcc.c_str());
-        calimaps[6] = (TH2F*)fCaliFile->Get(epmapcc.c_str());
-        calimaps[7] = (TH2F*)fCaliFile->Get(emmapcc.c_str());
+			fCaliFile->cd();
+        	string cmbsrt("AveXtalRecTime");
+        	string itcnt("");
+        	string ebmaprt(cmbsrt+"EBMap"+itcnt);
+        	string eberrmaprt(cmbsrt+"ErrEBMap"+itcnt);
+        	string epmaprt(cmbsrt+"EPMap"+itcnt);
+        	string emmaprt(cmbsrt+"EMMap"+itcnt);
+        	calimaps[0] = (TH2F*)fCaliFile->Get(ebmaprt.c_str());
+        	calimaps[1] = (TH2F*)fCaliFile->Get(eberrmaprt.c_str());
+        	calimaps[2] = (TH2F*)fCaliFile->Get(epmaprt.c_str());
+        	calimaps[3] = (TH2F*)fCaliFile->Get(emmaprt.c_str());
 		}//<<>>if( calimapname != "none" )
-
-//        std::cout << " Ic hists for " << cmbs << std::endl;
-//        std::cout << "  " << ebmapstring << " : " << ebmapic << std::endl;
-//        std::cout << "  " << eberrmapstring << " : " << eberrmapic << std::endl;
-//        std::cout << "  " << epmapstring << " : " << epmapic << std::endl;
-//        std::cout << "  " << emmapstring << " : " << emmapic << std::endl;
 
         std::cout << "Getting calibration values and plotting" << std::endl;
 
-        //fInFile->cd();
-		//unsigned int lastRun(0);
         auto nEntries = fInTree->GetEntries();
-		if( debug ) nEntries = ( nEntries < 10000 ) ? nEntries : 10000;
+		if( debug ) nEntries = ( nEntries < 1000 ) ? nEntries : 1000;
 		if( debug ) std::cout << "Mf2d Proccessing " << nEntries << " entries : " << std::endl;
         for (auto centry = 0U; centry < nEntries; centry++){
 
-			if( centry%10000000 == 0 or centry == 0) std::cout << "Proccessed " << centry << " of " << nEntries << " " << (1000.0*static_cast<float>(centry)/static_cast<float>(nEntries))/10.0 << "%" << std::endl;
+			if( centry%10000000 == 0 or centry == 0){ 
+				std::cout << "Proccessed " << centry << " of " << nEntries;
+				std::cout << " " << (1000.0*static_cast<float>(centry)/static_cast<float>(nEntries))/10.0 << "%" << std::endl;
+			}//<<>>if( centry%10000000 == 0 or centry == 0)
 
 			auto entry = fInTree->LoadTree(centry);
 
 			if(debug) std::cout << " - Start loop " << std::endl;
-	        //fInFile->cd();
 
 			gevents++;
 
@@ -557,13 +414,12 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
             b_resAmp->GetEntry(entry);   //!
             b_resE->GetEntry(entry);   //!
             b_resRtTime->GetEntry(entry);   //!
-            b_resCCTime->GetEntry(entry);   //!
             b_resTOF->GetEntry(entry);   //!
 
 			//int didx = 0;
 			for( int didx = debug?0:4; didx < 4; didx++ ){
 				if(debug) std::cout << "Run " << run << " id " << (*resRhID)[didx] << " Amp " << (*resAmp)[didx] << " E " << (*resE)[didx];
-            	if(debug) std::cout << " Rt " << (*resRtTime)[didx]  << " CC " << (*resCCTime)[didx] << " TOF " << (*resTOF)[didx] << std::endl;
+            	if(debug) std::cout << " Rt " << (*resRtTime)[didx]  << " TOF " << (*resTOF)[didx] << std::endl;
 			}//<<>>for( int didx = 0; didx < 4; didx++ ){
 			if( srun != 0 && ( run < srun || run > erun ) ) continue;
 
@@ -595,68 +451,54 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 	        int adjust = 0.0;
 
 			vector<float> seedTimeIC0{0,0};
-            vector<float> seedTimeCCIC0{0,0};
             vector<float> seedTimeICE0{0,0};
             vector<float> seedTimeIC1{0,0};
-            vector<float> seedTimeCCIC1{0,0};
             vector<float> seedTimeICE1{0,0};
 
 	        if( fCaliFile ){ //and califilename != "none" ){
 
 				if ( (*resRhID)[0] ){
-            	if ( L0EB == ECAL::EB ){
-            		seedTimeIC0[0] = calimaps[0]->GetBinContent( i2L0 + bin_offset, i1L0 ) - adjust;
-                    seedTimeCCIC0[0] = calimaps[4]->GetBinContent( i2L0 + bin_offset, i1L0 ) - adjust;
-					seedTimeICE0[0] = calimaps[1]->GetBinContent( i2L0 + bin_offset, i1L0 );
-            	}else if ( L0EB == ECAL::EP ){
-            	    seedTimeIC0[0] = calimaps[2]->GetBinContent( i2L0, i1L0 ) - adjust;
-                    seedTimeCCIC0[0] = calimaps[6]->GetBinContent( i2L0, i1L0 ) - adjust;
-            	}else if (L0EB == ECAL::EM ){
-            	    seedTimeIC0[0] = calimaps[3]->GetBinContent( i2L0, i1L0 ) - adjust;
-                    seedTimeCCIC0[0] = calimaps[7]->GetBinContent( i2L0, i1L0 ) - adjust;
-            	}//<<>>if ( L0EB == ECAL::EB )
+            		if ( L0EB == ECAL::EB ){
+            			seedTimeIC0[0] = calimaps[0]->GetBinContent( i2L0 + bin_offset, i1L0 ) - adjust;
+						seedTimeICE0[0] = calimaps[1]->GetBinContent( i2L0 + bin_offset, i1L0 );
+            		}else if ( L0EB == ECAL::EP ){
+            	    	seedTimeIC0[0] = calimaps[2]->GetBinContent( i2L0, i1L0 ) - adjust;
+            		}else if (L0EB == ECAL::EM ){
+            	    	seedTimeIC0[0] = calimaps[3]->GetBinContent( i2L0, i1L0 ) - adjust;
+            		}//<<>>if ( L0EB == ECAL::EB )
 				}//<<>>if ( (*resRhID)[0] )
             
                 if ( (*resRhID)[1] ){
-        		if ( L1EB == ECAL::EB ){
-            		seedTimeIC1[0] = calimaps[0]->GetBinContent( i2L1 + bin_offset, i1L1 ) - adjust;
-                    seedTimeCCIC1[0] = calimaps[4]->GetBinContent( i2L1 + bin_offset, i1L1 ) - adjust;
-                	seedTimeICE1[0] = calimaps[1]->GetBinContent( i2L1 + bin_offset, i1L1 );
-            	}else if ( L1EB == ECAL::EP ){
-                	seedTimeIC1[0] = calimaps[2]->GetBinContent( i2L1, i1L1 ) - adjust;
-                    seedTimeCCIC1[0] = calimaps[6]->GetBinContent( i2L1, i1L1 ) - adjust;
-            	}else if (L1EB == ECAL::EM ){
-                	seedTimeIC1[0] = calimaps[3]->GetBinContent( i2L1, i1L1 ) - adjust;
-                    seedTimeCCIC1[0] = calimaps[7]->GetBinContent( i2L1, i1L1 ) - adjust;
-				}//<<>>if ( L1EB == ECAL::EB )
+        			if ( L1EB == ECAL::EB ){
+            			seedTimeIC1[0] = calimaps[0]->GetBinContent( i2L1 + bin_offset, i1L1 ) - adjust;
+                		seedTimeICE1[0] = calimaps[1]->GetBinContent( i2L1 + bin_offset, i1L1 );
+            		}else if ( L1EB == ECAL::EP ){
+                		seedTimeIC1[0] = calimaps[2]->GetBinContent( i2L1, i1L1 ) - adjust;
+            		}else if (L1EB == ECAL::EM ){
+                		seedTimeIC1[0] = calimaps[3]->GetBinContent( i2L1, i1L1 ) - adjust;
+					}//<<>>if ( L1EB == ECAL::EB )
                 }//<<>>if ( (*resRhID)[1] )
 
                 if ( (*resRhID)[2] ){
-                if ( G0EB == ECAL::EB ){
-                    seedTimeIC0[1] = calimaps[0]->GetBinContent( i2G0 + bin_offset, i1G0 ) - adjust;
-                    seedTimeCCIC0[1] = calimaps[4]->GetBinContent( i2G0 + bin_offset, i1G0 ) - adjust;
-                    seedTimeICE0[1] = calimaps[1]->GetBinContent( i2G0 + bin_offset, i1G0 );
-                }else if ( G0EB == ECAL::EP ){
-                    seedTimeIC0[1] = calimaps[2]->GetBinContent( i2G0, i1G0 ) - adjust;
-                    seedTimeCCIC0[1] = calimaps[6]->GetBinContent( i2G0, i1G0 ) - adjust;
-                }else if (G0EB == ECAL::EM ){
-                    seedTimeIC0[1] = calimaps[3]->GetBinContent( i2G0, i1G0 ) - adjust;
-                    seedTimeCCIC0[1] = calimaps[7]->GetBinContent( i2G0, i1G0 ) - adjust;
-                }//<<>>if ( G0EB == ECAL::EB )
+                	if ( G0EB == ECAL::EB ){
+                    	seedTimeIC0[1] = calimaps[0]->GetBinContent( i2G0 + bin_offset, i1G0 ) - adjust;
+                    	seedTimeICE0[1] = calimaps[1]->GetBinContent( i2G0 + bin_offset, i1G0 );
+                	}else if ( G0EB == ECAL::EP ){
+                    	seedTimeIC0[1] = calimaps[2]->GetBinContent( i2G0, i1G0 ) - adjust;
+                	}else if (G0EB == ECAL::EM ){
+                    	seedTimeIC0[1] = calimaps[3]->GetBinContent( i2G0, i1G0 ) - adjust;
+                	}//<<>>if ( G0EB == ECAL::EB )
                 }//<<>>if ( (*resRhID)[2] )
 
                 if ( (*resRhID)[3] ){
-                if ( G1EB == ECAL::EB ){
-                    seedTimeIC1[1] = calimaps[0]->GetBinContent( i2G1 + bin_offset, i1G1 ) - adjust;
-                    seedTimeCCIC1[1] = calimaps[4]->GetBinContent( i2G1 + bin_offset, i1G1 ) - adjust;
-                    seedTimeICE1[1] = calimaps[1]->GetBinContent( i2G1 + bin_offset, i1G1 );
-                }else if ( G1EB == ECAL::EP ){
-                    seedTimeIC1[1] = calimaps[2]->GetBinContent( i2G1, i1G1 ) - adjust;
-                    seedTimeCCIC1[1] = calimaps[6]->GetBinContent( i2G1, i1G1 ) - adjust;
-                }else if (G1EB == ECAL::EM ){
-                    seedTimeIC1[1] = calimaps[3]->GetBinContent( i2G1, i1G1 ) - adjust;
-                    seedTimeCCIC1[1] = calimaps[7]->GetBinContent( i2G1, i1G1 ) - adjust;
-                }//<<>>if ( G1EB == ECAL::EB )
+                	if ( G1EB == ECAL::EB ){
+                    	seedTimeIC1[1] = calimaps[0]->GetBinContent( i2G1 + bin_offset, i1G1 ) - adjust;
+                    	seedTimeICE1[1] = calimaps[1]->GetBinContent( i2G1 + bin_offset, i1G1 );
+                	}else if ( G1EB == ECAL::EP ){
+                    	seedTimeIC1[1] = calimaps[2]->GetBinContent( i2G1, i1G1 ) - adjust;
+                	}else if (G1EB == ECAL::EM ){
+                    	seedTimeIC1[1] = calimaps[3]->GetBinContent( i2G1, i1G1 ) - adjust;
+                	}//<<>>if ( G1EB == ECAL::EB )
                 }//<<>>if ( (*resRhID)[3] )
 
 	        }//<<>>if( calimapname != "none" )
@@ -666,20 +508,30 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 
             if(debug) std::cout << " - Calc 2D Hist" << std::endl;
 
-			double dTOF = (*resTOF)[0]-(*resTOF)[1]; //phoseedTOF_0-phoseedTOF_1;
-            double lyfill = ((*resRtTime)[0]-seedTimeIC0[0])-((*resRtTime)[1]-seedTimeIC1[0])+(*resTOF)[0]-(*resTOF)[1];
-            double gyfill = ((*resRtTime)[2]-seedTimeIC0[1])-((*resRtTime)[3]-seedTimeIC1[1])+(*resTOF)[2]-(*resTOF)[3];
-            double lccyfill = ((*resCCTime)[0]-seedTimeCCIC0[0])-((*resCCTime)[1]-seedTimeCCIC1[0])+(*resTOF)[0]-(*resTOF)[1];
-            double gccyfill = ((*resCCTime)[2]-seedTimeCCIC0[1])-((*resCCTime)[3]-seedTimeCCIC1[1])+(*resTOF)[2]-(*resTOF)[3];
-			if(debug) std::cout << "delta seedTOF: " << to_string(dTOF) 
-								//<< " 0: " << to_string(phoseedTOF_0) << " 1: "  << to_string(phoseedTOF_1) 
-								<< std::endl;
             double leffa0 = useAmp ? (*resAmp)[0] : (*resE)[0]; //(phoseedE_0/phoseedadcToGeV_0)/phoseedpedrms12_0;
             double leffa1 = useAmp ? (*resAmp)[1] : (*resE)[1]; //(phoseedE_1/phoseedadcToGeV_1)/phoseedpedrms12_1;
             double geffa0 = useAmp ? (*resAmp)[2] : (*resE)[2]; //(phoseedE_0/phoseedadcToGeV_0)/phoseedpedrms12_0;
             double geffa1 = useAmp ? (*resAmp)[3] : (*resE)[3]; //(phoseedE_1/phoseedadcToGeV_1)/phoseedpedrms12_1;
             double lxfill = (leffa0*leffa1)/sqrt(pow(leffa0,2)+pow(leffa1,2));
             double gxfill = (geffa0*geffa1)/sqrt(pow(geffa0,2)+pow(geffa1,2));
+
+            double ldTOF = (*resTOF)[0]-(*resTOF)[1]; //phoseedTOF_0-phoseedTOF_1;
+            double gdTOF = (*resTOF)[2]-(*resTOF)[3]; //phoseedTOF_0-phoseedTOF_1;
+           	double lyf0 = (*resRtTime)[0]-seedTimeIC0[0];
+           	double lyf1 = (*resRtTime)[1]-seedTimeIC1[0];
+           	double gyf0 = (*resRtTime)[2]-seedTimeIC0[1];
+           	double gyf1 = (*resRtTime)[3]-seedTimeIC1[1];
+			//Double_t  Gaus(Double_t mean = 0, Double_t sigma = 1)
+			if( constant != 0 ){
+				double cterm = 2*pow(constant,2);
+                lyf0 = getRandom->Gaus(lyf0,std::sqrt((pow(noise/leffa0,2)+cterm)/2));
+                lyf1 = getRandom->Gaus(lyf1,std::sqrt((pow(noise/leffa1,2)+cterm)/2));
+                gyf0 = getRandom->Gaus(gyf0,std::sqrt((pow(noise/geffa0,2)+cterm)/2));
+                gyf1 = getRandom->Gaus(gyf1,std::sqrt((pow(noise/geffa1,2)+cterm)/2));
+			}//<<>>if( cterm != 0 )
+            double lyfill = lyf0-lyf1+ldTOF;
+            double gyfill = gyf0-gyf1+gdTOF;
+
             double timeErr0 = 0; //phoseedtimeErr_0/25.0;
             double timeErr1 = 0; //phoseedtimeErr_1/25.0;
 			double ldtserr0 = timeErr0*timeErr0+seedTimeICE0[0]*seedTimeICE0[0];
@@ -693,8 +545,8 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
             auto ge_cut = ((*resE)[2]>=10)&&((*resE)[2]<=120)&&((*resE)[3]>=10)&&((*resE)[3]<=120);
 	        auto leta_cut = (L0EB == ECAL::EB)&&(L1EB == ECAL::EB);
             auto geta_cut = (G0EB == ECAL::EB)&&(G1EB == ECAL::EB);
-            auto goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0 && (*resCCTime)[0] != 0 && (*resCCTime)[1] != 0;
-            auto goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0 && (*resCCTime)[2] != 0 && (*resCCTime)[3] != 0;
+            auto goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0; 
+            auto goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0; 
 			auto goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
             auto goodGloRHs = (*resRhID)[2] != 0 && (*resRhID)[3] != 0;
 
@@ -717,15 +569,13 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 			if(debug) std::cout << " - Fill 2D Hist" << std::endl;
 	        if( levent_good && isd_cut ){
 				theHistLS->Fill(lxfill,lyfill);
-                theHistCCLS->Fill(lxfill,lccyfill);
 				theSHistLS->Fill(lxfill,lyfill);
-                theSHistCCLS->Fill(lxfill,lccyfill);
 				theOthHistLS->Fill(leffa0,lyfill);
-				for( auto i = 0; i < nRand; i++ ){ 
-					//virtual Double_t	Gaus(Double_t mean = 0, Double_t sigma = 1)
-					auto gsfill = getRandom->Gaus(lyfill,ldterr);
-                  	theGHistLS->Fill(lxfill,gsfill);
-				}//<<>>for( int i = 0; i < 100; i++ )	
+				//for( auto i = 0; i < nRand; i++ ){ 
+				//	//virtual Double_t	Gaus(Double_t mean = 0, Double_t sigma = 1)
+				//	auto gsfill = getRandom->Gaus(lyfill,ldterr);
+                //  	theGHistLS->Fill(lxfill,gsfill);
+				//}//<<>>for( int i = 0; i < 100; i++ )	
 				if(debug) std::cout << " - Fill effA dist Hist" << std::endl;
 				//string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 950 2250");
 				caliErrBinHist[0]->Fill(lxfill);
@@ -744,7 +594,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
                	else if( lxfill < 600 ) caliErrBinHist[11]->Fill(ldterr);
                	else if( lxfill < 950 ) caliErrBinHist[12]->Fill(ldterr);
                	else if( lxfill < 2250 ) caliErrBinHist[13]->Fill(ldterr);
-				else std::cout << "Over 2250" << std::endl;
+				//else std::cout << "Over 2250" << std::endl;
             }//<<>>if( levent_good )
             if(debug) std::cout << " - Fill 1D Hist" << std::endl;
             if( levent_good ){
@@ -754,8 +604,8 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
 				theetaHistLS->Fill(i2L0,lyfill); theetaHistLS->Fill(i2L1,lyfill);
                 thephiHistLS->Fill(i1L0,lyfill); thephiHistLS->Fill(i1L1,lyfill);
 			}//<<>>if( levent_good )
-			if( levent_good && not isd_cut ){ theHistLD->Fill(lxfill,lyfill); theHistCCLD->Fill(lxfill,lccyfill); }
-            if( gevent_good ){ theHistGB->Fill(gxfill,gyfill); theHistCCGB->Fill(gxfill,gccyfill); }
+			if( levent_good && not isd_cut ){ theHistLD->Fill(lxfill,lyfill); }
+            if( gevent_good ){ theHistGB->Fill(gxfill,gyfill); }
 
 			if(debug) std::cout << " - Fill hists done" << std::endl;
 
@@ -774,18 +624,13 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     scaleHist(theGHistLS,false,fXVarBins,fYVarBins);
     scaleHist(theHistLD,false,fXVarBins,fYVarBins);
     scaleHist(theHistGB,false,fXVarBins,fYVarBins);
-    scaleHist(theHistCCLS,false,fXVarBins,fYVarBins);
-    scaleHist(theHistCCLD,false,fXVarBins,fYVarBins);
-    scaleHist(theHistCCGB,false,fXVarBins,fYVarBins);
-    NormX(theetaHistLS);
-    NormX(thephiHistLS);
+    normTH2F(theetaHistLS);
+    normTH2F(thephiHistLS);
 
     fOutFile->cd();
     theHistLS->Write();
-    theHistCCLS->Write();
     theGHistLS->Write();
     theSHistLS->Write();
-	theSHistCCLS->Write();
     theOthHistLS->Write();
     theEffaHistLS->Write();
     thetdHistLS->Write();
@@ -795,15 +640,11 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     timeErrBinHist->Write();
     for( auto ibin = 0; ibin < nMyBins; ibin++ ){ caliErrBinHist[ibin]->Write(); }
 	theHistLD->Write();
-    theHistCCLD->Write();
     theHistGB->Write();
-    theHistCCGB->Write();
 
     delete theHistLS;
-    delete theHistCCLS;
     delete theGHistLS;
     delete theSHistLS;
-    delete theSHistCCLS;
     delete theOthHistLS;
     delete theEffaHistLS;
     delete thetdHistLS;
@@ -813,9 +654,7 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     delete timeErrBinHist;
     for( auto ibin = 0; ibin < nMyBins; ibin++ ){ delete caliErrBinHist[ibin]; }
     delete theHistLD;
-    delete theHistCCLD;
     delete theHistGB;
-    delete theHistCCGB;
 
     delete fOutFile;
 	delete getRandom;
@@ -828,18 +667,18 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     if(gevents) std::cout << "Processed " << gevents << " with %" << passlev << " from %" << passlin << " of Local"; 
 	if(gevents) std::cout << " and %" << passgev << " from %" << passgin << " of Global" << std::endl;
     std::cout << "Thats all Folks!" << std::endl;
-}
 
+}//<<>> void plot2dResolution( std::string indir, std::string infilelistname, 
 
 int main ( int argc, char *argv[] ){
 
-
-		//[1,1,1,1, 1, 1, 1, 1, 2, 2, 3, 4, 7, 8, 16]
-		// 1 2 3 4  5  6  7  8  9  10 11 12 13 14 15
     	//std::string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 950 2250 9000"); 
    		//std::string xbinstr("VARIABLE 0 75 100 125 150 175 200 225 250 275 325 375 450 550 725 925 1325 1700 2250"); 
     	//std::string xbinstr("VARIABLE 0 75 100 125 150 175 225 275 325 375 475 600 750 950 1275 1700 2250");
-        std::string xbinstr("VARIABLE 60 80 100 120 150 180 240 320 400 480 560 640 800 1600 3200");
+        //std::string xbinstr("VARIABLE 60 80 100 120 150 180 240 320 400 480 560 640 800 1600 3200");
+        //std::string xbinstr("VARIABLE 60 120 180 240 300 360 420 480 540 600 690 780 960 1260 1740 2220 3200");
+        //std::string xbinstr("VARIABLE 60 120 180 240 300 420 510 600 780 960 1260 1740 2220 3200");
+        std::string xbinstr("VARIABLE 25 50 75 100 125 150 175 200 225 250 300 400 600 1000 1800"); // ZEE
 		bool useAmp(true);
         //std::string xbinstr("VARIABLE 0 10 12 14 16 18 20 22 24 26 30 34 40 48 62 78 120");
         //bool useAmp(false);
@@ -847,57 +686,75 @@ int main ( int argc, char *argv[] ){
         //if( argc != 7 ) { std::cout << "Insufficent arguments." << std::endl; }
         //else {
 
-            //auto indir = "jaking/ecalTiming/";
-            //auto indir = "jaking/ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/";
-            auto indir = "jaking/ecalTiming/gammares_mc/";
+            //std::string indir = "jaking/ecalTiming/";
+            //std::string indir = "jaking/ecalTiming/gammares_ttcc_140_v11_diag_ebsf_ccgt/";
+            //std::string indir = "jaking/ecalTiming/gammares_mc/";
+            //std::string indir = "jaking/ecalTiming/gammares_llpana/MET/";
+            //std::string indir = "jaking/ecalTiming/gammares_llpana_pd/MET/";
+            //std::string indir = "jaking/ecalTiming/gammares_llpana_qcd/";
+			//std::string indir = "jaking/ecalTiming/gammares_llpana_v2/MET/";
+			//std::string indir = "jaking/ecalTiming/gammares_llpana_pd/";
+            //std::string indir = "jaking/ecalTiming/gammares_llpana/";
+            std::string indir = "jaking/ecalTiming/gammares_llpana_mc/";
 
-            //auto infilelistname = "tt_run3_2022E_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
-            //auto infilelistname = "tt_run3_2022F_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
-            //auto infilelistname = "tt_run3_2022G_Prompt_359022_362760_126_gammares_v10_reso_plotfilelist.txt";
-    		//auto infilelistname = "ku_23D_eg0_diag_126_gammares_v10_reso_plotfilelist.txt";
-            //auto infilelistname = "ku_23B_378794_379366_eg01_140_gammares_v10_reso_plotfilelist.txt";
+            //std::string infilelistname = "list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_reso_plotfilelist.txt";
+            //std::string infilelistname = "list_files/egammares_MetPD_nocali_AOD_Run2017E-17Nov2017v2_reso_plotfilelist.txt";
+            //std::string infilelistname = "list_files/kuntuple_QCDHT_Met75_R17_v20_infileslist.txt";
+            //std::string infilelistname = "list_files/egammares_MetPD_MINIAOD_Run2017E_reso_plotfilelist.txt";
+            //std::string infilelistname = "list_files/egammares_MetPD_MINIAOD_Run2017E_reso_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_reso_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_reso_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_MetPD_MINIAOD_Run2017E_304475_none_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_MetPD_MINIAOD_Run2017E_304475_Cali_plotfilelist.txt";
+			//std::string infilelistname = "master_list_files/egammares_MetPD_MINIAOD_Run2017E_304475_CaliFltrd_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_MetPD_MINIAOD_Run2017E_v2_304475_Cali_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_DEGPD_AOD_Run2017F_v2_304475_noCali_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_DEGPD_AOD_Run2017F_v2_304475_Cali_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_DEGPD_AOD_Run2017EF_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_Cali_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/kuntuple_QCDHT_Met75_R17_v20_infileslist.txt";
+            //std::string infilelistname = "master_list_files/kuntuple_QCDHT100200_Met75_R17_v20_plotfileslist.txt";
+            std::string infilelistname = "master_list_files/egammares_DYJetsToLL_Met75_R17_v20_plotfilelist.txt";
 
-            //auto infilelistname = "list_files/ku_24C_eg01_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_24C_eg01_gold_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_24C_eg01_gold_iov1_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_24C_eg01_gold_iov2_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_24C_eg01_gold_iov3_140_gammares_v12_plotfilelist.txt";
-			//auto infilelistname = "list_files/ku_24D_eg01_140_gammares_v12_plotfilelist.txt";
-			//auto infilelistname = "list_files/ku_24D_eg01_cali_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_24CD_eg01_mixed_cali_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_24CE_test_140_gammares_v12_plotfilelist.txt";
-            //auto infilelistname = "list_files/ku_23D_eg1_sfeb_ccgt_140_gammares_v12_plotfilelist.txt";
-            auto infilelistname = "list_files/ku_W24_dy_eb_st_14011_gammares_v12_plotfilelist.txt";
+            //std::string outfilename = "egres_MetPD_AOD_Run2017E_Cali_Fltr_304475_14011_v12_resplots";
+            //std::string outfilename = "egres_MetPD_AOD_Run2017E_noCali_Full_14011_v12_resplots";
+            //std::string outfilename = "egres_QCDMC_AOD_R17_14011_v10_resplots";
+            //std::string outfilename = "egres_MetPD_MINIAOD_Run2017E_14011_v12_resplots";
+            //std::string outfilename = "egres_MetPD_MINIAOD_Run2017E_Cali_noFltr_304475_14011_v12_resplots";
+            //std::string outfilename = "egres_MetPD_MINIAOD_Run2017E_Cali_Fltr_304475_14011_v12_resplots";
+            //std::string outfilename = "egres_MetPD_AOD_Run2017E_v2_Cali_304475_14011_v12_resplots";
+            //std::string outfilename = "egres_DEGPD_AOD_Run2017F_v2_Cali_FilteredFit_Full_14011_v12_resplots";
+			//std::string outfilename = "egres_MetPD_AOD_Run2017E_Cali_FltrFit_304475_14011_v12_resplots";
+            //std::string outfilename = "egres_EgmPD_MINIAOD_Run2018D_324305_327239_Filter_14011_v12_resplots";
+            //std::string outfilename = "egres_QCD_AODSIM_Met75_R17_FilterFit_14011_v12_resplots";
+            //std::string outfilename = "egres_QCDHT100200_AODSIM_Met75_R17_FilterFit_14011_v12_resplots";
+            std::string outfilename = "egres_DY1JetsToLL_AODSIM_R17_FilterFit_Smear_v3_ZBins_14011_v12_resplots";
+            //std::string outfilename = "egres_DEGPD_AOD_Run2017F_v2_Cali_FilteredFit_ZBins_Full_14011_v12_resplots";
+            //std::string outfilename = "egres_DEGPD_AOD_Run2017EF_v2_Cali_FilteredFit_ZBins_Full_14011_v12_resplots";
 
-            //std::string outfilename = "egres_Run2018E_359022_362760_126_v10_resplots";
-            //std::string outfilename = "egres_Run2018F_360332_362180_126_v10_resplots";
-            //std::string outfilename = "egres_Run2018G_362350_362700_126_v10_resplots";
-            //std::string outfilename = "egres_Run2023D_dmv_eg0_diag_126_v10_resplots";
-            //std::string outfilename = "egres_Run2024B_eg01_378794_379323_140_v10_resplots";
-            //std::string outfilename = "egres_Run2024C_nojson_eg01_Full_140_v10_resplots";
-            //std::string outfilename = "egres_Run2024C_goldjson_eg01_Full_cali_140_v10_resplots";
-            //std::string outfilename = "egres_Run2024C_goldjson_eg01_379367_379543_140_v10_resplots";
-            //std::string outfilename = "egres_Run2024C_goldjson_eg01_380066_380238_140_v10_resplots";
-            //std::string outfilename = "egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots";
-            //std::string outfilename = "egres_Run2024CD_mixed_eg01_Full_cali_140_v10_resplots";
-            //std::string outfilename = "egres_Run2023D_SF_140_v10_resplots";
-            std::string outfilename = "egres_Winter24_DY_14011_v10_resplots";
-
-            auto tvarname = ""; //argv[4];
-			auto calimapname = "infile"; //argv[5];
-            auto isd_type = "yes"; //argv[6];
+            std::string tvarname = ""; //argv[4];
+			std::string calimapname = "infile"; //argv[5];
+            std::string isd_type = "yes"; //argv[6];
+			//float noise = 0.0;// no smearing term
+			//float constant = 0.0;// no smearing term
+            double noise = 14.0;// smearing term
+            double constant = 0.1083;// smearing term			
             //auto brun = std::stoi(argv[7]);
             //auto erun = std::stoi(argv[8]);
             //auto leta = std::stoi(argv[9]);
             //auto heta = std::stoi(argv[10]);
-      		plot2dResolution( indir, infilelistname, outfilename, tvarname, calimapname, isd_type, useAmp, xbinstr );
+      		plot2dResolution( indir, infilelistname, outfilename, tvarname, calimapname, isd_type, useAmp, xbinstr, noise, constant );
+            float rnoise = 0.0;// no smearing term
+            float rconstant = 0.0;// no smearing term
+            //float rnoise = 14.0;// smearing term
+            //float rconstant = 0.1083;// smearing term  
 			std::string fitInFile = outfilename + ".root";
-			runTimeFitter( fitInFile, "", "", "", "", outfilename, "SRO_Data_Hist", xbinstr );
-            runTimeFitter( fitInFile, "", "", "", "", outfilename, "DRO_Data_Hist", xbinstr );
-            runTimeFitter( fitInFile, "", "", "", "", outfilename, "ZEE_Data_Hist", xbinstr );
-            runTimeFitter( fitInFile, "", "", "", "", outfilename, "SRO_CC_Data_Hist", xbinstr );
-            runTimeFitter( fitInFile, "", "", "", "", outfilename, "DRO_CC_Data_Hist", xbinstr );
-            runTimeFitter( fitInFile, "", "", "", "", outfilename, "ZEE_CC_Data_Hist", xbinstr );
-        //}
+			runTimeFitter( fitInFile, outfilename, "SRO_Data_Hist", xbinstr, rnoise, rconstant );
+            runTimeFitter( fitInFile, outfilename, "DRO_Data_Hist", xbinstr, rnoise, rconstant );
+            runTimeFitter( fitInFile, outfilename, "ZEE_Data_Hist", xbinstr, rnoise, rconstant );
+//void runTimeFitter(const std::string fInFileName, const std::string fOutFileText, const std::string f2DHistName, const std::string & inplotname, std::string xbinstr, float noise, float constant ){
+
+        //}//<<>>//if( argc != 7 )
         return 1;
-}
+
+}//<<>>int main ( int argc, char *argv[] )
