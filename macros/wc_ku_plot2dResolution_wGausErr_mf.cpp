@@ -34,6 +34,7 @@
 //#include "wc_ku_timefitter_wErr_func_new.cpp"
 #include "KUCMSRootHelperFunctions.hh"
 #include "KUCMSHelperFunctions.hh"
+#include "ecal_config/KUCMSEcalDetIDFunctions.hh"
 
 using namespace std;
 
