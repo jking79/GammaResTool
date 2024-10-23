@@ -87,7 +87,7 @@ def subcrab( runs, events, reqmem ):
 	#config.Data.secondaryInputDataset = secInputPaths
         config.Data.partialDataset = True
         #config.Data.useParent      = False
-        config.Data.lumiMask     = inputDir+inputJSON
+        #config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
@@ -216,7 +216,9 @@ def subcrab( runs, events, reqmem ):
             #[/DoubleEG/Run2017F-17Nov2017-v1/AOD,''],
 
             #['/DoubleEG/Run2017F-09Aug2019_UL2017-v1/AOD',''],
-            ['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/AOD',''],
+            #['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/AOD',''],
+
+            ['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
 
 	    ]
  
@@ -231,8 +233,8 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_ratio_126_v2'
             #trial          = 'gammares_cc_140_v2'
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
-            trial          = 'gammares_llpana_pd'
-            #trial          = 'gammares_llpana_mc'
+            #trial          = 'gammares_llpana_pd'
+            trial          = 'gammares_llpana_mc'
             #trial          = 'gammares_llpana_qcd'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
@@ -254,9 +256,9 @@ def subcrab( runs, events, reqmem ):
 #>>>>>>>>>>>>>>>>>>>     #GMSB
             #config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True'] # GMSB
 #>>>>>>>>>>>>>>>>>>>     #DoubleEG/Run2017*-17Nov2017-v1/AOD good for #globalTag=94X_dataRun2_ReReco_EOY17_v2
-            config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v2','outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v2','outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>>>>>>>     #/DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM
-            #config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True']
+            config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True']
 
 #------------------------------------------------------------------------------------------------------------------
             config.Data.inputDataset     = inDO[0]

@@ -736,10 +736,10 @@ int main ( int argc, char *argv[] ){
             std::string tvarname = ""; //argv[4];
 			std::string calimapname = "infile"; //argv[5];
             std::string isd_type = "yes"; //argv[6];
-			//float noise = 0.0;// no smearing term
-			//float constant = 0.0;// no smearing term
-            double noise = 14.0;// smearing term
-            double constant = 0.1083;// smearing term			
+			double noise = 0.0;// no smearing term
+			double constant = 0.0;// no smearing term
+            //double noise = 14.0;// smearing term
+            //double constant = 0.1083;// smearing term			
             //auto brun = std::stoi(argv[7]);
             //auto erun = std::stoi(argv[8]);
             //auto leta = std::stoi(argv[9]);

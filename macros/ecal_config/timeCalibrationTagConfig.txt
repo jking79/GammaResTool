@@ -1,0 +1,2 @@
+none none none 0.0 0.0 0.0
+gjets17 KURes_14011_v12_DY1JetsToLL_AODSIM_Met75_R17_Cali_FilterFit.root KURes_14011_v12_DY1JetsToLL_AODSIM_Met75_R17_Cali_FilterFit.root 14.0 0.0 0.1083	
