@@ -9,17 +9,18 @@ options = VarParsing('python')
 #options.register('globalTag','124X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','112X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','124X_dataRun3_PromptAnalysis_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-#options.register('globalTag','140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','140X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','133X_mcRun3_2024_realistic_v10',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','94X_mc2017_realistic_v11',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 options.register('globalTag','140X_dataRun3_Prompt_v4',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
-#options.register('globalTag','140X_dataRun3_Candidate_2024_06_26_20_41_23',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','kutt_140_gammares_tevjets.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_jetmet_tevjets_diag_140_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
-options.register('doTwoTier',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to do twotier processing');
+options.register('doTwoTier',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to do twotier processing');
 options.register('doDiag',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to store diagnostic info');
 
 ## parsing command line arguments
@@ -48,9 +49,6 @@ process.load("RecoLuminosity.LumiProducer.bunchSpacingProducer_cfi")#
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 #process.load('RecoLocalCalo.EcalRecProducers.ecalCPUUncalibRecHitProducer_cfi')#
 #process.load("RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHit_cfi")
-process.load('GammaResTool.GammaResTool.jwk_ku_ecalMultiFitUncalRecHit_cff')
-process.load('GammaResTool.GammaResTool.jwk_ku_cc_ecalRecHit_cff')
-process.load('GammaResTool.GammaResTool.jwk_ku_ecalRecHit_cff')
 process.load('GammaResTool.GammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
 #process.load('RecoVertex.BeamSpotProducer.BeamSpot_cff' )
 
@@ -62,47 +60,48 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')#
 ## Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")#
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 ## Define the input source
 #eventList = open(options.rlelist,'r')
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/MINIAOD/PromptReco-v1/000/369/844/00000/1099c5f3-61ca-4f86-bf1b-8215df8b2e7d.root'
+        #'root://xrootd-cms.infn.it//eos/cms/tier0//store/data/Run2024I/JetMET1/RAW-RECO/TeVJet-PromptReco-v1/000/386/478/00000/a211a3fd-05fc-4369-aa47-a1a9e005d99e.root',
+        'root://cms-xrd-global.cern.ch//store/data/Run2024I/JetMET1/RAW-RECO/TeVJet-PromptReco-v1/000/386/478/00000/a211a3fd-05fc-4369-aa47-a1a9e005d99e.root',
+        #'file:jetmet_tevjets_423812da-ef1e-427f-abbb-a86f1db7774e.root',
+        #'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17DRPremix/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/AODSIM/PU2017_94X_mc2017_realistic_v11-v1/110000/1E29BF8B-5F60-E811-AD1D-0663CE00010C.root',
+        #'root://cms-xrd-global.cern.ch//store/mc/Run3Winter24MiniAOD/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v10-v2/2830000/000a0b08-4970-4a08-bbd1-69c4ae918e66.root',
+        #'file:967aebe0-e567-4139-9f91-d9e67f6b2ace.root'
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/43f9417c-f2bc-4e2c-a114-ac6d5c5b7052.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/444fe16d-0217-4915-92ca-101fdad77998.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/67beed64-8d00-4f97-93b2-72292c720443.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/6f38df6b-6ddb-400d-85ba-e8da46fb9500.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/967aebe0-e567-4139-9f91-d9e67f6b2ace.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/9aaff3a9-b4d8-4025-9dfa-a64751429a80.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/9ba1c87f-217b-46b0-b44b-7a6bc0a2ba17.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/b15ef1a9-d310-4a98-9da3-edbd85b93b01.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/b8a7f31d-8c9c-4254-99aa-38fd0d6d638f.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/d868dddd-3fff-456a-bc1f-09fba3339620.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/e0bd624f-b25d-48f0-890c-1340ea1eb666.root',
+        #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/f7b05c22-6939-429c-9a83-51cf69cdedc1.root',
 
 	),
-    secondaryFileNames = cms.untracked.vstring(
+#    secondaryFileNames = cms.untracked.vstring(
 
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/26d660ce-90ee-4dd5-8daa-1ca6afc40e13.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/1d5a7dc7-49b1-4800-bdb7-cab9cdf39687.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/1ca84eb6-c58d-47d7-abc8-6a7cf6b36db2.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/1d8f9009-0764-42a5-b76e-7151e158670b.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/328eeea0-73a7-4833-8c75-e9de909a5a25.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/43e60438-0172-4bcb-a4db-2aba048fea16.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/4a077359-a254-4540-83af-56100ec4e947.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/4aa408ef-5eec-46a2-b25f-ecb366b7bdc3.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/53102e06-1229-4241-928d-bd93ec57dc5e.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/9290b2f8-f608-4d8e-b499-810b70bb27ce.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/a3211580-8c85-4818-bb74-6697255a5458.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/b1d8463a-e508-470e-a3bb-dbad2eeabaa4.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/ec871711-0fca-4a2d-b2f6-24c3819d8a83.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/ee992f90-9537-4e59-bc99-a207cf5d3d47.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/f062b321-c0a3-4554-b9fb-25de47e3722a.root',
-        'root://xrootd-cms.infn.it///store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/ff999bba-3944-4e11-8309-19ae3714f6b6.root',
+#        '/store/data/Run2022F/EGamma/RAW/v1/000/362/154/00000/116043a5-e71e-4df8-8014-34fdb3391301.root'
 
-	),
+#	),
     #eventsToProcess = cms.untracked.VEventRange(eventList)
 )
-#Successfully opened file root://cmsxrootd.fnal.gov//store/data/Run2023D/EGamma0/RAW/v1/000/369/844/00000/4aa408ef-5eec-46a2-b25f-ecb366b7bdc3.root
+
 
 ## How many events to process
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
-
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
@@ -120,44 +119,52 @@ process.TFileService = cms.Service("TFileService", fileName = cms.string(options
 triggerFlagsProcess = "RECO"
 
 ## generate track collection at miniAOD
-from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
-process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
+#from PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi import unpackedTracksAndVertices
+#process.unpackedTracksAndVertices = unpackedTracksAndVertices.clone()
 
 # Make the tree 
-process.tree = cms.EDAnalyzer("GammaResTool",
+process.tree = cms.EDAnalyzer("GammaResToolAod",
    ## additional collections
-   triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
-   triggerObjects = cms.InputTag("slimmedPatTrigger"),
+   #triggerResults = cms.InputTag("TriggerResults", "", "HLT"),
+   #triggerObjects = cms.InputTag("slimmedPatTrigger"),
    ## met filters
    #inputFlags       = cms.string(options.inputFlags),
-   triggerFlags     = cms.InputTag("TriggerResults", "", triggerFlagsProcess),
-   ecalBadCalibFlag = cms.InputTag("ecalBadCalibReducedMINIAODFilter"),			      
+   #triggerFlags     = cms.InputTag("TriggerResults", "", triggerFlagsProcess),
+   #ecalBadCalibFlag = cms.InputTag("ecalBadCalibReducedMINIAODFilter"),			      
    ## tracks
-   tracks = cms.InputTag("unpackedTracksAndVertices"),
+   #tracks = cms.InputTag("unpackedTracksAndVertices"),
    ## vertices
-   vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+   #vertices = cms.InputTag("offlineSlimmedPrimaryVertices"),
+   vertices = cms.InputTag("offlinePrimaryVertices"),#AOD
    ## rho
-   rho = cms.InputTag("fixedGridRhoFastjetAll"), #fixedGridRhoAll
+   #rho = cms.InputTag("fixedGridRhoFastjetAll"), #fixedGridRhoAll
    ## METs
    #mets = cms.InputTag("slimmedMETsModifiedMET"),
-   mets = cms.InputTag("slimmedMETs"),
+   #mets = cms.InputTag("slimmedMETs"),
    ## jets
    #jets = cms.InputTag("updatedPatJetsUpdatedJEC"),
-   jets = cms.InputTag("slimmedJets"),
+   #jets = cms.InputTag("slimmedJets"),
    ## electrons
-   electrons = cms.InputTag("slimmedElectrons"),
+   #electrons = cms.InputTag("slimmedElectrons"),
+   electrons = cms.InputTag("gedGsfElectrons"),#AOD
    ## muons
-   muons = cms.InputTag("slimmedMuons"),
+   #muons = cms.InputTag("slimmedMuons"),
    ## photons
-   gedPhotons = cms.InputTag("slimmedPhotons"),
-   ootPhotons = cms.InputTag("slimmedOOTPhotons"),
+   #gedPhotons = cms.InputTag("slimmedPhotons"),
+   #ootPhotons = cms.InputTag("slimmedOOTPhotons"),
+   gedPhotons = cms.InputTag("gedPhotons"),#AOD
+   ootPhotons = cms.InputTag("ootPhotons"),#AOD
    ## ecal recHits
-   recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
-   recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   #recHitsEB = cms.InputTag("reducedEgamma", "reducedEBRecHits"),
+   #recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
+   recHitsEB = cms.InputTag("reducedEcalRecHitsEB"),#AOD
+   recHitsEE = cms.InputTag("reducedEcalRecHitsEE"),#AOD
 
    ## do two tier reconstruction of second rechit collection
-   doTwoTier = cms.bool(options.doTwoTier), 
-   doDiag = cms.bool(options.doDiag),
+   #doTwoTier = cms.bool(options.doTwoTier), 
+   #doDiag = cms.bool(options.doDiag),
+   doTwoTier = cms.bool(True),
+   doDiag = cms.bool(True),
 
    ## ecal kuRecHits
    #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
@@ -178,13 +185,10 @@ process.tree = cms.EDAnalyzer("GammaResTool",
 
    #kuCCStcRecHitsEB = cms.InputTag("none", "none"),
    #kuCCStcRecHitsEE = cms.InputTag("none", "none"),
-   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
-   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
-   kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
-   kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
-   #kuCCStcRecHitsEB = cms.InputTag("kuCCNativeEcalRecHit", "kuCCRecHitsEB"),
-   #kuCCStcRecHitsEE = cms.InputTag("kuCCNativeEcalRecHit", "kuCCRecHitsEE"),
-
+   #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
+   #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
+   kuCCStcRecHitsEB = cms.InputTag("kuCCNativeEcalRecHit", "kuCCRecHitsEB"),
+   kuCCStcRecHitsEE = cms.InputTag("kuCCNativeEcalRecHit", "kuCCRecHitsEE"),
 
    #kuRtStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
    #kuRtStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
@@ -201,14 +205,13 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    #uncalibratedRecHitsEB = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
    #uncalibratedRecHitsEE = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
 
-   ku_uncalibratedRecHitsEB = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEB"),
-   ku_uncalibratedRecHitsEE = cms.InputTag("kuCCEcalMultiFitUncalibRecHit","kuCCEcalUncalibRecHitsEE"),
-   #ku_uncalibratedRecHitsEB = cms.InputTag("kuCCNativeEcalMultiFitUncalibRecHit","EcalUncalibRecHitsEB"),
-   #ku_uncalibratedRecHitsEE = cms.InputTag("kuCCNativeEcalMultiFitUncalibRecHit","EcalUncalibRecHitsEE"),
+   ku_uncalibratedRecHitsEB = cms.InputTag("none","none"),
+   ku_uncalibratedRecHitsEE = cms.InputTag("none","none"),
 
    ## digis
    #EBdigiCollection = cms.InputTag("ecalDigis","ebDigis"),
    #EEdigiCollection = cms.InputTag("ecalDigis","eeDigis"),
+
 
 )
 
@@ -216,7 +219,7 @@ process.tree = cms.EDAnalyzer("GammaResTool",
 # Set up the path
 #process.treePath = cms.Path(
 process.tree_step = cms.EndPath(
-	process.unpackedTracksAndVertices +
+	#process.unpackedTracksAndVertices +
 	process.tree
 )
 
@@ -232,8 +235,8 @@ process.jwk_calolocalreco = cms.Sequence(
                 #process.kucc_only_ecalLocalRecoSequence
                	#process.ku_reduced_multi_ecalLocalRecoSequence
                 #process.ku_spike_nomulti_ecalLocalRecoSequence # vary on reduced
-                process.ku_cc_gt_ecalLocalRecoSequence
-                #process.ku_cc_native_ecalLocalRecoSequence # for use only with gt that have cc time calibrations
+                #process.ku_cc_gt_ecalLocalRecoSequence
+                process.ku_cc_native_ecalLocalRecoSequence # for use only with gt that have cc time calibrations
                	##process.ku_ecalLocalRecoSequence
                	##process.ecalLocalRecoSequence
 		##process.hcalLocalRecoSequence
@@ -289,7 +292,7 @@ process.schedule = cms.Schedule(
       	        #process.L1Reco_step,
 		process.reconstruction_step,
 		#process.content_step,
-		#process.endjob_step,
+		process.endjob_step,
 		process.tree_step
 )
 

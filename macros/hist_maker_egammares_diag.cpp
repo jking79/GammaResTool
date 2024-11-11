@@ -40,6 +40,8 @@
 
 #include "list_files/egammares_hist_base_v4.hh"
 
+//#include "KUCMSRootHelperFunctions.hh"
+
 #define n1dHists 512
 #define n2dHists 512 
 #define n3dHists 16
@@ -281,6 +283,30 @@ void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
 
 }//<<>>void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
 
+void ratioTH2D(TH2D* numi, TH2D* denom, TH2D* result, float thres = 0.f ){
+
+    std::cout << "Threshold Division - " << " hist: " << numi->GetName() << std::endl;
+    const auto nXbins = numi->GetNbinsX();
+    const auto nYbins = numi->GetNbinsY();
+    for (auto ibinX = 1; ibinX <= nXbins; ibinX++){
+        for (auto ibinY = 1; ibinY <= nYbins; ibinY++){
+            // get content/error
+            auto ncontent = numi->GetBinContent(ibinX,ibinY);
+            auto nerror   = numi->GetBinError  (ibinX,ibinY);
+            auto dcontent = denom->GetBinContent(ibinX,ibinY);
+            auto derror   = denom->GetBinError  (ibinX,ibinY);
+            // set new contents
+            auto content(0.0);
+            auto error(0.0);
+            if( dcontent > thres ){ content = ncontent/dcontent; error = nerror/derror; }
+            result->SetBinContent(ibinX,ibinY,content);
+            result->SetBinError  (ibinX,ibinY,error);
+        }//<<>>for (auto ibinY = 1; ibinY <= nXbins; ibinY++){
+    }//<<>>for (auto ibinX = 1; ibinX <+ nYbins; ibinX++){
+
+}//<<>>void thresDivTH2D(TH2D* numi, TH2D* denom, float thres){
+
+
 void fillMeanHist(TH1D* numi, TH1D* denom, TH1D* result ){
 
     const auto nbins = numi->GetNbinsX();
@@ -439,6 +465,7 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
         std::string califilename;
         std::string srunstr;
         std::string erunstr;
+		if( infilename[0] == '#' ) continue;
         ss >> infilename >> califilename >> srunstr >> erunstr;
         std::cout << "open input file : " << infilename << " with califile : " << califilename << std::endl;
         std::cout << "For Run " << srunstr << " to Run " << erunstr << std::endl;
@@ -452,6 +479,7 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
         std::cout << " - With : " << infilename << " >> " << fInTree << std::endl;
         std::string rootfilestr;
         while(std::getline(infile,rootfilestr)){
+			if( rootfilestr[0] == '#' ) continue;
             auto tfilename = eosdir + indir + rootfilestr;
             if(debug) std::cout << "--  adding file: " << tfilename << std::endl;
             fInTree->Add(tfilename.c_str());
@@ -560,8 +588,11 @@ void makehists::eventLoop( Long64_t entry ){
 			if( doEBOnly && rhIdInfo.ecal != EB ) continue;
             if( DEBUG ) std::cout << " - Rechit Cali map info" << std::endl;
 			// icmap lookup only works with EB rhs !!!!!!
-			float rhRtCali = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
-			float caliRtTime = (*rhRtTime)[it]-rhRtCali;
+			float rhRtCali = ( icmap[0] != NULL && rhIdInfo.ecal == EB ) ? icmap[0]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
+			//float caliRtTime = (*rhRtTime)[it]-rhRtCali;
+            float caliRtTime = (*rhCCTime)[it]-rhRtCali; if( caliRtTime < -25.0 ) caliRtTime = -26.0;
+            //bool isOOT = (*rhRtisOOT)[it];
+            bool isOOT = (*rhCCisOOT)[it];
 
 			if( DEBUG ) std::cout << " - Rechit loop  1" << std::endl;
         	hist1d[67]->Fill((*rhRtTime)[it]);
@@ -571,7 +602,7 @@ void makehists::eventLoop( Long64_t entry ){
         	hist2d[25]->Fill((*rhEnergy)[it],caliRtTime);
 			if( DEBUG ) std::cout << " - Rechit loop  1b" << std::endl;
 			if( (*rhEnergy)[it] > 4.0 ){// plot greater then 4 GeV
-				(*rhRtisOOT)[it] ? hist1d[127]->Fill(caliRtTime) : hist1d[129]->Fill(caliRtTime);
+				isOOT ? hist1d[127]->Fill(caliRtTime) : hist1d[129]->Fill(caliRtTime);
 			}//<<>>if( (*rhEnergy)[it] > 4.0 )
 
             if( DEBUG ) std::cout << " - Rechit loop  2" << std::endl;
@@ -588,9 +619,8 @@ void makehists::eventLoop( Long64_t entry ){
             hist1d[91]->Fill((*rhpedrms12)[it]);
 
             bool underMinEnergy = (*rhEnergy)[it] < 5.0;
-            bool rhTimeZero = (*rhRtTime)[it] == 0.0;
-            bool timeOutOfRange = std::abs((*rhRtTime)[it]) > 25.0;
-            bool isOOT = (*rhRtisOOT)[it];
+            //bool rhTimeZero = (*rhRtTime)[it] == 0.0;
+            bool rhTimeZero = (*rhCCTime)[it] == 0.0;
             bool isWeird = (*rhisWeird)[it];
             bool isDiWeird = (*rhisDiWeird)[it];
             bool hasHighSwissCross = (*rhSwCross)[it] > 0.96;
@@ -600,39 +630,44 @@ void makehists::eventLoop( Long64_t entry ){
 				hist2d[127]->Fill((*rhEnergy)[it],(*rhRtTime)[it]);
 			}//<<>>if( not underMinEnergy )
 
+			hist2d[129]->Fill((*rhRtTime)[it],(*rhCCTime)[it]);
+
 			if( DEBUG ) std::cout << " - Rechit loop  3" << std::endl;
 
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){ 
 				hist2d[119]->Fill((*rhEnergy)[it],caliRtTime);
-				if( (*rhRtisOOT)[it] == false ) hist2d[118]->Fill((*rhEnergy)[it],caliRtTime);
+				if( isOOT == true ) hist2d[118]->Fill((*rhEnergy)[it],caliRtTime);
 			}//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == false ){
                 hist2d[121]->Fill((*rhEnergy)[it],caliRtTime);
-                if( (*rhRtisOOT)[it] == false ) hist2d[120]->Fill((*rhEnergy)[it],caliRtTime);
+                if( isOOT == true ) hist2d[120]->Fill((*rhEnergy)[it],caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == false && (*rhisGS1)[it] ==true ){
                 hist2d[123]->Fill((*rhEnergy)[it],caliRtTime);
-                if( (*rhRtisOOT)[it] == false ) hist2d[122]->Fill((*rhEnergy)[it],caliRtTime);
+                if( isOOT == true ) hist2d[122]->Fill((*rhEnergy)[it],caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == false && (*rhisGS1)[it] ==false ){
                 hist2d[125]->Fill((*rhEnergy)[it],caliRtTime);
-                if( (*rhRtisOOT)[it] == false ) hist2d[124]->Fill((*rhEnergy)[it],caliRtTime);
+                if( isOOT == true ) hist2d[124]->Fill((*rhEnergy)[it],caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
 
-			if( (*rhEnergy)[it] > 10.0 ){// plot greater then 10 GeV 
+            //if( (*rhEnergy)[it] > 10.0 ){// plot greater then 10 GeV 
+			if( (*rhEnergy)[it] > 0.5 && std::abs(DetIDMap[resRhID->at(0)].i2) != 85 ){// plot greater then 10 GeV 
 				hist2d[108]->Fill((*rhSwCross)[it],caliRtTime); 
 				hist2d[117]->Fill((*rhSwCross)[it],(*rhEnergy)[it]);
 				auto toposel = not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] );
 				if( toposel ){ hist2d[110]->Fill((*rhSwCross)[it],caliRtTime); hist2d[116]->Fill((*rhSwCross)[it],(*rhEnergy)[it]); }
-				auto rttimesel = not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhRtisOOT)[it] );
+				auto rttimesel = not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] || isOOT );
             	if( rttimesel ){ hist2d[112]->Fill((*rhSwCross)[it],caliRtTime); hist2d[115]->Fill((*rhSwCross)[it],(*rhEnergy)[it]); }
             }//<<>>if( (*rhEnergy)[it] > 10.0 )
 
 			auto isSpike = (*rhSwCross)[it] > 0.95;
 			auto isSpikeRtSel = (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhRtisOOT)[it];						
+            auto isSpikeCCSel = (*rhisWeird)[it] || (*rhisDiWeird)[it] || (*rhCCisOOT)[it];
 			if( isSpike && (*rhEnergy)[it] > 10.0 ){
 				hist1d[131]->Fill((*rhEnergy)[it]);
-				if( isSpikeRtSel ) hist1d[132]->Fill((*rhEnergy)[it]);
+				//if( isSpikeRtSel ) hist1d[132]->Fill((*rhEnergy)[it]);
+                if( isSpikeCCSel ) hist1d[132]->Fill((*rhEnergy)[it]);
 			}//<<>>if( isSpike )
 			if( DEBUG ) std::cout << " - Rechit loop  4" << std::endl;
 
@@ -951,9 +986,10 @@ void makehists::getBranches( Long64_t entry ){
     b_rhID->GetEntry(entry);   //!
     if( DEBUG ) std::cout << " -- getting Banches rh 1" << std::endl;
     b_rhRtTime->GetEntry(entry);   //!
-    //b_rhCCTime->GetEntry(entry);   //!
+    b_rhCCTime->GetEntry(entry);   //!
     if( DEBUG ) std::cout << " -- getting Banches rh koot stuff" << std::endl;
     b_rhRtisOOT->GetEntry(entry);   //!
+    b_rhCCisOOT->GetEntry(entry);   //!
     b_rhisWeird->GetEntry(entry);   //!
     b_rhisDiWeird->GetEntry(entry);   //!
     b_rhSwCross->GetEntry(entry);   //!
@@ -999,6 +1035,7 @@ void makehists::endJobs(){
     if( DEBUG ) std::cout << " Starting End jobs " << std::endl;
 
 	fillRatioHist(hist1d[132],hist1d[131],hist1d[133]);
+	ratioTH2D(hist2d[110],hist2d[108],hist2d[109]);
 
 }//<<>>void makehists::endJobs()
 
@@ -1075,18 +1112,18 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[27] = new TH1D("phoR9_Glo0",addstr(fHTitle,"phoR9_Glo0").c_str(),100,0,1);
     hist1d[38] = new TH1D("phoR9_Glo1",addstr(fHTitle,"phoR9_Glo1").c_str(),100,0,1);
 
-	hist1d[39] = new TH1D("seedRtTime_sruLoc0",addstr(fHTitle,"seedRtTime SRU Loc0").c_str(),500,-25,25);
-    hist1d[40] = new TH1D("seedRtTime_sruLoc1",addstr(fHTitle,"seedRtTime SRU Loc1").c_str(),500,-25,25);
-    hist1d[43] = new TH1D("seedRtTime_Glo0",addstr(fHTitle,"seedRtTime_Glo0").c_str(),500,-25,25);
-    hist1d[44] = new TH1D("seedRtTime_Glo1",addstr(fHTitle,"seedRtTime_Glo1").c_str(),500,-25,25);
+	hist1d[39] = new TH1D("seedrhTime_sruLoc0",addstr(fHTitle,"seedrhTime SRU Loc0").c_str(),500,-25,25);
+    hist1d[40] = new TH1D("seedrhTime_sruLoc1",addstr(fHTitle,"seedrhTime SRU Loc1").c_str(),500,-25,25);
+    hist1d[43] = new TH1D("seedrhTime_Glo0",addstr(fHTitle,"seedrhTime_Glo0").c_str(),500,-25,25);
+    hist1d[44] = new TH1D("seedrhTime_Glo1",addstr(fHTitle,"seedrhTime_Glo1").c_str(),500,-25,25);
 
-    hist1d[45] = new TH1D("seedRtTimeDiff_sruLoc",addstr(fHTitle,"seedRtTimeDiff SRU Loc").c_str(),500,-25,25);
-    hist1d[46] = new TH1D("seedRtTimeDiff_Glo",addstr(fHTitle,"seedRtTimeDiff_Glo").c_str(),500,-25,25);
+    hist1d[45] = new TH1D("seedrhTimeDiff_sruLoc",addstr(fHTitle,"seedrhTimeDiff SRU Loc").c_str(),500,-25,25);
+    hist1d[46] = new TH1D("seedrhTimeDiff_Glo",addstr(fHTitle,"seedrhTimeDiff_Glo").c_str(),500,-25,25);
 
-    hist1d[47] = new TH1D("seedRtCali_sruLoc0",addstr(fHTitle,"seedRtCali SRU Loc0").c_str(),1000,-5,5);
-    hist1d[48] = new TH1D("seedRtCali_sruLoc1",addstr(fHTitle,"seedRtCali SRU Loc1").c_str(),1000,-5,5);
-    hist1d[51] = new TH1D("seedRtCali_Glo0",addstr(fHTitle,"seedRtCali_Glo0").c_str(),1000,-5,5);
-    hist1d[52] = new TH1D("seedRtCali_Glo1",addstr(fHTitle,"seedRtCali_Glo1").c_str(),1000,-5,5);
+    hist1d[47] = new TH1D("seedrhCali_sruLoc0",addstr(fHTitle,"seedrhCali SRU Loc0").c_str(),1000,-5,5);
+    hist1d[48] = new TH1D("seedrhCali_sruLoc1",addstr(fHTitle,"seedrhCali SRU Loc1").c_str(),1000,-5,5);
+    hist1d[51] = new TH1D("seedrhCali_Glo0",addstr(fHTitle,"seedrhCali_Glo0").c_str(),1000,-5,5);
+    hist1d[52] = new TH1D("seedrhCali_Glo1",addstr(fHTitle,"seedrhCali_Glo1").c_str(),1000,-5,5);
 
     hist1d[55] = new TH1D("seedTOF_sruLoc0",addstr(fHTitle,"seedTOF SRU Loc0").c_str(),250,-1.25,1.25);
     hist1d[56] = new TH1D("seedTOF_sruLoc1",addstr(fHTitle,"seedTOF SRU Loc1").c_str(),250,-1.25,1.25);
@@ -1104,8 +1141,8 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[66] = new TH1D("seedAmplitude_Glo1",addstr(fHTitle,"seedAmplitude_Glo1").c_str(),1000,0,1000);
 
     hist1d[67] = new TH1D("rhRHTimeUnCali",addstr(fHTitle,"rhRHTimeUnCali").c_str(),500,-25,25);
-    hist1d[70] = new TH1D("rhRtTimeCali",addstr(fHTitle,"rhRtTimeCali").c_str(),500,-25,25);
-    hist1d[72] = new TH1D("rhRtCali",addstr(fHTitle,"rhRtCali").c_str(),500,-25,25);
+    hist1d[70] = new TH1D("rhrhTimeCali",addstr(fHTitle,"rhrhTimeCali").c_str(),500,-25,25);
+    hist1d[72] = new TH1D("rhrhCali",addstr(fHTitle,"rhrhCali").c_str(),500,-25,25);
 
     hist1d[75] = new TH1D("phoCov2IEtaIEta_Glo0",addstr(fHTitle,"phoCov2IEtaIEta_Glo0").c_str(),1000,0,0.005);
     hist1d[76] = new TH1D("phoCov2IEtaIEta_Glo1",addstr(fHTitle,"phoCov2IEtaIEta_Glo1").c_str(),1000,0,0.005);
@@ -1117,7 +1154,7 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[82] = new TH1D("phoCov2IPhiIPhi_Glo1",addstr(fHTitle,"phoCov2IPhiIPhi_Glo1").c_str(),1000,0,0.005);
 
     hist1d[83] = new TH1D("rhEnergy",addstr(fHTitle,"rhEnergy").c_str(),1500,0,1500);
-    hist1d[84] = new TH1D("rhRHisoot",addstr(fHTitle,"rhRtisOOT").c_str(),3,0,2);
+    hist1d[84] = new TH1D("rhRHisoot",addstr(fHTitle,"rhrhisOOT").c_str(),3,0,2);
     hist1d[85] = new TH1D("rhisweird",addstr(fHTitle,"rhisWeird").c_str(),3,0,2);
     hist1d[86] = new TH1D("rhisdiweird",addstr(fHTitle,"rhisDiWeird").c_str(),3,0,2);
     hist1d[87] = new TH1D("rhSwissCross",addstr(fHTitle,"rhSwissCross").c_str(),15200,-150,2);
@@ -1149,7 +1186,7 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[126] = new TH1D("seedAmplitude_druLoc1",addstr(fHTitle,"seedAmplitude DRU Loc1").c_str(),1000,0,1000);
 
     hist1d[127] = new TH1D("rhRHTimeOOT1UnCali",addstr(fHTitle,"kOOT True rhRHTimeUnCali").c_str(),500,-25,25);
-    hist1d[129] = new TH1D("rhRHTimeOOT0UnCali",addstr(fHTitle,"kOOT False rhRHTimeUnCali").c_str(),500,-25,25);
+    hist1d[129] = new TH1D("rhRHTimeOOT0UnCali",addstr(fHTitle,"kOOT rhRHTimeUnCali").c_str(),500,-25,25);
 
 	hist1d[131] = new TH1D("spikes",addstr(fHTitle,"spikes").c_str(),20,0,1000);
     hist1d[132] = new TH1D("spikesRHSel",addstr(fHTitle,"spikesRHSelect").c_str(),20,0,1000);
@@ -1174,18 +1211,18 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[12] = new TH2D("phoEnergyVR9_sruLoc",addstr(fHTitle,"phoEnergy V R9 SRU Loc;E;R9").c_str(),500,0,250,100,0,1);
 
     hist2d[13] = new TH2D("scEnergyVAmp_sruLoc0",addstr(fHTitle,"scEnergy V Amp SRU Loc0;E;Amp").c_str(),500,0,250,1000,0,1000);
-    hist2d[14] = new TH2D("scEnergyVRtTime_sruLoc0",addstr(fHTitle,"scEnergy V RtTime SRU Loc0;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[14] = new TH2D("scEnergyVrhTime_sruLoc0",addstr(fHTitle,"scEnergy V rhTime SRU Loc0;E;rhTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[16] = new TH2D("scEnergyVAmp_sruLoc1",addstr(fHTitle,"scEnergy V Amp SRU Loc1;E;Amp").c_str(),500,0,250,1000,0,1000);
-    hist2d[17] = new TH2D("scEnergyVRtTime_sruLoc1",addstr(fHTitle,"scEnergy V RtTime SRU Loc1;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[17] = new TH2D("scEnergyVrhTime_sruLoc1",addstr(fHTitle,"scEnergy V rhTime SRU Loc1;E;rhTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[19] = new TH2D("scEnergyVAmp_Glo0",addstr(fHTitle,"scEnergy V Amp Glo0;E;Amp").c_str(),500,0,250,1000,0,1000);
-    hist2d[20] = new TH2D("scEnergyVRtTime_Glo0",addstr(fHTitle,"scEnergy V RtTime Glo0;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[20] = new TH2D("scEnergyVrhTime_Glo0",addstr(fHTitle,"scEnergy V rhTime Glo0;E;rhTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[22] = new TH2D("scEnergyVAmp_Glo1",addstr(fHTitle,"scEnergy V Amp Glo1;E;Amp").c_str(),500,0,250,1000,0,1000);
-    hist2d[23] = new TH2D("scEnergyVRtTime_Glo1",addstr(fHTitle,"scEnergy V RtTime Glo1;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[23] = new TH2D("scEnergyVrhTime_Glo1",addstr(fHTitle,"scEnergy V rhTime Glo1;E;rhTime").c_str(),500,0,250,600,-15,15);
 
-    hist2d[25] = new TH2D("rhEnergyVrhRtTime",addstr(fHTitle,"rhEnergy V rhRtTime;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[25] = new TH2D("rhEnergyVrhrhTime",addstr(fHTitle,"rhEnergy V rhrhTime;E;rhTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[28] = new TH2D("phoDiMassvPt0",addstr(fHTitle,"phoDiMass V Pt Pho0;Mass;Pt").c_str(),140,55,125,500,0,500);
     hist2d[29] = new TH2D("phoDiMassvPt1",addstr(fHTitle,"phoDiMass V Pt Pho1;Mass;Pt").c_str(),140,55,125,500,0,500);
@@ -1199,10 +1236,10 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[36] = new TH2D("druamp0vamp1l",addstr(fHTitle,"DRU Local E 0 V E 1;E0;E1").c_str(),500,0,250,250,0,250);
 
     hist2d[40] = new TH2D("scEnergyVAmp_druLoc0",addstr(fHTitle,"scEnergy V Amp DRU Loc0;E;Amp").c_str(),500,0,250,1000,0,1000);
-    hist2d[41] = new TH2D("scEnergyVRtTime_druLoc0",addstr(fHTitle,"scEnergy V RtTime DRU Loc0;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[41] = new TH2D("scEnergyVrhTime_druLoc0",addstr(fHTitle,"scEnergy V rhTime DRU Loc0;E;rhTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[43] = new TH2D("scEnergyVAmp_druLoc1",addstr(fHTitle,"scEnergy V Amp DRU Loc1;E;Amp").c_str(),500,0,250,1000,0,1000);
-    hist2d[44] = new TH2D("scEnergyVRtTime_druLoc1",addstr(fHTitle,"scEnergy V RtTime DRU Loc1;E;RtTime").c_str(),500,0,250,600,-15,15);
+    hist2d[44] = new TH2D("scEnergyVrhTime_druLoc1",addstr(fHTitle,"scEnergy V rhTime DRU Loc1;E;rhTime").c_str(),500,0,250,600,-15,15);
 
     hist2d[46] = new TH2D("evntvsieie",addstr(fHTitle,"Evnt V phoSigmaIEtaIEta;Event;Sieie").c_str(),24000,0,2400,400,0,0.04);
     hist2d[47] = new TH2D("sieievr9sruloc",addstr(fHTitle,"SigmaIEtaIeta V R9 SRU Loc;Sieie;r9").c_str(),400,0,0.04,100,0,1);
@@ -1211,9 +1248,9 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[50] = new TH2D("sieievr9glo1",addstr(fHTitle,"SigmaIEtaIeta V R9 Glo1;Sieie;r9").c_str(),400,0,0.04,100,0,1);
     hist2d[51] = new TH2D("sieieglo1v2",addstr(fHTitle,"SigmaIEtaIeta Glo0 V Glo1;Glo0;Glo1").c_str(),400,0,0.04,400,0,0.04);
 
-    hist2d[55] = new TH2D("scEfAmpVrtdt_Glo",addstr(fHTitle,"sc Eff Amp V Rt dT Glo;EffAmp;dt").c_str(),150,0,150,800,-4,4);
-    hist2d[56] = new TH2D("scEfAmpVrtdt_sruLoc",addstr(fHTitle,"sc Eff Amp V Rt dT SRU Loc;EffAmp;dt").c_str(),150,0,150,800,-4,4);
-    hist2d[57] = new TH2D("scEfAmpVtrdt_druLoc",addstr(fHTitle,"sc Eff Amp V Rt dT DRU Loc;EffAmp;dt").c_str(),150,0,150,800,-4,4);
+    hist2d[55] = new TH2D("scEfAmpVrtdt_Glo",addstr(fHTitle,"sc Eff Amp V rh dT Glo;EffAmp;dt").c_str(),150,0,150,800,-4,4);
+    hist2d[56] = new TH2D("scEfAmpVrtdt_sruLoc",addstr(fHTitle,"sc Eff Amp V rh dT SRU Loc;EffAmp;dt").c_str(),150,0,150,800,-4,4);
+    hist2d[57] = new TH2D("scEfAmpVtrdt_druLoc",addstr(fHTitle,"sc Eff Amp V rh dT DRU Loc;EffAmp;dt").c_str(),150,0,150,800,-4,4);
 
     hist2d[90] = new TH2D("phoEVHOEM_gloLoc",addstr(fHTitle,"Energy V HadOverEM GLO Loc").c_str(),1500,0,750,250,0,0.25);
     hist2d[91] = new TH2D("phoSieieVHOEM_gloLoc",addstr(fHTitle,"SIeIe V HadOverEM GLO Loc").c_str(),400,0,0.04,250,0,0.25);
@@ -1232,27 +1269,29 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[104] = new TH2D("phoEVTSPtHCDR04_gloLoc",addstr(fHTitle,"Energy V TrkSumPtHallowConeDR04 GLO Loc").c_str(),1500,0,750,100,0,50);
     hist2d[105] = new TH2D("phoSieieVTSPHCDR04_gloLoc",addstr(fHTitle,"SIeIe V TrkSumPtHallowConeDR04 GLO Loc").c_str(),400,0,0.04,100,0,50);
 
-	hist2d[108] = new TH2D("SwcrVRtTime",addstr(fHTitle,"SwissCross V RH Time;SwCrs;Rt [ns]").c_str(),400,0.1,1.1,300,-15,15);
-    hist2d[110] = new TH2D("SwcrVRtTimeTopo",addstr(fHTitle,"SwissCross V RH Time +Topo Cuts;SwCrs;Rt [ns]").c_str(),400,0.1,1.1,300,-15,15);
-    hist2d[112] = new TH2D("SwcrVRtTimeOOT",addstr(fHTitle,"SwissCross V RH Time +kOOT Cut;SwCrs;Rt [ns]").c_str(),400,0.1,1.1,300,-15,15);
+	hist2d[108] = new TH2D("SwcrVrhTime",addstr(fHTitle,"SwissCross V RH Time;SwCrs;rh [ns]").c_str(),1000,-9.0,1.0,400,-20,20);
+    hist2d[109] = new TH2D("SwcrVrhTimeRatio",addstr(fHTitle,"SwissCross V RH Time WRatio;SwCrs;rh [ns]").c_str(),1000,-9.0,1.0,400,-20,20);
+    hist2d[110] = new TH2D("SwcrVrhTimeTopo",addstr(fHTitle,"SwissCross V RH Time +Topo Cuts;SwCrs;rh [ns]").c_str(),1000,-9.0,1.0,400,-20,20);
+    hist2d[112] = new TH2D("SwcrVrhTimeOOT",addstr(fHTitle,"SwissCross V RH Time +kOOT Cut;SwCrs;rh [ns]").c_str(),1000,-9.0,1.0,400,-20,20);
 
 
-    hist2d[115] = new TH2D("SwcrVRhEnergyRtOOT",addstr(fHTitle,"SwissCross V RH Energy +RtkOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
-    hist2d[116] = new TH2D("SwcrVRhEnergyTopo",addstr(fHTitle,"SwissCross V RH Energy +kOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
-    hist2d[117] = new TH2D("SwcrVRhEnergy",addstr(fHTitle,"SwissCross V RH Energy +kOOT Cut;SwCrs;Energy [GeV]").c_str(),400,0.1,1.1,1000,0,1000);
+    hist2d[115] = new TH2D("SwcrVRhEnergyrhOOT",addstr(fHTitle,"SwissCross V RH Energy +rhkOOT Cut;SwCrs;Energy [GeV]").c_str(),1000,-9.0,1.0,1000,0,1000);
+    hist2d[116] = new TH2D("SwcrVRhEnergyTopo",addstr(fHTitle,"SwissCross V RH Energy +kOOT Cut;SwCrs;Energy [GeV]").c_str(),1000,-9.0,1.0,1000,0,1000);
+    hist2d[117] = new TH2D("SwcrVRhEnergy",addstr(fHTitle,"SwissCross V RH Energy +kOOT Cut;SwCrs;Energy [GeV]").c_str(),1000,-9.0,1.0,1000,0,1000);
 
-    hist2d[118] = new TH2D("EnergyVRtTimeKfG16",addstr(fHTitle,"Energy V RtTime kOOT False hasGS1&6;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[119] = new TH2D("EnergyVRtTimeG16",addstr(fHTitle,"Energy V RtTime;Energy [GeV] hasGS1&6;Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[120] = new TH2D("EnergyVRtTimeKfG6",addstr(fHTitle,"Energy V RtTime kOOT False hasGS6;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[121] = new TH2D("EnergyVRtTimeG6",addstr(fHTitle,"Energy V RtTime;Energy [GeV] hasGS6;Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[122] = new TH2D("EnergyVRtTimeKfG1",addstr(fHTitle,"Energy V RtTime kOOT False hasGS1;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[123] = new TH2D("EnergyVRtTimeG1",addstr(fHTitle,"Energy V RtTime;Energy [GeV] hasGS1;Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[124] = new TH2D("EnergyVRtTimeKfG0",addstr(fHTitle,"Energy V RtTime kOOT False noGS;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[125] = new TH2D("EnergyVRtTimeG0",addstr(fHTitle,"Energy V RtTime;Energy [GeV] noGS;Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[118] = new TH2D("EnergyVrhTimeKfG16",addstr(fHTitle,"Energy V rhTime kOOT  hasGS1&6;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[119] = new TH2D("EnergyVrhTimeG16",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS1&6;Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[120] = new TH2D("EnergyVrhTimeKfG6",addstr(fHTitle,"Energy V rhTime kOOT hasGS6;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[121] = new TH2D("EnergyVrhTimeG6",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS6;Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[122] = new TH2D("EnergyVrhTimeKfG1",addstr(fHTitle,"Energy V rhTime kOOT hasGS1;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[123] = new TH2D("EnergyVrhTimeG1",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS1;Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[124] = new TH2D("EnergyVrhTimeKfG0",addstr(fHTitle,"Energy V rhTime kOOT noGS;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[125] = new TH2D("EnergyVrhTimeG0",addstr(fHTitle,"Energy V rhTime;Energy [GeV] noGS;Time [ns]").c_str(),400,0,2000,600,-30,30);
 
-    hist2d[126] = new TH2D("EnergyVRtTimeInvFiltered",addstr(fHTitle,"Energy V RtTime InvFiltered;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[127] = new TH2D("EnergyVRtTimeUnfiltered",addstr(fHTitle,"Energy V RtTime unFiltered;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
-    hist2d[128] = new TH2D("EnergyVRtTimeFiltered",addstr(fHTitle,"Energy V RtTime Filtered;Energy [GeV];Time [ns]").c_str(),250,0,1000,600,-30,30);
+    hist2d[126] = new TH2D("EnergyVrhTimeInvFiltered",addstr(fHTitle,"Energy V rhTime InvFiltered;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[127] = new TH2D("EnergyVrhTimeUnfiltered",addstr(fHTitle,"Energy V rhTime unFiltered;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[128] = new TH2D("EnergyVrhTimeFiltered",addstr(fHTitle,"Energy V rhTime Filtered;Energy [GeV];Time [ns]").c_str(),400,0,2000,600,-30,30);
+    hist2d[129] = new TH2D("RtRhTimwVCCRhTime",addstr(fHTitle,"rt rhTime V CC rhTime;Rt Time [ns];CC Time [ns]").c_str(),600,-30,30,600,-30,30);
 
 
 }//<<>>void makehists::initHists()
@@ -1270,11 +1309,14 @@ int main ( int argc, char *argv[] ){
     	//auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/";
         //auto indir = "ecalTiming/gammares_mc/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/";
         //auto indir = "ecalTiming/gammares_mc/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/";
-        auto indir = "ecalTiming/gammares_llpana/";
+        //auto indir = "ecalTiming/gammares_llpana/";
         //auto indir = "/ecalTiming/gammares_llpana_pd/MET/";
         //auto indir = "/ecalTiming/gammares_llpana_qcd/";
 		//auto indir = "ecalTiming/gammares_llpana/MET/";
         //auto indir = "/ecalTiming/gammares_llpana_pd/";
+        //auto indir = "ecalTiming/gammares_ccval/";
+        //auto indir = "ecalTiming/gammares_r24fprompt/";
+        auto indir = "/ecalTiming/gammares_ecaldpg_tevjets/";
 
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
@@ -1284,7 +1326,10 @@ int main ( int argc, char *argv[] ){
 		//auto infilename = "list_files/kuntuple_QCDHT_Met75_R17_v20_infileslist.txt";
         //auto infilename = "list_files/egammares_MetPD_MINIAOD_Run2017E_reso_plotfilelist.txt";
         //auto infilename = "master_list_files/egammares_DEGPD_AOD_Run2017F_v2_304475_noCali_plotfilelist.txt";
-        auto infilename = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_noCali_plotfilelist.txt";
+        //auto infilename = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_noCali_plotfilelist.txt";
+        //auto infilename = "master_list_files/egammares_JetMET1_MINIAOD_CCVal_v2_noCali_plotfilelist.txt";
+        //auto infilename = "master_list_files/egammares_JetMET1_MINIAOD_r24fprompt_v2_noCali_plotfilelist.txt";
+		auto infilename = "master_list_files/egammares_JetMET1_AOD_tevjets_v2_noCali_plotfilelist.txt";
 
         //auto outfilename = "egammares_diag_23D_370496_370580_tt_exp3_v12_EB.root";
         //auto outfilename = "egammares_diag_winter24_DYto2L-4Jets_MLL-50_1J_v12_EB.root";
@@ -1293,16 +1338,19 @@ int main ( int argc, char *argv[] ){
         //auto outfilename = "egammares_llpana_metpd_v2_diag.root";
         //auto outfilename = "egammares_llpana_qcdht_r17_v20_diag.root";
         //auto outfilename = "egammares_llpana_metpd_miniaod_diag.root";
-        //auto outfilename = "egammares_llpana_deg_aod_r17_v20_diag.root";
-        auto outfilename = "egammares_llpana_egm_miniaod_r18_v20_diag.root";
+        //auto outfilename = "egammares_llpana_met_aod_r17_v21c_diag.root";
+        //auto outfilename = "egammares_llpana_egm_miniaod_r18_v20_diag.root";
+        //auto outfilename = "egammares_diag_jetmet1_minaod_r24fprompt_v21_diag.root";
+		auto outfilename = "egammares_diag_cc_jetmet1_aod_tevjets_v21_diag.root";
 
         //auto fhtitle = "Run2024E 14_0_4 EB ";
-		//auto fhtitle = "Winter24 DY EB";
-        //auto fhtitle = "QCD MC R17";
-        //auto fhtitle = "MET AOD 2017E";
-        //auto fhtitle = "MET MINIAOD 2017E";
-        //auto fhtitle = "DEG AOD R17";
-        auto fhtitle = "EGM MINIAOD R18";
+		//auto fhtitle = "Winter24 DY EB ";
+        //auto fhtitle = "QCD MC R17 ";
+        //auto fhtitle = "MET AOD 2017E ";
+        //auto fhtitle = "MET MINIAOD 2017E ";
+    	//auto fhtitle = "DEG AOD R17 ";
+        //auto fhtitle = "EGM MINIAOD R18 ";
+        auto fhtitle = "JetMet1 TeVJets ";
 
 		makehists base;				
         base.llpgana_hist_maker( indir, infilename, outfilename, fhtitle );

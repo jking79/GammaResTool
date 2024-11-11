@@ -60,7 +60,7 @@ def subcrab( runs, events, reqmem ):
 
         # External files needed by CRAB
         inputDir     = ''
-        inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+        #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
         #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
         #inputJSON    = 'Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
         #inputJSON    = ''
@@ -75,7 +75,7 @@ def subcrab( runs, events, reqmem ):
         #config.General.requestName = None
 
         config.JobType.pluginName  = 'Analysis'
-        config.JobType.psetName    = 'gammares_notwotier_multi.py'
+        config.JobType.psetName    = 'gammares_twotier_multi_aod.py'
         #config.JobType.numCores    = 8
         #config.JobType.maxMemoryMB = 2250 #reqmem
         #config.JobType.maxJobRuntimeMin = 1500
@@ -85,13 +85,17 @@ def subcrab( runs, events, reqmem ):
         config.Data.inputDataset = None
         #config.Data.useParent      = True
 	#config.Data.secondaryInputDataset = secInputPaths
-        #config.Data.useParent      = False
+        #config.Data.partialDataset = True
         #config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
+        config.Data.unitsPerJob  =  250 # jetmet tev jets 2024
+        config.Data.unitsPerJob  =  25000 # MET 2017 AOD
+        #config.Data.unitsPerJob  =  1500 # MC GMSB
+        #config.Data.unitsPerJob  =  15000 # MC QCD
 
-        config.Data.unitsPerJob  =  100000 # for auto job splitting
+        #config.Data.unitsPerJob  =  300 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
 
@@ -107,8 +111,6 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            ['/JetMET1/Run2024F-PromptReco-v1/MINIAOD'],  
-            #['/JetMET1/Run2024F-ECAL_CC_HCAL_DI-v1/MINIAOD'],    
             ##['/EGamma0/Run2024A-PromptReco-v1/MINIAOD'], 	# 378927-378962 52.6M
             #['/EGamma0/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379350	0.54T
             #['/EGamma0/Run2024C-PromptReco-v1/MINIAOD'],	# 379413-379765	3.3T
@@ -119,79 +121,39 @@ def subcrab( runs, events, reqmem ):
             #['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
             #['/EGamma1/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T
 
-            #['/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
-            #['/DYto2L-4Jets_MLL-50_2J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
-            #['/DYto2L-4Jets_MLL-50_3J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
-            #['/DYto2L-4Jets_MLL-50_4J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
-
-            #['/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v8-v2/MINIAODSIM'], #
-
-            #['/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
-            #['/DYto2L-4Jets_MLL-50_2J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
-            #['/DYto2L-4Jets_MLL-50_3J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
-            #['/DYto2L-4Jets_MLL-50_4J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
-
-            #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
-
-            #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1 352499 - 355062    
-            #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'], #						    355094 - 355769											 
-            #['/EGamma/Run2022C-PromptReco-v1/MINIAOD'], #						    355809 - 357482
-            #['/EGamma/Run2022D-PromptReco-v1/MINIAOD'], #						    357538 - 357733
-            #['/EGamma/Run2022D-PromptReco-v2/MINIAOD'], #						    357734 - 357902
-            #['/EGamma/Run2022D-PromptReco-v3/MINIAOD'], #						    358381
-            #['/EGamma/Run2022E-PromptReco-v1/MINIAOD'], # 2022 EF Prompt 124X_dataRun3_Prompt_v8	    359090 - 360327
-            #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #						    360389 - 362167
-            #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   	    362399 - 362760
-
-            #['/MET/Run2017E-17Nov2017-v1/MINIAOD']
-            #['/EGamma/Run2018D-22Jan2019-v2/MINIAOD']
+            ['/JetMET1/Run2024F-TeVJet-PromptReco-v1/RAW-RECO'],
+            ['/JetMET1/Run2024G-TeVJet-PromptReco-v1/RAW-RECO'],
+            ['/JetMET1/Run2024H-TeVJet-PromptReco-v1/RAW-RECO'],
 
 	    ]
  
         for inDO in inputDataAndOpts:
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
-            #primaryDataset = inDO[0].split('/')[1]
-            primaryDataset = (inDO[0].split('/')[1]).split('_TuneCP5')[0]
-            #runEra         = inDO[0].split('/')[2]
+            primaryDataset = inDO[0].split('/')[1]
+            runEra         = inDO[0].split('/')[2]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
-            runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
             dataset	   = inDO[0].split('/')[3]
 
             #trial          = 'gammares_ratio_126_v2'
             #trial          = 'gammares_cc_140_v2'
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
-            #trial          = 'gammares_mc'
-            #trial          = 'gammares_llpana'
-            trial          = 'gammares_r24fprompt'
+            #trial          = 'gammares_llpana_pd'
+            #trial          = 'gammares_llpana_mc'
+            #trial          = 'gammares_llpana_qcd'
+            trial           = 'gammares_ecaldpg_tevjets'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
-            #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
-            #config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
-            #config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
-            config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_request"
-            config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra
+            ##config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
+            ##config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
+            ##config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
+            config.General.requestName   = primaryDataset+"_"+dataset+"_"+runEra+"_t2_request"
+            config.Data.outputDatasetTag = dataset+"_"+runEra
 
-#>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
-            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v6', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-#>>>>>>>>>>>>>  2018 EOY
-            #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-#>>>>>>>>>>>> 2024 tested
-            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v4', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+#>>>>>>>>>>>>>>>>>>>     #JetMet TevJets 2024
+            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v4','outputFileName=output.root','doTwoTier=True','doDiag=True']
 
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
-            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4','doTwoTier=False','doDiag=False']  
-            #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=False']]  # 2018A tested
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # ABCD
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # EF
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # G
-            #config.JobType.pyCfgParams   = ['globalTag=130X_mcRun3_2023_realistic_v14', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] # R3 DY summer23
-            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] # R3 DY winter24
-            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
-            #config.JobType.pyCfgParams   = ['globalTag=102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
-
-
+#------------------------------------------------------------------------------------------------------------------
             config.Data.inputDataset     = inDO[0]
             # Submit.
             try:
@@ -239,7 +201,8 @@ def submit_run():
         #subcrab( "357101-357268","",2500)#22C?
 	#subcrab( "360395-360415","",2500)#22F?
 
-        subcrab( "000000-999999","",2500)#MC
+        subcrab( "000000-999999","",2500)# anything
+
 
 ########################################################
 

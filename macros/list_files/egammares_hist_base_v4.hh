@@ -41,12 +41,12 @@ public :
 
    std::vector<unsigned int> *rhID;
    std::vector<float>   *rhRtTime;
-   //std::vector<float>   *rhCCTime;
+   std::vector<float>   *rhCCTime;
    std::vector<float>   *rhTOF;
    std::vector<float>   *rhEnergy;
    std::vector<bool>    *rhRtisOOT;
    std::vector<float>   *rhAmp;
-   //std::vector<bool>    *rhCCisOOT;
+   std::vector<bool>    *rhCCisOOT;
    std::vector<bool>    *rhisWeird;
    std::vector<bool>    *rhisDiWeird;
    std::vector<float>   *rhSwCross;
@@ -105,10 +105,10 @@ public :
    TBranch        *b_resTOF;   //!
    TBranch        *b_rhID;   //!
    TBranch        *b_rhRtTime;   //!
-   //TBranch        *b_rhCCTime;   //!
+   TBranch        *b_rhCCTime;   //!
    TBranch        *b_rhEnergy;   //!
    TBranch        *b_rhRtisOOT;   //!
-   //TBranch        *b_rhCCisOOT;   //!
+   TBranch        *b_rhCCisOOT;   //!
    TBranch        *b_rhisWeird;   //!
    TBranch        *b_rhisDiWeird;   //!
    TBranch        *b_rhSwCross;   //!
@@ -227,10 +227,10 @@ void egammares_hist_base::Init(TTree *tree)
    resTOF = 0;
    rhID = 0;
    rhRtTime = 0;
-   //rhCCTime = 0;
+   rhCCTime = 0;
    rhEnergy = 0;
    rhRtisOOT = 0;
-   //rhCCisOOT = 0;
+   rhCCisOOT = 0;
    rhisWeird = 0;
    rhisDiWeird = 0;
    rhSwCross = 0;
@@ -287,10 +287,10 @@ void egammares_hist_base::Init(TTree *tree)
 
    fChain->SetBranchAddress("rhID", &rhID, &b_rhID);
    fChain->SetBranchAddress("rhRtTime", &rhRtTime, &b_rhRtTime);
-   //fChain->SetBranchAddress("rhCCTime", &rhCCTime, &b_rhCCTime);
+   fChain->SetBranchAddress("rhCCTime", &rhCCTime, &b_rhCCTime);
    fChain->SetBranchAddress("rhEnergy", &rhEnergy, &b_rhEnergy);
    fChain->SetBranchAddress("rhRtisOOT", &rhRtisOOT, &b_rhRtisOOT);
-   //fChain->SetBranchAddress("rhCCisOOT", &rhCCisOOT, &b_rhCCisOOT);
+   fChain->SetBranchAddress("rhCCisOOT", &rhCCisOOT, &b_rhCCisOOT);
    fChain->SetBranchAddress("rhisWeird", &rhisWeird, &b_rhisWeird);
    fChain->SetBranchAddress("rhisDiWeird", &rhisDiWeird, &b_rhisDiWeird);
    fChain->SetBranchAddress("rhSwCross", &rhSwCross, &b_rhSwCross);

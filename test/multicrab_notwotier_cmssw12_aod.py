@@ -194,6 +194,9 @@ def subcrab( runs, events, reqmem ):
             #['/MET/Run2017E-17Nov2017-v1/AOD',''],#28.5
             #['/MET/Run2017F-17Nov2017-v1/AOD',''],#75.3
 
+            #['/JetHT/Run2017F-17Nov2017-v1/AOD',''],# llpana
+            ['/MET/Run2017E-17Nov2017-v1/AOD',''],# llpana
+
             # PD: /DoubleEG/Run2017*-17Nov2017-v1/AOD
             #['/DoubleEG/Run2017B-17Nov2017-v1/AOD',''],
             #['/DoubleEG/Run2017D-17Nov2017-v1/AOD',''],
@@ -218,7 +221,7 @@ def subcrab( runs, events, reqmem ):
             #['/DoubleEG/Run2017F-09Aug2019_UL2017-v1/AOD',''],
             #['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/AOD',''],
 
-            ['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
+            #['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
 
 	    ]
  
@@ -226,15 +229,15 @@ def subcrab( runs, events, reqmem ):
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
             primaryDataset = inDO[0].split('/')[1]
-            #runEra         = inDO[0].split('/')[2]
-            runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
+            runEra         = inDO[0].split('/')[2]
+            #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
             dataset	   = inDO[0].split('/')[3]
 
             #trial          = 'gammares_ratio_126_v2'
             #trial          = 'gammares_cc_140_v2'
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
-            #trial          = 'gammares_llpana_pd'
-            trial          = 'gammares_llpana_mc'
+            trial          = 'gammares_llpana_pd'
+            #trial          = 'gammares_llpana_mc'
             #trial          = 'gammares_llpana_qcd'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
@@ -252,13 +255,13 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # EF
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # G
 #>>>>>>>>>>>>>>>>>>>     #MET 2017E
-            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1','outputFileName=output.root','doTwoTier=False','doDiag=True'] # MET 2017E
+            config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1','outputFileName=output.root','doTwoTier=False','doDiag=True'] # MET 2017E
 #>>>>>>>>>>>>>>>>>>>     #GMSB
             #config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True'] # GMSB
 #>>>>>>>>>>>>>>>>>>>     #DoubleEG/Run2017*-17Nov2017-v1/AOD good for #globalTag=94X_dataRun2_ReReco_EOY17_v2
             #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v2','outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>>>>>>>     #/DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM
-            config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True']
 
 #------------------------------------------------------------------------------------------------------------------
             config.Data.inputDataset     = inDO[0]

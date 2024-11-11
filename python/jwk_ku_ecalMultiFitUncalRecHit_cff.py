@@ -315,6 +315,10 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
 import RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHitProducer_cfi as _mod
 #ecalMultiFitUncalibRecHitCCBase = _mod.ecalMultiFitUncalibRecHitProducer.clone()
 kuCCNativeEcalMultiFitUncalibRecHit = _mod.ecalMultiFitUncalibRecHitProducer.clone(
+        #EBhitCollection = cms.string("kuCCEcalUncalibRecHitsEB"),
+        #EEhitCollection = cms.string('kuCCEcalUncalibRecHitsEE'),
+        EBdigiCollection = cms.InputTag("selectDigi","selectedEcalEBDigiCollection"),
+        EEdigiCollection = cms.InputTag("selectDigi","selectedEcalEEDigiCollection"),
         algoPSet = cms.PSet(
               timealgo = cms.string('crossCorrelationMethod'),
               EBtimeNconst = cms.double(25.5),

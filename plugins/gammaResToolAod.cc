@@ -52,8 +52,8 @@ GammaResToolAod::GammaResToolAod(const edm::ParameterSet& iConfig) :
     kuRtStcRecHitsEBTag(iConfig.getParameter<edm::InputTag>("kuRtStcRecHitsEB")),
     kuRtStcRecHitsEETag(iConfig.getParameter<edm::InputTag>("kuRtStcRecHitsEE")),
 
-    //kuCCStcRecHitsEBTag(iConfig.getParameter<edm::InputTag>("kuCCStcRecHitsEB")),
-    //kuCCStcRecHitsEETag(iConfig.getParameter<edm::InputTag>("kuCCStcRecHitsEE")),
+    kuCCStcRecHitsEBTag(iConfig.getParameter<edm::InputTag>("kuCCStcRecHitsEB")),
+    kuCCStcRecHitsEETag(iConfig.getParameter<edm::InputTag>("kuCCStcRecHitsEE")),
 
     //unCCRecHitsEBTag(iConfig.getParameter<edm::InputTag>("ku_uncalibratedRecHitsEB")),
     //unCCRecHitsEETag(iConfig.getParameter<edm::InputTag>("ku_uncalibratedRecHitsEE")),
@@ -96,19 +96,19 @@ GammaResToolAod::GammaResToolAod(const edm::ParameterSet& iConfig) :
 	recHitsEBToken_	= consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(recHitsEBTag);
 	recHitsEEToken_	= consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(recHitsEETag);
 
-    if( doDiag ){
-    	kuRtStcRecHitsEBToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuRtStcRecHitsEBTag);
-    	kuRtStcRecHitsEEToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuRtStcRecHitsEETag);
-    }//if( doTwoTier )
+    //if( doDiag ){
+    //	kuRtStcRecHitsEBToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuRtStcRecHitsEBTag);
+    //	kuRtStcRecHitsEEToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuRtStcRecHitsEETag);
+    //}//if( doTwoTier )
 
-	//if( doTwoTier ){
-    //	kuCCStcRecHitsEBToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEBTag);
-    //	kuCCStcRecHitsEEToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEETag);
-	//	unCCRecHitsEBToken_ = 
-	//		consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEBTag);
-    //	unCCRecHitsEEToken_ = 
-	//		consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEETag);
-	//}//if( doTwoTier )
+	if( doTwoTier ){
+    	kuCCStcRecHitsEBToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEBTag);
+    	kuCCStcRecHitsEEToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEETag);
+		//unCCRecHitsEBToken_ = 
+		//	consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEBTag);
+    	//unCCRecHitsEEToken_ = 
+		//	consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEETag);
+	}//if( doTwoTier )
 
 	// photons
 	gedPhotonsToken_ = consumes<phoColView>(gedPhotonsTag);
@@ -187,12 +187,12 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     //	iEvent.getByToken(kuRtStcRecHitsEEToken_, kuRtStcRecHitsEE_);
     //}//if( doTwoTier )
 
-	//if( doTwoTier ){
-    //	iEvent.getByToken(kuCCStcRecHitsEBToken_, kuCCStcRecHitsEB_);
-    //	iEvent.getByToken(kuCCStcRecHitsEEToken_, kuCCStcRecHitsEE_);
+	if( doTwoTier ){
+    	iEvent.getByToken(kuCCStcRecHitsEBToken_, kuCCStcRecHitsEB_);
+    	iEvent.getByToken(kuCCStcRecHitsEEToken_, kuCCStcRecHitsEE_);
     // 	iEvent.getByToken(unCCRecHitsEBToken_, unCCRecHitsEB_);
     //	iEvent.getByToken(unCCRecHitsEEToken_, unCCRecHitsEE_);
-	//}//if( doTwoTier )
+	}//if( doTwoTier )
 
 	// GEOMETRY : https://gitlab.cern.ch/shervin/ECALELF
 	caloGeo_ = iSetup.getHandle(caloGeometryToken_); 
@@ -240,12 +240,13 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     std::vector<EcalRecHit> frechits;
     std::vector<bool> frhUsed;
     //std::vector<EcalRecHit> frtrechits;
-    //std::vector<EcalRecHit> fccrechits;
+    std::vector<EcalRecHit> fccrechits;
     //std::vector<EcalUncalibratedRecHit> funccrechits;
     std::vector<reco::Photon> fphotons;
     std::vector<reco::GsfElectron> felectrons;
 
-	float minRecHitEnergy = 0.2;
+    //float minRecHitEnergy = 0.2;
+	float minRecHitEnergy = 2.0;
 	if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
 	for (const auto & recHit : *recHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); frhUsed.push_back(false);}
     for (const auto & recHit : *recHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); frhUsed.push_back(false);}
@@ -253,12 +254,12 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     //    for (const auto & recHit : *kuRtStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
     //    for (const auto & recHit : *kuRtStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frtrechits.push_back(recHit); }
     //}//<<>>if( doDiag )
-	//if( doTwoTier ){
-    //	for (const auto & recHit : *kuCCStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
-    //	for (const auto & recHit : *kuCCStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
+	if( doTwoTier ){
+    	for (const auto & recHit : *kuCCStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
+    	for (const auto & recHit : *kuCCStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
     //    for (const auto & recHit : *unCCRecHitsEB_ ){ if( recHit.amplitude() > minRecHitAmp ) funccrechits.push_back(recHit); }
     //    for (const auto & recHit : *unCCRecHitsEE_ ){ if( recHit.amplitude() > minRecHitAmp ) funccrechits.push_back(recHit); }
-	//}//<<>>if( doTwoTier )
+	}//<<>>if( doTwoTier )
 
 // -- Process gedPhotons
     if( DEBUG ) std::cout << "Processing " << gedPhotons_->size() << " gedPhotons" << std::endl;
@@ -370,7 +371,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
     rhID.clear();
     rhRtTime.clear();
-    //rhCCTime.clear();
+    rhCCTime.clear();
     //rhUnCCTime.clear();
     //rhTimeErr, 
     rhTOF.clear();
@@ -378,7 +379,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     rhAmp.clear();
     //rhRawAmp.clear();
     rhRtisOOT.clear();
-    //rhCCisOOT.clear();
+    rhCCisOOT.clear();
     rhisGS6.clear();
     rhisGS1.clear();
     rhisWeird.clear();
@@ -393,25 +394,27 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     std::vector<float> miniRhAmp;
     std::vector<float> miniRhEnergy;
     std::vector<float> miniRhRtTime;
-    //std::vector<float> miniRhCCTime;
+    std::vector<float> miniRhCCTime;
     //std::vector<float> miniRhUnCCTime;
     std::vector<float> miniRhTOF;
 
     //if( DEBUG ) std::cout << " - enetering RecHit loop" << std::endl;
     for (const auto & recHit : frechits ){
 
+		bool ccisoot = false;
 		const auto recHitID = getRawID(recHit);
-        //float cctime = -999.0;
+        float cctime = -99.0;
 		//float uncctime = -999.0;
-        //if( doTwoTier ){
-        //    for (const auto & ccRecHit : fccrechits ){ 
-		//		if( getRawID(ccRecHit) == recHitID ){ 
-		//			cctime = ccRecHit.time(); 
+        if( doTwoTier ){
+            for (const auto & ccRecHit : fccrechits ){ 
+				if( getRawID(ccRecHit) == recHitID ){ 
+					cctime = ccRecHit.time();
+					ccisoot = ccRecHit.checkFlag(EcalRecHit::kOutOfTime); 
 	   	//			uncctime = ccRecHit.nonCorrectedTime();
-		//			break; 
-		//		}//if( getRawID(ccRecHit) == recHitID )
-		//	}//for (const auto & ccRecHit : fccrechits )
-        //}//if( doTwoTier )
+					break; 
+				}//if( getRawID(ccRecHit) == recHitID )
+			}//for (const auto & ccRecHit : fccrechits )
+        }//if( doTwoTier )
 
         const auto isEB = getIsEB(recHit);
         //if( DEBUG ) std::cout << " -- proccesing EBEE info" << std::endl;
@@ -442,8 +445,8 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
         const auto amplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV)/pedrms12 : -99;
 
         float swisscross(10.0);
-        //if( isEB ) swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEB_, 1.0, true);
-        //else swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEE_, 1.0, true);
+        ////if( isEB ) swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEB_, 1.0, true);
+        ////else swisscross = EcalTools::swissCross(recHitID, *kuRtStcRecHitsEE_, 1.0, true);
         if( isEB ) swisscross = EcalTools::swissCross(recHitID, *recHitsEB_, 1.0, true);
         else swisscross = EcalTools::swissCross(recHitID, *recHitsEE_, 1.0, true);
 
@@ -451,7 +454,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 		miniRhAmp.push_back(amplitude);
 		miniRhEnergy.push_back(recHit.energy());
 		miniRhRtTime.push_back(recHit.time());
-		//miniRhCCTime.push_back(cctime);
+		miniRhCCTime.push_back(cctime);
 		//miniRhUnCCTime.push_back(uncctime);
 		miniRhTOF.push_back(tof);
 
@@ -461,7 +464,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
             rhCaliID.push_back(recHitID);
 			rhCaliEnergy.push_back(recHit.energy());
             rhCaliRtTime.push_back(recHit.time());
-            //rhCaliCCTime.push_back(cctime);
+            rhCaliCCTime.push_back(cctime);
 
         }//<<>>if( recHit.energy() > 5.0 )
 
@@ -477,7 +480,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
             	//rhPosEta.push_back(recHitPos.eta());
             	//rhPosPhi.push_back(recHitPos.phi());
             	rhRtTime.push_back(recHit.time());
-            	//rhCCTime.push_back(cctime);
+            	rhCCTime.push_back(cctime);
             	//rhUnCCTime.push_back(uncctime);
             	//if( DEBUG ) std::cout << " -- storing values FLAGS" << std::endl;
             	rhEnergy.push_back(recHit.energy());
@@ -485,7 +488,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
             	rhAmp.push_back(amplitude);
             	//energyError()
             	rhRtisOOT.push_back(recHit.checkFlag(EcalRecHit::kOutOfTime));
-            	//rhCCisOOT.push_back(ccisoot);
+            	rhCCisOOT.push_back(ccisoot);
             	//rhisGood.push_back(recHit.checkFlag(EcalRecHit::kGood));
             	rhSwCross.push_back(swisscross);
             	rhisWeird.push_back(recHit.checkFlag(EcalRecHit::kWeird));
@@ -1156,7 +1159,7 @@ void GammaResToolAod::beginJob(){
     outTree->Branch("rhCaliID", &rhCaliID);
     outTree->Branch("rhCaliEnergy", &rhCaliEnergy);
     outTree->Branch("rhCaliRtTime", &rhCaliRtTime);
-    //outTree->Branch("rhCaliCCTime", &rhCaliCCTime);
+    outTree->Branch("rhCaliCCTime", &rhCaliCCTime);
 
     outTree->Branch("resRhID", &resRhID);
     outTree->Branch("resAmp", &resAmp);
@@ -1207,7 +1210,7 @@ void GammaResToolAod::beginJob(){
 
     	outTree->Branch("rhID", &rhID);
     	outTree->Branch("rhRtTime", &rhRtTime);
-        //outTree->Branch("rhCCTime", &rhCCTime);
+        outTree->Branch("rhCCTime", &rhCCTime);
         //outTree->Branch("rhUnCCTime", &rhUnCCTime);
         outTree->Branch("rhTOF", &rhTOF);
         outTree->Branch("rhEnergy", &rhEnergy);
@@ -1215,7 +1218,7 @@ void GammaResToolAod::beginJob(){
 
         outTree->Branch("rhIsUsed", &rhIsUsed);
 	    outTree->Branch("rhRtisOOT", &rhRtisOOT);
-        //outTree->Branch("rhCCisOOT", &rhCCisOOT);
+        outTree->Branch("rhCCisOOT", &rhCCisOOT);
 	    //outTree->Branch("rhisGood", &rhisGood);
 	    outTree->Branch("rhisWeird", &rhisWeird);
 	    outTree->Branch("rhisDiWeird", &rhisDiWeird);
