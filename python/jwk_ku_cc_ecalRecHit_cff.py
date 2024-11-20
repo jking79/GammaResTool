@@ -31,8 +31,8 @@ ecalRecHitCCBase = cms.EDProducer("EcalRecHitProducer",
     EELaserMAX = cms.double(8.0),
 
     # to select timing conditions record
-    timeCalibTag = cms.ESInputTag('', ''),
-    timeOffsetTag = cms.ESInputTag('', ''),
+    timeCalibTag = cms.ESInputTag("", "CC"),
+    timeOffsetTag = cms.ESInputTag("", "CC"),
 
     # useful if time is not calculated, as at HLT                        
     skipTimeCalib = cms.bool(False),                         

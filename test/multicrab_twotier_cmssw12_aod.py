@@ -141,17 +141,19 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_llpana_pd'
             #trial          = 'gammares_llpana_mc'
             #trial          = 'gammares_llpana_qcd'
-            trial           = 'gammares_ecaldpg_tevjets'
+            trial           = 'gammares_ecaldpg_tevjets_prompt_oot3_v3'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             ##config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
             ##config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
             ##config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
-            config.General.requestName   = primaryDataset+"_"+dataset+"_"+runEra+"_t2_request"
+            config.General.requestName   = primaryDataset+"_"+dataset+"_"+runEra+"-"+trial+"_request"
             config.Data.outputDatasetTag = dataset+"_"+runEra
 
 #>>>>>>>>>>>>>>>>>>>     #JetMet TevJets 2024
             config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v4','outputFileName=output.root','doTwoTier=True','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Candidate_2024_06_26_20_41_23','outputFileName=output.root','doTwoTier=True','doDiag=True']
+
 
 #------------------------------------------------------------------------------------------------------------------
             config.Data.inputDataset     = inDO[0]

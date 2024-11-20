@@ -18,7 +18,7 @@ options.register('globalTag','140X_dataRun3_Prompt_v4',VarParsing.multiplicity.s
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
-options.register('outputFileName','ku_jetmet_tevjets_diag_140_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
+options.register('outputFileName','ku_jetmet_tevjets_stc_diag_140_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
 
 options.register('doTwoTier',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to do twotier processing');
 options.register('doDiag',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to store diagnostic info');
@@ -159,6 +159,8 @@ process.tree = cms.EDAnalyzer("GammaResToolAod",
    #recHitsEE = cms.InputTag("reducedEgamma", "reducedEERecHits"),
    recHitsEB = cms.InputTag("reducedEcalRecHitsEB"),#AOD
    recHitsEE = cms.InputTag("reducedEcalRecHitsEE"),#AOD
+   #recHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
+   #recHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
 
    ## do two tier reconstruction of second rechit collection
    #doTwoTier = cms.bool(options.doTwoTier), 
@@ -185,8 +187,8 @@ process.tree = cms.EDAnalyzer("GammaResToolAod",
 
    #kuCCStcRecHitsEB = cms.InputTag("none", "none"),
    #kuCCStcRecHitsEE = cms.InputTag("none", "none"),
-   #kuCCStcRecHitsEB = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEB"),
-   #kuCCStcRecHitsEE = cms.InputTag("kuCCEcalRecHit", "kuCCRecHitsEE"),
+   #kuCCStcRecHitsEB = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEB"),
+   #kuCCStcRecHitsEE = cms.InputTag("kuCCStcEcalRecHit", "kuCCStcRecHitsEE"),
    kuCCStcRecHitsEB = cms.InputTag("kuCCNativeEcalRecHit", "kuCCRecHitsEB"),
    kuCCStcRecHitsEE = cms.InputTag("kuCCNativeEcalRecHit", "kuCCRecHitsEE"),
 

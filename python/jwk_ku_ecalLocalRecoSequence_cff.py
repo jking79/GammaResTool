@@ -66,15 +66,15 @@ kuEcalLHCRecHit = ecalRecHitBase.clone(
 	EEuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
 	EBuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
 	EBrechitCollection = cms.string('kuRecHitsEB'),
-   skipTimeCalib = cms.bool(False),
-   # below params for LHCInfo plots form badder
-   killDeadChannels = cms.bool( True ),
-   recoverEBVFE = cms.bool( False ),
-   recoverEEVFE = cms.bool( False ),
-   recoverEBFE = cms.bool( False ),
-   recoverEEFE = cms.bool( False ),
-   recoverEEIsolatedChannels = cms.bool( False ),
-   recoverEBIsolatedChannels = cms.bool( False ),
+        skipTimeCalib = cms.bool(False),
+        # below params for LHCInfo plots form badder
+        killDeadChannels = cms.bool( True ),
+        recoverEBVFE = cms.bool( False ),
+        recoverEEVFE = cms.bool( False ),
+        recoverEBFE = cms.bool( False ),
+        recoverEEFE = cms.bool( False ),
+        recoverEEIsolatedChannels = cms.bool( False ),
+        recoverEBIsolatedChannels = cms.bool( False ),
 	)
 
 kuEcalRecHit = ecalRecHitBase.clone(
@@ -94,18 +94,18 @@ kuStcEcalRecHit = ecalRecHitBase.clone(
 
 kuStcEcalLHCRecHit = ecalRecHitBase.clone(
 	EErechitCollection = cms.string('kuStcRecHitsEE'),
-    EEuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
-    EBuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
-    EBrechitCollection = cms.string('kuStcRecHitsEB'),
-    skipTimeCalib = cms.bool(True),
-    # below params for LHCInfo plots from badder
-    killDeadChannels = cms.bool( True ),
-    recoverEBVFE = cms.bool( False ),
-    recoverEEVFE = cms.bool( False ),
-    recoverEBFE = cms.bool( False ),
-    recoverEEFE = cms.bool( False ),
-    recoverEEIsolatedChannels = cms.bool( False ),
-    recoverEBIsolatedChannels = cms.bool( False ),
+        EEuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
+        EBuncalibRecHitCollection = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
+        EBrechitCollection = cms.string('kuStcRecHitsEB'),
+        skipTimeCalib = cms.bool(True),
+        # below params for LHCInfo plots from badder
+        killDeadChannels = cms.bool( True ),
+        recoverEBVFE = cms.bool( False ),
+        recoverEEVFE = cms.bool( False ),
+        recoverEBFE = cms.bool( False ),
+        recoverEEFE = cms.bool( False ),
+        recoverEEIsolatedChannels = cms.bool( False ),
+        recoverEBIsolatedChannels = cms.bool( False ),
         )
 
 kuWtEcalRecHit = ecalRecHitBase.clone(

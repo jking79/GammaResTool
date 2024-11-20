@@ -47,7 +47,10 @@ class KUCMSTimeCalibration : KUCMSRootHelperBaseClass {
     const std::string detIDConfigEE;
     const std::string caliFileDir;
     const std::string caliRunConfig;
-
+    const std::string smearConfig;
+    const std::string lumi16Config;
+    const std::string lumi17Config;
+    const std::string lumi18Config;
 
 	struct DetIDStruct {
 
@@ -77,23 +80,44 @@ class KUCMSTimeCalibration : KUCMSRootHelperBaseClass {
 
 	struct CaliRunStruct {
 
-		TimeCaliTagStruct() {}
-		TimeCaliTagStruct( std::string tmpxtalmap, std::string tmpttmap, float tn, float ts, float tc, float tlumi ) 
-			: XtalMaps(tmpxtalmap), TTMaps(tmpttmap), smrn(tn), smrs(ts), smrc(tc), lumi(tlumi) {}	
+		CaliRunStruct() {}
+		CaliRunStruct( std::string tmpxtalmap, int tstart, int tend, float tlumi ) 
+			: XtalMaps(tmpxtalmap), startRun(tstart), endRun(tend), lumi(tlumi) {}	
 
+		int startRun;
+		int endRun;
 		std::string XtalMap;
-		std::string TTMap;
-		float smearn;
-		float smears;
-		float seamrc;
 		float lumi;
 
 	};//<<>>TimeCaliTagStruct
 
+    struct lumiRunStruct {
+
+		lumiRunStruct() {}
+		lumiRunStruct( int trun, int tfill, int tlumi )
+			: run(trun), fill(tfill), lumi(tlumi) {}
+
+		int run;
+		int fill;
+		int lumi
+
+	};//<<>>lumiRunStruct
+
+	struct smearParameters {
+
+		float noise;
+		float stochastic;
+		float constant;
+
+	}; //smearParameters
+
+
     std::map<UInt_t,DetIDStruct> DetIDMap;
-	std::map<int,CaliRunStruct> CaliRunMap;
-	std::map<std::string,caliMapStruct> XtalCaliMaps;
-    std::map<std::string,caliMapStruct> TTCaliMaps;
+	std::map<std::string,std::map<int,CaliRunStruct>> CaliRunMap; // str is tag, int is internal iov/era number 
+	std::map<std::string,caliMapStruct> XtalCaliMaps; // str is label for specific xtalcalimap - stored as ref in calirunmap
+    std::map<std::string,std::map<int,caliMapStruct>> TTCaliMaps; // used to set up XtalMap,  int is run, str is tag
+    std::map<int,lumiRunStruct> lumiRunMap; // int is run ( run is listed twice ? )
+    std::map<std::string,std::map<std::string,smearParameters>> smearMap; // 1st str is MC camp, 2nd str is PD tag
 
 	public:
 
@@ -101,13 +125,14 @@ class KUCMSTimeCalibration : KUCMSRootHelperBaseClass {
 	void SetupDetIDsEE();
 
 	void ReadCaliRunFile();
+	void ReadSmearFile();
 	void SaveCaliRunFile();
+	void SaveSmearFile();
 	void SetupCaliMaps();
-	//void ReadLumiFile();
-	//void SaveLumifile();
+	void ReadLumiFile( std::string lumifile );// only need to create caliRunMap entries
 
-	void upLoadCaliFile( std::string infilelist );
-	void upLoadLumiMap( std::string lumifile );
+	//void upLoadCaliFile( std::string infilelist ); same as read
+	//void upLoadLumiMap( std::string lumifile ); same as read
 
 	float getCalibration( uInt rhid, int run );
     float getSmearedTime( float rhtime, float rhamplitude, uInt rhid, int run );
@@ -127,12 +152,15 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
     detIDConfigEE = "ecal_config/fullinfo_v2_detids_EE.txt";
 	caliRunConfig = "ecal_config/calibrationRunConfig.txt";
 	caliFileDir = "cali_root_files/";
+	lumi16Config = "";
+	lumi17Config = "";
+	lumi18Config = "";
 
     SetupDetIDsEB();
 	SetupDetIDsEE();
 	ReadCaliRunFile();
 	SetupXtalMaps();
-	SetupTTMaps();
+	//SetupTTMaps();
 
 };//<<>>KUCMSTimeCalibration()   
 
@@ -145,12 +173,12 @@ KUCMSTimeCalibration::~KUCMSTimeCalibration(){
 
 	}//<<>>for( auto calitag : TimeCaliTagMap )
 
-    for( auto& calimap : TTMaps ){
-
-        if( calimap.second.histFile ) calimap.second.histFile.Close();
-        if( calimap.second.treeFile ) calimap.second.treeFile.Close();
-
-    }//<<>>for( auto calitag : TimeCaliTagMap )
+    //for( auto& calimap : TTMaps ){
+    //
+    //    if( calimap.second.histFile ) calimap.second.histFile.Close();
+    //    if( calimap.second.treeFile ) calimap.second.treeFile.Close();
+    //
+    //}//<<>>for( auto calitag : TimeCaliTagMap )
 
 	SaveCaliRunFile();
 
@@ -192,7 +220,7 @@ void KUCMSTimeCalibration::SetupDetIDsEE(){
 
 }//<<>>void SetupDetIDsEE( std::map<UInt_t,DetIDStruct> &DetIDMap )
 
-void KUCMSTimeCalibration::upLoadLumiFile( std::string lumifile ){
+void KUCMSTimeCalibration::ReadLumiFile( std::string lumifile ){
 
     std::ifstream infile( lumifile, std::ios::in);
     std::string infilestr;
@@ -211,28 +239,23 @@ void KUCMSTimeCalibration::upLoadLumiFile( std::string lumifile ){
 			std::stringstream sfil( runfill.substr( 7, 10 ) );
 			sfil >> fill;		
 
-			if( CaliRunMap.find(run) == CaliRunMap.end() ){
-				
-				CaliRunStruct newrun( NULL, NULL, "none", "none", 0, 0, 0, lumi );
- 				CaliRunMap[run] = newrun;
+			lumiRunStruct newrun( run, fill, lumi );
+ 			lumiRunMap[run] = newrun;
 
-			} else CaliRunMap[run].lumi = recorded;
-		
 		}//<<>>if( infilestr[0] != '#' )
 
 	}//<<>>while(std::getline(iflstream,infilestr))	
-
 
 }//<<>>void KUCMSTimeCalibration::upLoadLumiFile( std::string lumifile )
 
 void KUCMSTimeCalibration::ReadCaliRunFile(){
 
     std::ifstream infile( timeTagConfig, std::ios::in);
-    std::string TTCaliMapName, XtalCaliMapName;
-	int run;
-    float n, s, c, lumi;
-    while( infile >> run >> TTCaliMapName >> XtalCaliMapName >> n >> s >> c >> lumi ){
-		CaliRunMap[run] = { TTCaliMapName, XtalCaliMapName, n, s, c, lumi };
+    std::string XtalCaliMapName, tag;
+	int srun, erun, iov;
+    float lumi;
+    while( infile >> tag >> iov >> srun >> erun >> XtalCaliMapName >> lumi ){
+		CaliRunMap[tag][iov] = { XtalCaliMapName, srun, erun, lumi };
     }//<<>>while (infile >>
 
 }//<<>>void ReadTimeCaliTagFile()
@@ -241,16 +264,16 @@ void KUCMSTimeCalibration::SetupCaliMaps(){
 
 	for( auto& calirunmap : CaliRunMap ){
 
-		std::string ttfilename( calirunmap.second.TTCaliMapName );
-		if( ttfilename != "none" && TTMaps.find(ttfilename) == TTMaps.end() ){ 
-			TFile* caliFile = TFile::Open( ttfilename.c_str(), "read" );
-			TH2F* hist = (TH2F*)caliFile->Get("AveTTRecTimeMap");
-			caliMapStruct newmap( hist, caliFile );
-			TTMaps[ttfilename] = newmap;
-		}//<<>>if( TTMaps.find(calirunmap.second.TTCaliMapName) == TTMaps.end() )
+		//std::string ttfilename( calirunmap.second.TTCaliMapName );
+		//if( ttfilename != "none" && TTMaps.find(ttfilename) == TTMaps.end() ){ 
+		//	TFile* caliFile = TFile::Open( ttfilename.c_str(), "read" );
+		//	TH2F* hist = (TH2F*)caliFile->Get("AveTTRecTimeMap");
+		//	caliMapStruct newmap( hist, caliFile );
+		//	TTMaps[ttfilename] = newmap;
+		//}//<<>>if( TTMaps.find(calirunmap.second.TTCaliMapName) == TTMaps.end() )
 
         std::string xtfilename( calirunmap.second.XtalCaliMapName );
-        if( xtfilename != "none" && TTMaps.find(xtfilename) == XtalMaps.end() ){
+        if( xtfilename != "none" && XTMaps.find(xtfilename) == XtalMaps.end() ){
             TFile* caliFile = TFile::Open( xtfilename.c_str(), "read" );
             TH2F* hist = (TH2F*)caliFile->Get("AveXtalRecTimeMap");
             caliMapStruct newmap( hist, caliFile );
@@ -277,13 +300,14 @@ float KUCMSTimeCalibration::getCalibration( uInt rhid ){
 	if( not validCurrentTag ){ std::cout << "No current tag set." << std::endl; return 0.f; }
 	if( not isEB ){ std::cout << "Calibration for EE is not supported." << std::endl; return 0.f; }
 
-	int ttphi = (iPhi-1)/5;
-    int ttabseta = (std::abs(iEta)-1)/5;
-    int tteta = ( iEta < 0 ) ? ttabseta : ttabseta + 17;
+	//int ttphi = (iPhi-1)/5;
+    //int ttabseta = (std::abs(iEta)-1)/5;
+    //int tteta = ( iEta < 0 ) ? ttabseta : ttabseta + 17;
     float xtaltime = CurrentTag.XtalCaliMap->GetBinContent( iEta + 86, iPhi );
-    float tttime = CurrentTag.TTCaliMap->GetBinContent( tteta, ttphi );
+    //float tttime = CurrentTag.TTCaliMap->GetBinContent( tteta, ttphi );
 
-	return xtaltime + tttime;
+	//return xtaltime + tttime;
+    return xtaltime
 
 }//<<>>float KUCMSTimeCalibration::getCalibration( std::string tag )
 

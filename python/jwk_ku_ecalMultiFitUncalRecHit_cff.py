@@ -251,6 +251,8 @@ kuCCEcalMultiFitUncalibRecHit = ecalMultiFitUncalibRecHitBase.clone(
               # decide which algorithm to be use to calculate the jitter
               #timealgo = cms.string("RatioMethod"),
               timealgo = cms.string("crossCorrelationMethod"),
+              timeCalibTag = cms.ESInputTag("","CC"),
+              timeOffsetTag = cms.ESInputTag("","CC"),
 
               # for ratio method
               EBtimeFitParameters = cms.vdouble(-2.015452e+00, 3.130702e+00, -1.234730e+01, 4.188921e+01, -8.283944e+01, 9.101147e+01, -5.035761e+01, 1.105621e+01),
@@ -336,6 +338,7 @@ kuCCNativeEcalMultiFitUncalibRecHit = _mod.ecalMultiFitUncalibRecHitProducer.clo
 #import FWCore.ParameterSet.Config as cms
 #from Configuration.ProcessModifiers.ecal_cctiming_cff import ecal_cctiming
 ecal_ccunrhtiming =  cms.Modifier()
+#ecal_ccunrhtiming.toModify(ecalMultiFitUncalibRecHitBase,
 ecal_ccunrhtiming.toModify(kuCCNativeEcalMultiFitUncalibRecHit,
      algoPSet = dict(timealgo = 'crossCorrelationMethod',
          EBtimeNconst = 25.5,

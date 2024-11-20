@@ -33,10 +33,11 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'/ecalTiming/gammares_llpana_v2/'
 #command = eosll+mspc+'/ecalTiming/gammares_llpana_pd/'
 #command = eosll+mspc+'ecalTiming/gammares_llpana_mc/'
-command = eosll+mspc+'ecalTiming/gammares_llpana_pd/'
+#command = eosll+mspc+'ecalTiming/gammares_llpana_pd/'
 #command = eosll+mspc+'ecalTiming/gammares_ccval/'
 #command = eosll+mspc+'ecalTiming/gammares_r24fprompt/'
-command = eosll+mspc+'ecalTiming/gammares_ecaldpg_tevjets/'
+#command = eosll+mspc+'ecalTiming/gammares_ecaldpg_tevjets_prompt_v3/'
+command = eosll+mspc+'ecalTiming/gammares_ecaldpg_tevjets_prompt_oot3_v3/'
 
 #version = 'Run2018D'
 #version = 'GJets'
@@ -154,7 +155,7 @@ for line2 in targdirs :
     		if rootfile in lline : filelist.append(subdir2+lline)
    
     select =  line2.split("Tune")
-    outfile = 'kuntuple_' + select[0] + '_v21.txt'
+    outfile = 'kuntuple_' + select[0] + '_p3_v21.txt'
     #print( outfile )
     outf = open( outfile, 'w' )
     for thefile in filelist:
