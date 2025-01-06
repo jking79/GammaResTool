@@ -12,6 +12,7 @@ test/myWorkingArea/
 test/myWorkSpace/
 test/compWorkingArea/
 *_log*.txt
+*.obj
 *.root
 *.pyc
 *.log

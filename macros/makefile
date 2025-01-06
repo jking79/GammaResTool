@@ -21,8 +21,9 @@ p3=wc_ku_InterCali_aveRecHit_isoot_kucc_fliter_red
 p4=wc_ku_plot2dResolution_wGausErr_mf
 p5=wc_ku_timefitter_wErr
 p6=hist_maker_egammares_diag
-p7= make_cali_list
+p7=make_cali_list
 p8=wc_ku_InterCali_aveRecHit_isoot_kucc_fliterFit_red
+p9=fillKUCMSTimeCalibration
 
 all: $(p2) 
 #$(p2) $(p3) $(p6) $(p22)
@@ -51,4 +52,7 @@ $(p7): $(p7).cpp
 
 $(p8): $(p8).cpp
 	$(CC) -o $(p8).obj $(p8).cpp $(RTCFLAGS) $(RTGLIBS)
+
+$(p9): $(p9).cpp
+	$(CC) -o $(p9).obj $(p9).cpp $(RTCFLAGS) $(RTGLIBS)
 

@@ -9,7 +9,7 @@
 //--------------------   hh file -------------------------------------------------------------
 //---------------------------------------------------------------------------------------------
 
-#include "./KUCMSHelperBaseClass.hh"
+#include "KUCMSHelperBaseClass.hh"
 
 // ROOT/
 
@@ -49,7 +49,7 @@
 #ifndef KUCMSRootHelperFunctionsH
 #define KUCMSRootHelperFunctionsH 
 
-class KUCMSRootHelperBaseClass : KUCMSHelperBaseClass {
+class KUCMSRootHelperBaseClass : public KUCMSHelperBaseClass {
 
 	public:
 

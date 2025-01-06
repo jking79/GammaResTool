@@ -22,8 +22,8 @@
 #include "gammaResTool.hh"
 using namespace std;
 
-#define DEBUG true
-//#define DEBUG false
+//#define DEBUG true
+#define DEBUG false
 
 //
 // constructors and destructor

@@ -1,0 +1,45 @@
+//////////////////////////////////////////////////////////////////////
+// -*- C++ -*-
+//
+//
+// Original Author:  Jack W King III
+//         Created:  Fri, 20 Dec 2024
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "KUCMSTimeCalibration.hh"
+// ------------------------------------------- main function ------------------------------------------------------------
+int main ( int argc, char *argv[] ){
+
+	KUCMSTimeCalibration theCali;
+
+    ///////////////////////////////////////////////////////////////////
+    // this section should be moved to run file --- DONE --------------
+    // no need to "recreate" cali maps every time, they will be saved -
+    ///////////////////////////////////////////////////////////////////
+
+    // for mc use "mc" for TTIov and XIov
+
+    //-----//////////  making tt cali file :
+    std::string r2ulTag( "r2ul" );
+    std::string mctag( "mc" );
+    std::string xiovtag( "prompt" );
+
+    theCali.setTTIov( r2ulTag );
+    std::string inputfilename( "kucmsTimeCaliTestFile.txt" );
+    theCali.makeTTCaliMapEGR( inputfilename );
+    //-----//////////  making xtal cali file :
+    theCali.setXIov( xiovtag );
+    // same as above std::string inputfilename( "someEGRfile.txt" );
+    theCali.makeXCaliMapEGR( inputfilename );
+
+    // make smear maps
+
+    /////////////////////////////////////////////////////////////////////
+    //-------------------------------------------------------------------
+	
+	std::cout << " -- Thats All Folks !!!!!!!!! " << std::endl;
+
+    return 1;
+
+}//<<>>int main ( int argc, char *argv[] )

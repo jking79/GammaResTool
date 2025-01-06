@@ -60,9 +60,12 @@ def subcrab( runs, events, reqmem ):
 
         # External files needed by CRAB
         inputDir     = ''
-        inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
+        #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
         #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
         #inputJSON    = 'Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
+        inputJSON     = 'Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
+        #inputJSON     = 'Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'
+        #inputJSON     = 'Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'
         #inputJSON    = ''
         #--------------------------------------------------------
         # This is the base config:
@@ -86,12 +89,12 @@ def subcrab( runs, events, reqmem ):
         #config.Data.useParent      = True
 	#config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
-        #config.Data.lumiMask     = inputDir+inputJSON
+        config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
 
-        config.Data.unitsPerJob  =  100000 # for auto job splitting
+        config.Data.unitsPerJob  =  150000 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
 
@@ -107,7 +110,7 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            ['/JetMET1/Run2024F-PromptReco-v1/MINIAOD'],  
+            #['/JetMET1/Run2024F-PromptReco-v1/MINIAOD'],  
             #['/JetMET1/Run2024F-ECAL_CC_HCAL_DI-v1/MINIAOD'],    
             ##['/EGamma0/Run2024A-PromptReco-v1/MINIAOD'], 	# 378927-378962 52.6M
             #['/EGamma0/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379350	0.54T
@@ -146,16 +149,45 @@ def subcrab( runs, events, reqmem ):
             #['/MET/Run2017E-17Nov2017-v1/MINIAOD']
             #['/EGamma/Run2018D-22Jan2019-v2/MINIAOD']
 
+                        # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/MINIAOD
+
+            #['/EGamma/Run2018A-15Feb2022_UL2018-v1/MINIAOD',''],
+            ['/EGamma/Run2018B-15Feb2022_UL2018-v1/MINIAOD',''],
+            #['/EGamma/Run2018C-15Feb2022_UL2018-v1/MINIAOD',''],
+            #['/EGamma/Run2018D-15Feb2022_UL2018-v1/MINIAOD',''],
+
+            # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/AOD
+
+
+                        # Dataset: /DoubleEG/Run2016-21Feb2020_UL2016-/MINIAOD
+
+            #['/DoubleEG/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD',''],
+            #['/DoubleEG/Run2016C-21Feb2020_UL2016_HIPM-v1/MINIAOD',''],
+            #['/DoubleEG/Run2016D-21Feb2020_UL2016_HIPM-v1/MINIAOD',''],
+            #['/DoubleEG/Run2016E-21Feb2020_UL2016_HIPM-v1/MINIAOD',''],
+            #['/DoubleEG/Run2016F-21Feb2020_UL2016-v1/MINIAOD',''],
+            #['/DoubleEG/Run2016G-21Feb2020_UL2016-v1/MINIAOD',''],
+            #['/DoubleEG/Run2016H-21Feb2020_UL2016-v1/MINIAOD',''],
+
+                        # Dataset: /DoubleEG/Run2017-09Aug2019_UL2017-/MINIAOD
+
+            #['/DoubleEG/Run2017B-09Aug2019_UL2017-v1/MINIAOD',''],
+            #['/DoubleEG/Run2017C-09Aug2019_UL2017-v1/MINIAOD',''],
+            #['/DoubleEG/Run2017D-09Aug2019_UL2017-v1/MINIAOD',''],
+            #['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/MINIAOD',''],
+            #['/DoubleEG/Run2017F-09Aug2019_UL2017-v1/MINIAOD',''],
+
+
 	    ]
  
         for inDO in inputDataAndOpts:
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
-            #primaryDataset = inDO[0].split('/')[1]
-            primaryDataset = (inDO[0].split('/')[1]).split('_TuneCP5')[0]
-            #runEra         = inDO[0].split('/')[2]
+            primaryDataset = inDO[0].split('/')[1]
+            #primaryDataset = (inDO[0].split('/')[1]).split('_TuneCP5')[0]
+            runEra         = inDO[0].split('/')[2]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
-            runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
+            #runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
             dataset	   = inDO[0].split('/')[3]
 
             #trial          = 'gammares_ratio_126_v2'
@@ -163,7 +195,8 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
             #trial          = 'gammares_mc'
             #trial          = 'gammares_llpana'
-            trial          = 'gammares_r24fprompt'
+            #trial          = 'gammares_r24fprompt'
+            trial          = 'gammares_cali'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
@@ -172,12 +205,15 @@ def subcrab( runs, events, reqmem ):
             config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_request"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra
 
+#>>>>>>>>>>>>>  Run2 UL 16/17/18
+            config.JobType.pyCfgParams   = ['globalTag=globalTag=106X_dataRun2_v36', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+
 #>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
             #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v6', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>  2018 EOY
             #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>> 2024 tested
-            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v4', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v4', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad

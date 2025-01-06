@@ -59,7 +59,7 @@ class KUCMSHelperBaseClass {
 	//KUCMSHelperBaseClass(){};
 	//~KUCMSHelperBaseClass(){};
 
-	const auto sortByPt = [](auto & obj1, auto & obj2) {return obj1.pt() > obj2.pt();};
+	//auto sortByPt = [](auto & obj1, auto & obj2) {return obj1.pt() > obj2.pt();};
 
 	//
 	// The "crystalball" function for ROOT 5.x (mimics ROOT 6.x).
@@ -298,7 +298,7 @@ class KUCMSHelperBaseClass {
 			std::stringstream ss(str);
 			ss >> nbins >> low >> high;
 			double bin_width = (high-low)/nbins;
-			for (Int_t ibin = 0; ibin <= nbins; ibin++){ bins.push_back(low+ibin*bin_width); }
+			for (int ibin = 0; ibin <= nbins; ibin++){ bins.push_back(low+ibin*bin_width); }
 
 		} else if(str.find("VARIABLE") != std::string::npos) {
 
