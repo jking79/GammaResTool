@@ -89,11 +89,12 @@ struct caliHistStruct {
     
     caliHistStruct(){}
     caliHistStruct( TH2F* thist, std::string histname, bool isnew )
-        : h2f(thist), histName(histname), isNew(isnew) {}
+        : h2f(thist), histName(histname), isNew(isnew) { isResHist = false; }
     
     TH2F* h2f;
     std::string histName;
 	bool isNew;
+	bool isResHist;
 
 };//<<>>struct caliHistStruct
 
@@ -129,10 +130,10 @@ class CaliRunClass : public KUCMSRootHelperBaseClass {
     std::map<uInt,sumCnt> sumCntMap;
     std::map<uInt,float> meanMap;
     std::map<uInt,float> errMap;
-	std::map<UInt_t,TH1F*> detIdHists;
+	std::map<uInt_t,TH1F*> detIdHists;
 	//detIdHists[cmsswId] = new TH1F(histname.c_str(),"AveXtalTimeDist;XtalTime [ns]",500,-5,5);	
 
-	void fillSumCnt( uInt detID, float val, int cnt = 1 ); 
+	void fillSumCnt( uInt detID, float val, int cnt = 1 );
 	void makeMeanMap( bool filter = false );
 
 };//<<>>TimeCaliTagStruct
@@ -143,9 +144,13 @@ CaliRunClass::CaliRunClass( std::string tmpxtalmap, int tstart, int tend, int la
 
 CaliRunClass::~CaliRunClass(){
 
-	std::cout << "Wrapping CaliRunClass " << histMapName << std::endl;
+	//std::cout << "Wrapping CaliRunClass " << histMapName << std::endl;
 	for( auto& detidhist : detIdHists ){ delete detidhist.second; }
-	std::cout << "Finished Wrapping CaliRunClass" << std::endl;
+	detIdHists.clear();
+	sumCntMap.clear();
+	meanMap.clear();
+	errMap.clear();
+	//std::cout << "Finished Wrapping CaliRunClass" << std::endl;
 
 }//<<>>CaliRunClass::~CaliRunClass()
 
@@ -190,13 +195,15 @@ void CaliRunClass::fillSumCnt( uInt detid, float val, int cnt ){
         //sumCntMap[detid].sumsqr = val*val;
 		//sumCntMap[detid].cnt = cnt; 
 	}//<<>>if( sumCntMap.find(detid) != sumCntMap.end() )
-	if( detIdHists.find(detid) != detIdHists.end() ){ detIdHists[detid]->Fill(val); }
-	else {
-		std::string histname = addstr( "XtalTimeHist", std::to_string(detid) );
-		detIdHists[detid] = new TH1F(histname.c_str(),"AveXtalTimeDist;XtalTime [ns]",500,-5,5);
-		detIdHists[detid]->Sumw2();
-		detIdHists[detid]->Fill(val);
-	}//<<>>if( detIdHists.find(detid) != detIdHists.end() )
+
+	//if( detIdHists.find(detid) != detIdHists.end() ){ detIdHists[detid]->Fill(val); std::cout << " -- hist Fill " << detid << " with " << val << std::endl; }
+	//else {
+	//	//std::cout << " -- hist Make " << detid << " with " << val << std::endl;
+	//	std::string histname = histMapName + "_SumCntHist_" + std::to_string( startRun ) + "_" + std::to_string(detid) ;
+	//	detIdHists[detid] = new TH1F(histname.c_str(),"AveXtalTimeDist;XtalTime [ns]",500,-5,5);
+	//	detIdHists[detid]->Sumw2();
+	//	detIdHists[detid]->Fill(val);
+	//}//<<>>if( detIdHists.find(detid) != detIdHists.end() )
 
 }//<<>>void CaliRunClass::fillSumCnt( uInt detID, float sum, int cnt )
 
@@ -311,6 +318,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 	void makeTTCaliMapEGR( std::string inputFileName ){ makeCaliMapsEGR( inputFileName, true ); }; 
 	void makeXCaliMapEGR( std::string inputFileName ){ makeCaliMapsEGR( inputFileName, false ); };
 
+	void plot2dResolution();
+
 };//<<>>class KUCMSTimeCalibration : KUCMSRootHelperBaseClass
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,6 +328,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 
 KUCMSTimeCalibration::KUCMSTimeCalibration(){
 
+    std::cout << "Initiating KUCMSTimeCalibrationClass" << std::endl;
 	// parameter and setup hardcoded in constructer - some of this needs moved to "run" code
 
     caliFileDir = "ecal_config/";// move
@@ -331,20 +341,22 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
     xtalHistMapName = "_X_";
     ttHistMapName = "_TT_";
 
+    std::cout << " - opening caliHistsTFile " << std::endl;
     caliTFileName = caliFileDir + "caliHistsTFile.root";// name configurable ?
 	caliTFile = TFile::Open( caliTFileName.c_str(), "UPDATE" );
+    caliTFile->cd();
 
     curTag = "default";
 	curTTIov = "default";
     curXIov = "default";
 
-	maptypes = {"MeanMap","ErrMap","SumMap","Sum2Map","OccMap"};
+	maptypes = {"_MeanMap","_ErrMap","_SumMap","_Sum2Map","_OccMap"};
 
 	updated = false;
 
+    std::cout << " - setup DetID & IOV Maps " << std::endl;
     SetupDetIDsEB();
     SetupDetIDsEE();
-    SetupIovMaps(); // this info hardcoded from DB
 
     getRandom = new TRandom();
     getRandom->SetSeed(0);
@@ -374,11 +386,16 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
 	//-------------------------------------------------------------------
 */
 
-	//ReadCaliRunFile();
-	//ReadTTRunFile();
+    std::cout << " - reading in TT & X cali run files " << std::endl;
+	ReadCaliRunFile();
+	ReadTTRunFile();
 	//ReadSmearFile();
 
+    //std::cout << " - loading cali hists " << std::endl;
 	//SetupCaliMaps();
+	LoadCaliHists();
+    //std::cout << " - making cali maps " << std::endl;
+	makeCaliMaps();
 
 }//<<>>KUCMSTimeCalibration()   
 
@@ -390,9 +407,10 @@ KUCMSTimeCalibration::~KUCMSTimeCalibration(){
 
 	SaveCaliRunFile();
 	SaveTTRunFile();
-	//SaveSmearFile();
+    //SaveSmearFile();
 
-	//caliTFile.Close();
+	makeCaliHists();
+	SaveCaliHists();
 
     std::cout << "Finished Wrapping KUCMSTimeCalibrationClass" << std::endl;
 
@@ -502,7 +520,7 @@ void KUCMSTimeCalibration::SetupIovMaps(){
 	mcIovMap[1] = 999999;
 	iovMaps["mc"] = mcIovMap;
 
-    float minttlumi = 10000000;// in /ub
+    float minttlumi = 1000000000;// in /ub
     std::string r2ulTag( "r2ul" );
     std::string lumiUL16Config = "UL2016_runlumi.txt";
     std::string lumiUL17Config = "UL2017_runlumi.txt";
@@ -542,9 +560,10 @@ void KUCMSTimeCalibration::SetupTTIovMap( std::string tag, float minTTLumi ){
 
 void KUCMSTimeCalibration::ReadLumiFile( std::string lumifile, std::string tag ){
 
+	std::cout << " - Read LumiFile : " << lumifile << std::endl;
     std::ifstream infile( lumifile, std::ios::in);
+	if( not infile.is_open() ){ std::cout << " -- " << lumifile << " not opened. "  << std::endl; return; }
     std::string infilestr;
-	if( not infile.is_open() ){ std::cout << "Failed to open file !!! " << std::endl; return; }
 	while( std::getline( infile, infilestr ) ){
 
 		if( infilestr[0] != '#' ){
@@ -555,10 +574,12 @@ void KUCMSTimeCalibration::ReadLumiFile( std::string lumifile, std::string tag )
     		float delivered, recorded;
 
 			ss >> runfill >> date >> time >> nls >> ncms >> delivered >> recorded;
-			std::stringstream srun( runfill.substr( 0, 5 ) );
+			auto splitRunFill = splitString( runfill, ":" );
+			std::stringstream srun( splitRunFill[0] );
 			srun >> run;
-			std::stringstream sfil( runfill.substr( 7, 10 ) );
+			std::stringstream sfil( splitRunFill[1] );
 			sfil >> fill;		
+			//std::cout << " --- " << run << " " << fill  << std::endl;
 
  			lumiRunMaps[tag][run] = { run, fill, recorded };
 
@@ -570,12 +591,14 @@ void KUCMSTimeCalibration::ReadLumiFile( std::string lumifile, std::string tag )
 
 void KUCMSTimeCalibration::ReadCaliRunFile(){
 
+	std::cout << " - Reading CaliRunFile " << caliRunConfig << std::endl;
     std::ifstream infile( caliRunConfig, std::ios::in);
+    if( not infile.is_open() ){ std::cout << " -- " << caliRunConfig << " not opened. "  << std::endl; return; }
     std::string caliMapName, tag;
-    if( not infile.is_open() ){ std::cout << "Failed to open file !!! " << std::endl; return; }
 	int srun, erun, lrun;
     float lumi;
     while( infile >> tag >> caliMapName >> srun >> erun >> lrun >> lumi ){
+        //std::cout << " -- " << tag << " " << caliMapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
 		CaliRunMapSet[tag][srun] = { caliMapName, srun, erun, lrun, lumi };
         CaliRunMapSet[tag][srun].isNew = false;
     }//<<>>while (infile >>
@@ -587,7 +610,7 @@ void KUCMSTimeCalibration::SaveCaliRunFile(){
 
     std::cout << " - Saving CaliRunFile " << std::endl;
     std::ofstream outfile( caliRunConfig, std::ios::out | std::ios::trunc );
-    if( not outfile.is_open() ){ std::cout << "Failed to open file !!! " << std::endl; return; }
+    if( not outfile.is_open() ){ std::cout << " -- " << caliRunConfig << " not opened. "  << std::endl; return; }
 	for( auto& calirunmap : CaliRunMapSet ){
 
 		std::string tag = calirunmap.first;
@@ -599,7 +622,7 @@ void KUCMSTimeCalibration::SaveCaliRunFile(){
             int lrun = calirunsct.second.lastRun;
         	float lumi = calirunsct.second.lumi;
 
-            std::cout << tag << " " << mapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
+            //std::cout << tag << " " << mapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
             outfile << tag << " " << mapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
 
 		}//<<>>for( auto& calirunsct : calirunmap[tag] )
@@ -611,12 +634,14 @@ void KUCMSTimeCalibration::SaveCaliRunFile(){
 
 void KUCMSTimeCalibration::ReadTTRunFile(){
 
+    std::cout << " - Reading TTCaliRunFile " << caliTTConfig << std::endl;
     std::ifstream infile( caliTTConfig, std::ios::in);
+    if( not infile.is_open() ){ std::cout << " -- " << caliTTConfig << " not opened. "  << std::endl; return; }
     std::string caliMapName, tag;
     int srun, erun, lrun;
     float lumi;
-    if( not infile.is_open() ){ std::cout << "Failed to open file !!! " << std::endl; return; }
     while( infile >> tag >> caliMapName >> srun >> erun >> lrun >> lumi ){
+        //std::cout << " -- " << tag << " " << caliMapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
         TTCaliRunMapSet[tag][srun] = { caliMapName, srun, erun, lrun, lumi };
         TTCaliRunMapSet[tag][srun].isNew = false;
     }//<<>>while (infile >>
@@ -641,7 +666,7 @@ void KUCMSTimeCalibration::SaveTTRunFile(){
         	std::string mapName = calirunsct.second.histMapName;
         	float lumi = calirunsct.second.lumi;
 			int lrun = calirunsct.second.lastRun;        
-			std::cout << tag << " " << mapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
+			//std::cout << " -- " << tag << " " << mapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
         	outfile << tag << " " << mapName << " " << srun << " " << erun << " " << lrun << " " << lumi << std::endl;
     
 		}//<<>>for( auto& calirunsct : calirunmap )
@@ -693,20 +718,31 @@ void KUCMSTimeCalibration::SaveSmearFile(){
 //		SumMap + pd/camp/tag name + start run
 //		Sum2Map + pd/camp/tag name + start run
 //      OccMap + pd/camp/tag name + start run
-// std::vector<std::string> mtype = {"MeanMap","ErrMap","SumMap","Sum2Map","OccMap"};
+//     maptypes = {"_MeanMap","_ErrMap","_SumMap","_Sum2Map","_OccMap"};
+// std::string tfilename = calirunmap.first + "_" + std::to_string( calirunsct.first ) + ttHistMapName;
+//            //calirunsct.second.histMapName = tfilename;
+//            std::string sfilename = tfilename + "SumMap";
+//            std::string s2filename = tfilename + "Sum2Map";
+//            std::string ofilename = tfilename + "OccMap";
+//            std::string mfilename = tfilename + "MeanMap";
+//            std::string efilename = tfilename + "ErrMap";
 
 void KUCMSTimeCalibration::LoadCaliHists(){
 
+    std::cout << " - Loading CaliHists " << std::endl;
 	caliTFile->cd();
 	for( auto& calirunmap : TTCaliRunMapSet ){
 		for( auto& calirunsct : calirunmap.second ){
 			std::string ttfilename( calirunsct.second.histMapName );
 			for( auto mapname : maptypes ){
-				std::string filename = ttfilename + ttHistMapName + mapname;
-				if( ttfilename != "none" && CaliHists.find(filename) == CaliHists.end() ){ 
+				std::string filename = ttfilename + mapname;
+				//std::cout << " -- loading : " << filename << " ( " << ttfilename << " ) ";
+				if( ttfilename != "none" && CaliHists.find(filename) == CaliHists.end() ){
 					TH2F* hist = (TH2F*)caliTFile->Get(filename.c_str());
-					CaliHists[filename] = { hist, filename, false }; // histfile histname isnew isopen lastrun
+                    //std::cout << " Found " << hist << std::endl;
+					if( hist ) CaliHists[filename] = { hist, filename, false }; // histfile histname isnew isopen lastrun
 				}//<<>>if( TTMaps.find(calirunmap.second.TTCaliMapName) == TTMaps.end() )
+				//else { std::cout << " Not Found " << std::endl; }
 			}//<<>>for( auto mapname : mtype )
 		}//<<>>for( auto& calirunsct : calirunmap )
     }//<<>>for( auto& calirunmap : CaliRunMapSet )
@@ -715,10 +751,12 @@ void KUCMSTimeCalibration::LoadCaliHists(){
         for( auto& calirunsct : calirunmap.second ){
         	std::string xtfilename( calirunsct.second.histMapName );
             for( auto mapname : maptypes ){
-                std::string filename = xtfilename + xtalHistMapName + mapname;
+                std::string filename = xtfilename + mapname;
+                //std::cout << " -- loading : " << filename << " ( " << xtfilename << " ) ";
                 if( xtfilename != "none" && CaliHists.find(filename) == CaliHists.end() ){
                     TH2F* hist = (TH2F*)caliTFile->Get(filename.c_str());
-                    CaliHists[filename] = { hist, filename, false }; // histfile histname isnew isopen lastrun
+                    //std::cout << " Found " << hist << std::endl;
+                    if( hist ) CaliHists[filename] = { hist, filename, false }; // histfile histname isnew isopen lastrun
                 }//<<>>if( TTMaps.find(calirunmap.second.TTCaliMapName) == TTMaps.end() )
             }//<<>>for( auto mapname : mtype )
         }//<<>>for( auto& calirunsct : calirunmap )
@@ -726,13 +764,17 @@ void KUCMSTimeCalibration::LoadCaliHists(){
 
 }//<<>>void KUCMSTimeCalibration::SetupCaliHists()
 
+//    TH2F* h2f;
+//    std::string histName;
+//    bool isNew;
+
 void KUCMSTimeCalibration::SaveCaliHists(){
 
+    std::cout << " - Saving CaliHists " << std::endl;
 	caliTFile->cd();
-	caliTFile->Close();
-	caliTFile = TFile::Open( caliTFileName.c_str(), "RECREATE" );
 	for( auto& calihist : CaliHists ){
 
+	//std::cout << " -- saving : " << calihist.second.h2f << " " << calihist.second.histName << " " << calihist.second.isNew << std::endl;
 		calihist.second.h2f->Write();	
 		delete calihist.second.h2f;
 
@@ -747,7 +789,7 @@ void KUCMSTimeCalibration::SaveCaliHists(){
 //      SumMap + pd/camp/tag name + start run
 //      Sum2Map + pd/camp/tag name + start run
 //      OccMap + pd/camp/tag name + start run
-// std::vector<std::string> mtype = {"MeanMap","ErrMap","SumMap","Sum2Map","OccMap"};
+// maptypes = {"_MeanMap","_ErrMap","_SumMap","_Sum2Map","_OccMap"};
 //    std::map<uInt,sumCnt> sumCntMap;
 //    std::map<uInt,float> meanMap;
 //    std::map<uInt,float> errMap;
@@ -756,67 +798,83 @@ void KUCMSTimeCalibration::SaveCaliHists(){
 void KUCMSTimeCalibration::makeCaliHists(){
 
 	// assumed : all current hists are cleared and we remake everything ( maps in runsets are primary )
+	std::cout << "Deleting Exisiting CaliHists " << std::endl;
 	for( auto& entry : CaliHists ){ delete entry.second.h2f; }
+    std::cout << "Clearing CaliHists " << std::endl;
 	CaliHists.clear();
 
+    std::cout << "Recreate TFile " << std::endl;
+    caliTFile->cd();
+    caliTFile->Close();
+    caliTFile = TFile::Open( caliTFileName.c_str(), "RECREATE" );
+    caliTFile->cd();
+
+    std::cout << "Making CaliHists from CaliRunMapSet" << std::endl;
     for( auto& calirunmap : CaliRunMapSet ){
         for( auto& calirunsct : calirunmap.second ){
-			std::string tfilename = calirunmap.first + "_" + std::to_string( calirunsct.first ) + xtalHistMapName;
-			calirunsct.second.histMapName = tfilename;
-            std::string sfilename = tfilename + "SumMap";
-            std::string s2filename = tfilename + "Sum2Map";
-            std::string ofilename = tfilename + "OccMap";
-            std::string mfilename = tfilename + "MeanMap";
-            std::string efilename = tfilename + "ErrMap";
+			std::string tfilename( calirunsct.second.histMapName );
+			//std::string tfilename = calirunmap.first + "_" + std::to_string( calirunsct.first ) + xtalHistMapName;
+			//calirunsct.second.histMapName = tfilename;
+            std::string sfilename = tfilename + maptypes[2];
+            std::string s2filename = tfilename + maptypes[3];
+            std::string ofilename = tfilename + maptypes[4];
+            std::string mfilename = tfilename + maptypes[0];
+            std::string efilename = tfilename + maptypes[1];
             for( auto mapname : maptypes ){
                 std::string filename = tfilename + mapname;
-				TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),171,-85.5,85.5,360,0.5,360.5);
+				//std::cout << " --- creating TH2F for " << filename << std::endl;
+				TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),171,-85,86,360,1,361);
 				CaliHists[filename] = { hist, filename, true }; // histfile histname isnew isopen lastrun
             }//<<>>for( auto mapname : mtype )
+			//std::cout << " -- filling hists for " << tfilename << std::endl;
 			for( auto& entry : calirunsct.second.sumCntMap ){
 				DetIDStruct idinfo = DetIDMap[entry.first];
-				CaliHists[sfilename].h2f->Fill( idinfo.i2 + 86, idinfo.i1, entry.second.sum );
-                CaliHists[s2filename].h2f->Fill( idinfo.i2 + 86, idinfo.i1, entry.second.sumsqr );
-                CaliHists[ofilename].h2f->Fill( idinfo.i2 + 86, idinfo.i1, entry.second.cnt );
+				CaliHists[sfilename].h2f->Fill( idinfo.i2, idinfo.i1, entry.second.sum );
+                CaliHists[s2filename].h2f->Fill( idinfo.i2, idinfo.i1, entry.second.sumsqr );
+                CaliHists[ofilename].h2f->Fill( idinfo.i2, idinfo.i1, entry.second.cnt );
 			}//<<>>for( auto& entry : calirunsct.second.sumCntMap )
             for( auto& entry : calirunsct.second.meanMap ){
                 DetIDStruct idinfo = DetIDMap[entry.first];
-                CaliHists[mfilename].h2f->Fill( idinfo.i2 + 86, idinfo.i1, entry.second );
+                CaliHists[mfilename].h2f->Fill( idinfo.i2, idinfo.i1, entry.second );
 			}//<<>>for( auto& entry : calirunsct.second.meanMap )
             for( auto& entry : calirunsct.second.errMap ){
                 DetIDStruct idinfo = DetIDMap[entry.first];
-                CaliHists[efilename].h2f->Fill( idinfo.i2 + 86, idinfo.i1, entry.second );
+                CaliHists[efilename].h2f->Fill( idinfo.i2, idinfo.i1, entry.second );
             }//<<>>for( auto& entry : calirunsct.second.errMap )
         }//<<>>for( auto& calirunsct : calirunmap )
     }//<<>>for( auto& calirunmap : CaliRunMapSet )
 
+    std::cout << "Making CaliHists from TTCaliRunMapSet" << std::endl;
     for( auto& calirunmap : TTCaliRunMapSet ){
         for( auto& calirunsct : calirunmap.second ){
-            std::string tfilename = calirunmap.first + "_" + std::to_string( calirunsct.first ) + ttHistMapName;
-            calirunsct.second.histMapName = tfilename;
-            std::string sfilename = tfilename + "SumMap";
-            std::string s2filename = tfilename + "Sum2Map";
-            std::string ofilename = tfilename + "OccMap";
-            std::string mfilename = tfilename + "MeanMap";
-            std::string efilename = tfilename + "ErrMap";
+            std::string tfilename( calirunsct.second.histMapName );
+            //std::string tfilename = calirunmap.first + "_" + std::to_string( calirunsct.first ) + ttHistMapName;
+            //calirunsct.second.histMapName = tfilename;
+            std::string sfilename = tfilename + maptypes[2];
+            std::string s2filename = tfilename + maptypes[3];
+            std::string ofilename = tfilename + maptypes[4];
+            std::string mfilename = tfilename + maptypes[0];
+            std::string efilename = tfilename + maptypes[1];
             for( auto mapname : maptypes ){
                 std::string filename = tfilename + mapname;
-                TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),34,0,34,72,0,72);
+                //std::cout << " --- creating TH2F for " << filename << std::endl;
+                TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),35,-17,18,72,1,73);
                 CaliHists[filename] = { hist, filename, true }; // histfile histname isnew isopen lastrun
             }//<<>>for( auto mapname : mtype )
+            //std::cout << " -- filling hists for " << tfilename << std::endl;
             for( auto& entry : calirunsct.second.sumCntMap ){
 				auto idinfo = getTTInfo( entry.first );
-                CaliHists[sfilename].h2f->Fill( idinfo.second + 17, idinfo.first, entry.second.sum );
-                CaliHists[s2filename].h2f->Fill( idinfo.second + 17, idinfo.first, entry.second.sumsqr );
-                CaliHists[ofilename].h2f->Fill( idinfo.second + 17, idinfo.first, entry.second.cnt );
+                CaliHists[sfilename].h2f->Fill( idinfo.second, idinfo.first, entry.second.sum );
+                CaliHists[s2filename].h2f->Fill( idinfo.second, idinfo.first, entry.second.sumsqr );
+                CaliHists[ofilename].h2f->Fill( idinfo.second, idinfo.first, entry.second.cnt );
             }//<<>>for( auto& entry : calirunsct.second.sumCntMap )
             for( auto& entry : calirunsct.second.meanMap ){
                 auto idinfo = getTTInfo( entry.first );
-                CaliHists[mfilename].h2f->Fill( idinfo.second + 17, idinfo.first, entry.second );
+                CaliHists[mfilename].h2f->Fill( idinfo.second, idinfo.first, entry.second );
             }//<<>>for( auto& entry : calirunsct.second.meanMap )
             for( auto& entry : calirunsct.second.errMap ){
                 auto idinfo = getTTInfo( entry.first );
-                CaliHists[efilename].h2f->Fill( idinfo.second + 17, idinfo.first, entry.second );
+                CaliHists[efilename].h2f->Fill( idinfo.second, idinfo.first, entry.second );
             }//<<>>for( auto& entry : calirunsct.second.errMap )
         }//<<>>for( auto& calirunsct : calirunmap )
     }//<<>>for( auto& calirunmap : CaliRunMapSet )
@@ -825,52 +883,76 @@ void KUCMSTimeCalibration::makeCaliHists(){
 
 void KUCMSTimeCalibration::makeCaliMaps(){
 
+    std::cout << " - Making CaliMaps " << std::endl;
 	//TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),171,-85.5,85.5,360,0.5,360.5);
     for( auto& calirunmap : CaliRunMapSet ){
         for( auto& calirunsct : calirunmap.second ){
             //std::string tfilename = calirunsct.second.histMapName + "_" + std::to_string( calirunsct.first ) + xtalHistMapName;
 			std::string tfilename = calirunsct.second.histMapName;
-            std::string sfilename = tfilename + "SumMap";
-            std::string s2filename = tfilename + "Sum2Map";
-            std::string ofilename = tfilename + "OccMap";
-            std::string mfilename = tfilename + "MeanMap";
-            std::string efilename = tfilename + "ErrMap";
+			//std::cout << " -- opening : " << tfilename << std::endl;
+            std::string sfilename = tfilename + "_SumMap";
+            std::string s2filename = tfilename + "_Sum2Map";
+            std::string ofilename = tfilename + "_OccMap";
+            std::string mfilename = tfilename + "_MeanMap";
+            std::string efilename = tfilename + "_ErrMap";
+            //std::cout << " --- with : " << sfilename << std::endl;
 			if( CaliHists.find(sfilename) != CaliHists.end() ){
+               //std::cout << " --- found : " << tfilename << std::endl;
 				for( int ieta = 1; ieta < 172; ieta++ ){
 					for( int iphi = 1; iphi < 361; iphi++ ){
-						uInt detid = InvDetIDMap[iphi][ieta-86][ECAL::EB];
+						//std::cout << " -- Processing : " << ieta << " " << iphi;
+						int i1 = ieta - 86;
+						if( i1 == 0 ) continue;
+						uInt detid = InvDetIDMap[iphi][i1][ECAL::EB];
 						float sum = CaliHists[sfilename].h2f->GetBinContent(ieta,iphi);
 						float sum2 = CaliHists[s2filename].h2f->GetBinContent(ieta,iphi);
                 		int occ = CaliHists[ofilename].h2f->GetBinContent(ieta,iphi);
+						if( occ == 0 ) continue;
+						//std::cout << " " << detid << " " << sum << " " << sum2;
 						calirunsct.second.sumCntMap[detid] = { sum, sum2, occ };
-                        calirunsct.second.meanMap[detid] = CaliHists[mfilename].h2f->GetBinContent(ieta,iphi);
-                        calirunsct.second.errMap[detid] = CaliHists[efilename].h2f->GetBinContent(ieta,iphi);
+                        float mean  = CaliHists[mfilename].h2f->GetBinContent(ieta,iphi);
+						float error  = CaliHists[efilename].h2f->GetBinContent(ieta,iphi);
+                        //std::cout << " " << mean << " " << error << " " << std::endl;
+                        calirunsct.second.meanMap[detid] = mean;
+                        calirunsct.second.errMap[detid] = error;
 					}//<<>>for( int iphi = 1; iphi < 361; iphi++ )
 				}//<<>>for( int ieta = 1; ieta < 172; ieta++ )
 			}//<<>>if( CaliHists.find(sfilename) != CaliHists.end() )
         }//<<>>for( auto& calirunsct : calirunmap )
     }//<<>>for( auto& calirunmap : CaliRunMapSet )
 
+    std::cout << " - Making TTCaliMaps " << std::endl;
 	//TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),34,0,34,72,0,72);
     for( auto& calirunmap : TTCaliRunMapSet ){
         for( auto& calirunsct : calirunmap.second ){
             //std::string tfilename = calirunsct.second.histMapName + "_" + std::to_string( calirunsct.first ) + ttHistMapName;
             std::string tfilename = calirunsct.second.histMapName;
-            std::string sfilename = tfilename + "SumMap";
-            std::string s2filename = tfilename + "Sum2Map";
-            std::string ofilename = tfilename + "OccMap";
-            std::string mfilename = tfilename + "MeanMap";
-            std::string efilename = tfilename + "ErrMap";
+            //std::cout << " -- opening : " << tfilename << std::endl;
+            std::string sfilename = tfilename + "_SumMap";
+            std::string s2filename = tfilename + "_Sum2Map";
+            std::string ofilename = tfilename + "_OccMap";
+            std::string mfilename = tfilename + "_MeanMap";
+            std::string efilename = tfilename + "_ErrMap";
+            //std::cout << " --- with : " << sfilename << std::endl;
             if( CaliHists.find(sfilename) != CaliHists.end() ){
-                for( int ieta = 1; ieta < 35; ieta++ ){
+				//std::cout << " --- found : " << tfilename << std::endl;
+                for( int ieta = 1; ieta < 36; ieta++ ){
                     for( int iphi = 1; iphi < 73; iphi++ ){
-						uInt detid = getInvTTId( iphi, ieta );
+                        //std::cout << " -- Processing : " << ieta << " " << iphi;
+                        int i1 = ieta - 18;
+                        if( i1 == 0 ) continue;
+						uInt detid = getInvTTId( iphi, i1 );
                         float sum = CaliHists[sfilename].h2f->GetBinContent(ieta,iphi);
                         float sum2 = CaliHists[s2filename].h2f->GetBinContent(ieta,iphi);
                         int occ = CaliHists[ofilename].h2f->GetBinContent(ieta,iphi);
+                        if( occ == 0 ) continue;
+                        //std::cout << " " << detid << " " << sum << " " << sum2;
                         calirunsct.second.sumCntMap[detid] = { sum, sum2, occ };
-                        calirunsct.second.meanMap[detid] = CaliHists[mfilename].h2f->GetBinContent(ieta,iphi);
-                        calirunsct.second.errMap[detid] = CaliHists[efilename].h2f->GetBinContent(ieta,iphi);
+                        float mean  = CaliHists[mfilename].h2f->GetBinContent(ieta,iphi);
+                        float error  = CaliHists[efilename].h2f->GetBinContent(ieta,iphi);
+                        //std::cout << " " << mean << " " << error << " " << std::endl;
+                        calirunsct.second.meanMap[detid] = mean;
+                        calirunsct.second.errMap[detid] = error;
                     }//<<>>for( int iphi = 1; iphi < 361; iphi++ )
                 }//<<>>for( int ieta = 1; ieta < 172; ieta++ )
             }//<<>>if( CaliHists.find(sfilename) != CaliHists.end() )
@@ -881,8 +963,8 @@ void KUCMSTimeCalibration::makeCaliMaps(){
 
 uInt KUCMSTimeCalibration::getTTId( uInt detId ){
 
-	int ttphi = int( DetIDMap[detId].i1 - 1 )/5;
-	int tteta = int( std::abs( DetIDMap[detId].i2 ) - 1 )/5;
+	int ttphi = 1 + int( DetIDMap[detId].i1 - 1 )/5;
+	int tteta = 1 + int( std::abs( DetIDMap[detId].i2 ) - 1 )/5;
 	uInt id = ( DetIDMap[detId].i2 < 0 ) ? (ttphi+tteta*100)+2000 : (ttphi+tteta*100);
 	//std::cout << " getTTId " << detId << " phi " << DetIDMap[detId].i1 << " eta " << DetIDMap[detId].i2 << std::endl; 
     //std::cout << "  --> p " << ttphi << " e " << tteta << " = " << id <<std::endl;
@@ -1008,6 +1090,9 @@ float KUCMSTimeCalibration::getSmrdCalibTime( float rhtime, float rhamp, uInt rh
 
 void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT ){
 
+	std::string whichstring = ( doTT ) ? "for TT " : "for Xtal ";
+	std::cout << "Creating calibration files from EgammaRes Ntuples " << whichstring << std::endl; 
+
 	bool debug = false;
     //bool debug = true;
 
@@ -1021,14 +1106,14 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
     std::vector<uInt> *rhID = 0;
     std::vector<float> *rhRtTime = 0;
     std::vector<float> *rhEnergy = 0;
-	std::vector<float> *rhAmp = 0;
+	//std::vector<float> *rhAmp = 0;
 
     // List of branches
     TBranch *b_run;   //!
     TBranch *b_rhID;   //!
     TBranch *b_rhRtTime;   //!
     TBranch *b_rhEnergy;   //!
-    TBranch *b_rhAmp;
+    //TBranch *b_rhAmp;
 
 	// make sure iov maps exist for cali maps we are making
 	if( doTT && iovMaps.find(curTTIov) == iovMaps.end() ){ std::cout << " TT Iov not valid !!" << std::endl; return; }
@@ -1076,15 +1161,16 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
 
 		// use special calibration rh set?
         fInTree->SetBranchAddress("run", &run, &b_run);
-        fInTree->SetBranchAddress("rhID", &rhID, &b_rhID);
-        fInTree->SetBranchAddress("rhRtTime", &rhRtTime, &b_rhRtTime);
-        fInTree->SetBranchAddress("rhEnergy", &rhEnergy, &b_rhEnergy);
+        fInTree->SetBranchAddress("rhCaliID", &rhID, &b_rhID);
+        fInTree->SetBranchAddress("rhCaliRtTime", &rhRtTime, &b_rhRtTime);
+        fInTree->SetBranchAddress("rhCaliEnergy", &rhEnergy, &b_rhEnergy);
 
         //auto nEntries = fInTree->GetEntries();
-		auto nEntries = 5000000;
+        auto treeEntries = fInTree->GetEntries();
+        auto nEntries = ( treeEntries < 10000000 ) ? treeEntries : 10000000;
         std::cout << "Starting entry loops for " << nEntries << " Entries" <<  std::endl;
-        if( debug ) nEntries = 100;
-		int modbreak = debug ? 10 : 1000000;
+        if( debug ) nEntries = 10000;
+		int modbreak = debug ? 1000 : 1000000;
         for (Long64_t centry = 0; centry < nEntries; centry++){
 
             if( centry%modbreak == 0 or centry == 0){
@@ -1120,19 +1206,22 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
 					if( debug) std::cout << " - run chk : " << run << " " << range.startRun << " " << range.endRun << std::endl;
 					if( run >= range.startRun && run <= range.endRun ){ // run range exists 
 						runNotFound = false;
-						if( debug) std::cout << " - check lastRun : " << run << " last " << range.lastRun << " nrh " << nRecHits << std::endl; 
+						if( debug) std::cout << " - check lastRun : " << run << " last " << range.lastRun;
+						if( debug) std::cout  << " nrh " << nRecHits << std::endl; 
 						// if end == last : all runs in range completed, if run > last : run in range already filled
 						if( run > range.lastRun ){
 							for( int idx = 0; idx < nRecHits; idx++ ){
 								//if( debug) std::cout << rhEnergy->at(idx) << " " << rhID->at(idx) << " " << rhRtTime->at(idx) << std::endl;
                                 if( rhEnergy->at(idx) < 5.0 ) continue;
 								uInt id = rhID->at(idx);
-								//if( debug) std::cout << " - EB check --- " << id << " / " << DetIDMap[id].ecal << " - " << ECAL::EB << std::endl;
+								//if( debug) std::cout << " - EB check --- " << id << " / " << DetIDMap[id].ecal;
+								//if( debug) std::cout << " - " << ECAL::EB << std::endl;
 								if( DetIDMap[id].ecal != ECAL::EB ) continue;
 								float time = rhRtTime->at(idx);
            						uInt crsid = doTT ? getTTId( id ) : id;
            						float crstime = doTT ? time : time + getTTCali( id, run, tag );
-                                //if( crstime == 0 ) std::cout << " -- " << crsid << " = " << id << " = e " << DetIDMap[id].i2 << " p " << DetIDMap[id].i1 << std::endl;
+                                //if( crstime == 0 ) std::cout << " -- " << crsid << " = " << id;
+                                //if( crstime == 0 ) std::cout << " = e " << DetIDMap[id].i2 << " p " << DetIDMap[id].i1 << std::endl;
 								range.fillSumCnt( crsid, crstime ); // lastrun valid?????
 							}//<<>>for( int idx = 0; idx < nRecHits; idx++ )
 						}//<<>>if( run > range.lastRun )
@@ -1160,7 +1249,9 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
 					}// not first run in range no current partial mapping ?
 				}//<<>>for( auto& iovmap : iovMaps[tag] )
 				if( tstart < 9999999 ) { 
-					calirunset[tag][run] = { tag+"_"+wichtype, tstart, tend, last, tlumi };
+					//std::cout << "Found IOV for this run/tag " << run << " - " << tag << std::endl;
+					std::string hfname = tag+"_"+std::to_string(tstart)+"_"+wichtype;
+					calirunset[tag][tstart] = { hfname, tstart, tend, last, tlumi };
                     for( int idx = 0; idx < nRecHits; idx++ ){
 						//if( debug) std::cout << rhEnergy->at(idx) << " " << rhID->at(idx) << " " << rhRtTime->at(idx) << std::endl;
                         if( rhEnergy->at(idx) < 5.0 ) continue;
@@ -1169,9 +1260,9 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
                         float time = rhRtTime->at(idx);
                         uInt crsid = doTT ? getTTId( id ) : id;
                         float crstime = doTT ? time : time + getTTCali( id, run, tag );
-						calirunset[tag][run].fillSumCnt( crsid, crstime );
+						calirunset[tag][tstart].fillSumCnt( crsid, crstime );
                     }//<<>>for( int idx = 0; idx < nRecHits; idx++ )
-				} else { std::cout << "No IOV for this run/tag ? !!!!!!! " << std::endl; }
+				} // else { std::cout << "No IOV for this run/tag " << run << " - " << tag << " ? !!!!!!! " << std::endl; }
 			}//<<>>if( not tagfound )
 
 		}//<<>>for (Long64_t centry = 0; centry < nEntries; centry++)
@@ -1185,13 +1276,336 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
 			auto& range = runrange.second;
 			if( range.updated ){ 
 				if( finalRun > 100000 ) range.lastRun = ( finalRun < range.endRun ) ? finalRun : range.endRun;
-				range.makeMeanMap( true );
+				range.makeMeanMap();
 				range.updated = false;
 			}//<<>>if( range.updated )
 		}//<<>>for( auto& runrange : calirun.second )
 	}//<<>>for( auto& calirun : calirunset )
 
 }//<<>>void KUCMSTimeCalibration::makeTTCaliMap( std::string inputFileName )
+
+//--------------------------------------------------------------------------------------
+//struct caliHistStruct {
+//
+//    TH2F* h2f;
+//    std::string histName;
+//    bool isNew;
+//    bool isResHist;
+//
+//};//<<>>struct caliHistStruct
+//class CaliRunClass : public KUCMSRootHelperBaseClass {
+//
+//    std::string histMapName;
+//    int startRun;
+//    int endRun;
+//    int lastRun;
+//    float lumi;
+//    bool isNew;
+//    bool updated;
+//
+//};//<<>>TimeCaliTagStruct
+
+
+void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName ){
+
+    std::cout << "Creating 2D Resolution Hist from EgammaRes Ntuples " << std::endl;
+
+    bool debug = false;
+    //bool debug = true;
+
+    const std::string treename("tree/llpgtree");
+
+    bool useAmp(true);
+
+    // Declaration of leaf types
+    UInt_t          run;
+    vector<unsigned int> *resRhID;
+    vector<float>   *resAmp;
+    vector<float>   *resE;
+    vector<float>   *resRtTime;
+    vector<float>   *resTOF;
+
+    // List of branches
+    TBranch        *b_run;   //!
+    TBranch        *b_resRhID;   //!
+    TBranch        *b_resAmp;   //!
+    TBranch        *b_resE;   //!
+    TBranch        *b_resRtTime;   //!
+    TBranch        *b_resTOF;   //!
+
+    std::string locsname("_SRO_");
+    std::string globname("_ZEE_");
+    std::string histname("Data_Hist");
+    std::string fTitle("#Delta(Photon Seed Time) [ns] vs. A_{eff}/#sigma_{n} (EBEB)");
+    std::string fXTitle("A_{eff}/#sigma_{n} (EBEB)");
+    std::string fYTitle("#Delta(Photon Seed Time) [ns] (EBEB)");
+    std::string fZTitle("");
+
+    std::vector<Double_t> fXBins;
+    Bool_t fXVarBins = false;//dummy not used
+    std::vector<Double_t> fYBins;
+    Bool_t fYVarBins = false;//dummy not used;
+    std::string xbinstr("VARIABLE 25 50 75 100 125 150 175 200 225 250 300 400 600 1000 1800"); // ZEE
+    //string ybinstr("CONSTANT 1920 -3 3");
+    std::string ybinstr("CONSTANT 600 -3 3");
+    setBins(xbinstr,fXBins,fXVarBins);
+    setBins(ybinstr,fYBins,fYVarBins);
+    const auto xbins = &fXBins[0];
+    const auto ybins = &fYBins[0];
+    int nMyBins = fXBins.size()-1;
+
+    // local same
+    auto lochist = locsname+histname;
+    auto theHistLS = new TH2F(lochist.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
+    theHistLS->GetXaxis()->SetTitle(fXTitle.c_str());
+    theHistLS->GetYaxis()->SetTitle(fYTitle.c_str());
+    theHistLS->GetZaxis()->SetTitle(fZTitle.c_str());
+
+    // global
+    auto globhist = globname+histname;
+    auto theHistGB = new TH2F(globhist.c_str(),fTitle.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
+    theHistGB->GetXaxis()->SetTitle(fXTitle.c_str());
+    theHistGB->GetYaxis()->SetTitle(fYTitle.c_str());
+    theHistGB->GetZaxis()->SetTitle(fZTitle.c_str());
+
+    double goodlev(0);
+    double goodlin(0);
+    double goodgev(0);
+    double goodgin(0);
+    double gevents(0);
+
+    std::cout << "open input files list : " << infilelistname << std::endl;
+
+    std::ifstream infilelist(inputFileName);
+    std::string infilestr;
+    while( std::getline( infilelist, infilestr ) ) {
+
+        std::stringstream ss(infilestr);
+        std::string infilename, tag;
+        int srun, erun;
+
+        ss >> infilename >> srun >> erun >> tag;
+        std::cout << "open input file : " << infilename << std::endl;
+        std::cout << "For Run " << srun << " to Run " << erun << std::endl;
+        std::cout << "Producing 2D Resolution Map " << std::endl;
+
+        // insure we have Calimaps if we are doing Xtal calibration maps
+        if( CaliRunMapSet.find(tag) == CaliRunMapSet.end() ){
+            std::cout << " No Cali maps for this tag !!" << std::endl;
+            return;
+        }//<<>>if( CaliRunMapSet.find(tag) == TTCaliRunMapSet.end() )
+
+        std::ifstream infile(infilename);
+        std::string instr;
+        auto fInTree = new TChain( treename.c_str() );
+        std::cout << "Adding files to TChain." << std::endl;
+        const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");// input parameter!
+        const std::string indir("/ecalTiming/gammares_llpana_pd/");// input paramter !  
+        //const std::string indir("/ecalTiming/gammares_llpana_mc/");// input paramter ! 
+        while (std::getline(infile,instr)){
+            auto tfilename = eosdir + indir + instr;
+            std::cout << "-";
+            fInTree->Add(tfilename.c_str());
+        }//<<>>while (std::getline(infile,str))
+        std::cout << std::endl;
+
+        run = 0;
+        resRhID = 0;
+        resAmp = 0;
+        resE = 0;
+        resRtTime = 0;
+        resTOF = 0;
+
+        fInTree->SetBranchAddress( "run", &run, &b_run );   //!
+        fInTree->SetBranchAddress( "resRhID", &resRhID, &b_resRhID );   //!
+        fInTree->SetBranchAddress( "resAmp", &resAmp, &b_resAmp);   //!
+        fInTree->SetBranchAddress( "resE", &resE, &b_resE);   //!
+        fInTree->SetBranchAddress( "resRtTime", &resRtTime, &b_resRtTime);   //!
+        fInTree->SetBranchAddress( "resTOF" , &resTOF, &b_resTOF);   //!
+
+        std::cout << " Getting calibration values and plotting" << std::endl;
+
+        auto nEntries = fInTree->GetEntries();
+        if( debug ) nEntries = ( nEntries < 1000 ) ? nEntries : 1000;
+        if( debug ) std::cout << "Mf2d Proccessing " << nEntries << " entries : " << std::endl;
+        for (auto centry = 0U; centry < nEntries; centry++){
+
+            if( centry%10000000 == 0 or centry == 0){
+                std::cout << "Proccessed " << centry << " of " << nEntries;
+                std::cout << " " << (1000.0*static_cast<float>(centry)/static_cast<float>(nEntries))/10.0 << "%" << std::endl;
+            }//<<>>if( centry%10000000 == 0 or centry == 0)
+
+            auto entry = fInTree->LoadTree(centry);
+
+            if(debug) std::cout << " - Start loop " << std::endl;
+
+            gevents++;
+
+            b_run->GetEntry(entry);   //!
+            b_resRhID->GetEntry(entry);   //!
+            b_resAmp->GetEntry(entry);   //!
+            b_resE->GetEntry(entry);   //!
+            b_resRtTime->GetEntry(entry);   //!
+            b_resTOF->GetEntry(entry);   //!
+
+            //int didx = 0;
+            for( int didx = debug?0:4; didx < 4; didx++ ){
+                if(debug) std::cout << "Run " << run << " id " << (*resRhID)[didx] << " Amp " << (*resAmp)[didx] << " E " << (*resE)[didx];
+                if(debug) std::cout << " Rt " << (*resRtTime)[didx]  << " TOF " << (*resTOF)[didx] << std::endl;
+            }//<<>>for( int didx = 0; didx < 4; didx++ ){
+            if( srun != 0 && ( run < srun || run > erun ) ) continue;
+
+            if(debug) std::cout << " - Finshed Get Entry " << std::endl;
+
+
+            bool tagNotFound( true );
+            bool runNotFound( true );
+            auto& calirunset = CaliRunMapSet;
+            if( calirunset.find(tag) != calirunset.end() ){ // tag exists
+                if( debug) std::cout << " - tag found : " << tag << std::endl;
+                tagNotFound = false;
+                auto& runset = calirunset[tag];
+                if( debug) std::cout << " - In runset : " << tag << " " << runset[run].startRun << std::endl;
+                for( auto& runrange : runset ){
+                    auto& range = runrange.second;
+                    if( debug) std::cout << " - run chk : " << run << " " << range.startRun << " " << range.endRun << std::endl;
+                    if( run >= range.startRun && run <= range.endRun ){ // run range exists 
+                        runNotFound = false;
+                        if( debug) std::cout << " - check lastRun : " << run << " last " << range.lastRun;
+                        if( debug) std::cout  << " nrh " << nRecHits << std::endl;
+                        // if end == last : all runs in range completed, if run > last : run in range already filled
+                        if( range.lastRun >= range.endRun ){ // caliRunRange is ready for 2d res plot
+							std::string lsfname = tag+"_"+std::to_string(range.startRun)+lochist;
+                            std::string gbfname = tag+"_"+std::to_string(range.startRun)+globhist;
+							if( CaliHists.find(lsfname) == CaliHists.end() ){ // 2D hist already made? 
+    							TH2F* theHistLS = new TH2F(lsfname.c_str(),lsfname.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
+    							theHistLS->GetXaxis()->SetTitle(fXTitle.c_str());
+    							theHistLS->GetYaxis()->SetTitle(fYTitle.c_str());
+    							theHistLS->GetZaxis()->SetTitle(fZTitle.c_str());
+                				CaliHists[lsfname] = { theHistLS, lsfname, true }; // histfile histname isnew isopen lastrun
+								CaliHists[lsfname].isResHist = true;
+    							TH2F* theHistGB = new TH2F(gbfname.c_str(),gbfname.c_str(),fXBins.size()-1,xbins,fYBins.size()-1,ybins);
+    							theHistGB->GetXaxis()->SetTitle(fXTitle.c_str());
+    							theHistGB->GetYaxis()->SetTitle(fYTitle.c_str());
+    							theHistGB->GetZaxis()->SetTitle(fZTitle.c_str());
+                                CaliHists[gbfname] = { theHistGB, gbfname, true }; // histfile histname isnew isopen lastrun
+                                CaliHists[gbfname].isResHist = true;
+							}//if( CaliHists.find(lsfname) == CaliHists.end() ){ 
+							if( CaliHists[lsfname].isNew ){
+
+								// ----  fill res hist
+
+							}//if( CaliHists[lsfname].isNew )
+                        }//<<>>if( run > range.lastRun )
+                        break;
+                    }//<<>>if( run > startRun && run <= endRun )
+                }//<<>>for( auto& range : runset )
+            }//<<>>if( calirunset.find(tag) != calirunset.end() )
+
+
+			// ----   scale and set isNew to false
+
+
+            auto idinfoL0 = DetIDMap[(*resRhID)[0]];
+            auto idinfoL1 = DetIDMap[(*resRhID)[1]];
+            auto idinfoG0 = DetIDMap[(*resRhID)[2]];
+            auto idinfoG1 = DetIDMap[(*resRhID)[3]];
+
+            auto i1L0 = idinfoL0.i1;
+            auto i1L1 = idinfoL1.i1;
+            auto i2L0 = idinfoL0.i2;
+            auto i2L1 = idinfoL1.i2;
+
+            auto i1G0 = idinfoG0.i1;
+            auto i1G1 = idinfoG1.i1;
+            auto i2G0 = idinfoG0.i2;
+            auto i2G1 = idinfoG1.i2;
+
+            auto L0EB = idinfoL0.ecal;
+            auto L1EB = idinfoL1.ecal;
+            auto G0EB = idinfoG0.ecal;
+            auto G1EB = idinfoG1.ecal;
+
+			auto seedTimeIC00 = getCalibration( (*resRhID)[0], run, tag );
+			auto seedTimeIC10 = getCalibration( (*resRhID)[1], run, tag );
+			auto seedTimeIC01 = getCalibration( (*resRhID)[2], run, tag );
+			auto seedTimeIC11 = getCalibration( (*resRhID)[3], run, tag );
+
+//-------------------set for local, repo calcs for global --------------------------------
+
+            if(debug) std::cout << " - Calc 2D Hist" << std::endl;
+
+            double leffa0 = useAmp ? (*resAmp)[0] : (*resE)[0]; //(phoseedE_0/phoseedadcToGeV_0)/phoseedpedrms12_0;
+            double leffa1 = useAmp ? (*resAmp)[1] : (*resE)[1]; //(phoseedE_1/phoseedadcToGeV_1)/phoseedpedrms12_1;
+            double geffa0 = useAmp ? (*resAmp)[2] : (*resE)[2]; //(phoseedE_0/phoseedadcToGeV_0)/phoseedpedrms12_0;
+            double geffa1 = useAmp ? (*resAmp)[3] : (*resE)[3]; //(phoseedE_1/phoseedadcToGeV_1)/phoseedpedrms12_1;
+            double lxfill = (leffa0*leffa1)/sqrt(pow(leffa0,2)+pow(leffa1,2));
+            double gxfill = (geffa0*geffa1)/sqrt(pow(geffa0,2)+pow(geffa1,2));
+
+            double ldTOF = (*resTOF)[0]-(*resTOF)[1]; //phoseedTOF_0-phoseedTOF_1;
+            double gdTOF = (*resTOF)[2]-(*resTOF)[3]; //phoseedTOF_0-phoseedTOF_1;
+            double lyf0 = (*resRtTime)[0]-seedTimeIC00;
+            double lyf1 = (*resRtTime)[1]-seedTimeIC10;
+            double gyf0 = (*resRtTime)[2]-seedTimeIC01;
+            double gyf1 = (*resRtTime)[3]-seedTimeIC11;
+            double lyfill = lyf0-lyf1+ldTOF;
+            double gyfill = gyf0-gyf1+gdTOF;
+
+            auto le_cut = ((*resE)[0]>=10)&&((*resE)[0]<=120)&&((*resE)[1]>=10)&&((*resE)[1]<=120);
+            auto ge_cut = ((*resE)[2]>=10)&&((*resE)[2]<=120)&&((*resE)[3]>=10)&&((*resE)[3]<=120);
+            auto leta_cut = (L0EB == ECAL::EB)&&(L1EB == ECAL::EB);
+            auto geta_cut = (G0EB == ECAL::EB)&&(G1EB == ECAL::EB);
+            auto goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0;
+            auto goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0;
+            auto goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
+            auto goodGloRHs = (*resRhID)[2] != 0 && (*resRhID)[3] != 0;
+
+            auto isd_cut = idinfoL0.TT == idinfoL1.TT; // true = same, fasle = different
+            auto levent_good = le_cut && leta_cut && goodLocRHs && goodLocTime;
+            auto gevent_good = ge_cut && geta_cut && goodGloRHs && goodGloTime;
+
+            if( levent_good ) goodlev++;
+            if( goodLocRHs ) goodlin++;
+            if( gevent_good ) goodgev++;
+            if( goodGloRHs ) goodgin++;
+
+            if(debug) std::cout << " - lxfill : " << lxfill << " lyfill : " << lyfill;
+            if(debug) std::cout  << " flag : " << le_cut << " " << leta_cut << " " << goodLocRHs << std::endl;
+            if(debug) std::cout << " - gxfill : " << gxfill << " gyfill : " << gyfill;
+            if(debug) std::cout  << " flag : " << ge_cut << " " << geta_cut << " " << goodGloRHs << std::endl;
+
+            if(debug) std::cout << " - Fill 2D Hist" << std::endl;
+            if( levent_good && isd_cut ){ theHistLS->Fill(lxfill,lyfill); }
+            if( gevent_good ){ theHistGB->Fill(gxfill,gyfill); }
+
+            if(debug) std::cout << " - Fill hists done" << std::endl;
+
+        } // for (auto entry = 0U; entry < nEntries; entry++)
+
+        if(debug) std::cout << " -------- Next Input file " << std::endl;
+
+    } // while (std::getline(infilelist,infiles))
+
+// --------------  process new histos ----------------------------------------------
+
+    if(debug) std::cout << " - Scale 2D Hist" << std::endl;
+    scaleHist(theHistLS,false,fXVarBins,fYVarBins);
+    scaleHist(theHistGB,false,fXVarBins,fYVarBins);
+
+	// --  save 2D hist here  -----    
+
+
+    auto passlev = 100.0*goodlev/gevents;
+    auto passlin = 100.0*goodlin/gevents;
+    auto passgev = 100.0*goodgev/gevents;
+    auto passgin = 100.0*goodgin/gevents;
+
+    if(gevents) std::cout << "Processed " << gevents << " with %" << passlev << " from %" << passlin << " of Local";
+    if(gevents) std::cout << " and %" << passgev << " from %" << passgin << " of Global" << std::endl;
+    std::cout << "Thats all Folks!" << std::endl;
+
+}//<<>> void plot2dResolution( std::string indir, std::string infilelistname, 
+
 
 #endif
 //-------------------------------------------------------------------------------------------------------------------

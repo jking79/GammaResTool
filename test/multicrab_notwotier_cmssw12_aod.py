@@ -63,6 +63,7 @@ def subcrab( runs, events, reqmem ):
         #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
         #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
         inputJSON    = 'Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
+        #inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
         #inputJSON    = ''
         #--------------------------------------------------------
         # This is the base config:
@@ -190,12 +191,12 @@ def subcrab( runs, events, reqmem ):
 
             #['/MET/Run2017B-17Nov2017-v1/AOD',''],#12.5
             #['/MET/Run2017C-17Nov2017-v1/AOD',''],#27.9
-            #['/MET/Run2017D-17Nov2017-v1/AOD',''],#5.3
+            ['/MET/Run2017D-17Nov2017-v1/AOD',''],#5.3
             #['/MET/Run2017E-17Nov2017-v1/AOD',''],#28.5
             #['/MET/Run2017F-17Nov2017-v1/AOD',''],#75.3
 
             #['/JetHT/Run2017F-17Nov2017-v1/AOD',''],# llpana
-            ['/MET/Run2017E-17Nov2017-v1/AOD',''],# llpana
+            #['/MET/Run2017E-17Nov2017-v1/AOD',''],# llpana
 
             # PD: /DoubleEG/Run2017*-17Nov2017-v1/AOD
             #['/DoubleEG/Run2017B-17Nov2017-v1/AOD',''],
@@ -222,6 +223,7 @@ def subcrab( runs, events, reqmem ):
             #['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/AOD',''],
 
             #['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
+            #['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/AOD',''],
 
 	    ]
  
@@ -235,19 +237,21 @@ def subcrab( runs, events, reqmem ):
 
             #trial          = 'gammares_ratio_126_v2'
             #trial          = 'gammares_cc_140_v2'
+            #trial          = 'gammares_r3_cc_reco'
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
-            trial          = 'gammares_llpana_pd'
+            #trial          = 'gammares_llpana_pd'
             #trial          = 'gammares_llpana_mc'
             #trial          = 'gammares_llpana_qcd'
+            trial          = 'gammares_cali_test'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             ##config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
             ##config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
             ##config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
-            config.General.requestName   = primaryDataset+"_"+dataset+"_"+runEra+"_t2_request"
-            config.Data.outputDatasetTag = dataset+"_"+runEra
+            config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_request"
+            config.Data.outputDatasetTag = trial+"_"+dataset+"_"+runEra
 
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4','doTwoTier=False','doDiag=False']  
             #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=False']]  # 2018A tested

@@ -24,13 +24,15 @@ int main ( int argc, char *argv[] ){
     std::string r2ulTag( "r2ul" );
     std::string mctag( "mc" );
     std::string xiovtag( "prompt" );
-
-    theCali.setTTIov( r2ulTag );
     std::string inputfilename( "kucmsTimeCaliTestFile.txt" );
+
+	//-----////////// prep for making cali maps :
+    theCali.SetupIovMaps();
+    //-----//////////  making tt cali  :
+    theCali.setTTIov( r2ulTag );
     theCali.makeTTCaliMapEGR( inputfilename );
-    //-----//////////  making xtal cali file :
+    //-----//////////  making xtal cali :
     theCali.setXIov( xiovtag );
-    // same as above std::string inputfilename( "someEGRfile.txt" );
     theCali.makeXCaliMapEGR( inputfilename );
 
     // make smear maps

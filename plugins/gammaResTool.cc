@@ -103,10 +103,10 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 	if( doTwoTier ){
     	kuCCStcRecHitsEBToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEBTag);
     	kuCCStcRecHitsEEToken_ = consumes<edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit>>>(kuCCStcRecHitsEETag);
-		unCCRecHitsEBToken_ = 
-			consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEBTag);
-    	unCCRecHitsEEToken_ = 
-			consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEETag);
+		//unCCRecHitsEBToken_ = 
+		//	consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEBTag);
+    	//unCCRecHitsEEToken_ = 
+		//	consumes<edm::SortedCollection<EcalUncalibratedRecHit,edm::StrictWeakOrdering<EcalUncalibratedRecHit>>>(unCCRecHitsEETag);
 	}//if( doTwoTier )
 
 	// photons
@@ -190,8 +190,8 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	if( doTwoTier ){
     	iEvent.getByToken(kuCCStcRecHitsEBToken_, kuCCStcRecHitsEB_);
     	iEvent.getByToken(kuCCStcRecHitsEEToken_, kuCCStcRecHitsEE_);
-    	iEvent.getByToken(unCCRecHitsEBToken_, unCCRecHitsEB_);
-    	iEvent.getByToken(unCCRecHitsEEToken_, unCCRecHitsEE_);
+    	//iEvent.getByToken(unCCRecHitsEBToken_, unCCRecHitsEB_);
+    	//iEvent.getByToken(unCCRecHitsEEToken_, unCCRecHitsEE_);
 	}//if( doTwoTier )
 
 	// GEOMETRY : https://gitlab.cern.ch/shervin/ECALELF
@@ -244,8 +244,8 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     std::vector<pat::Photon>        fphotons;
     std::vector<pat::Electron>  	felectrons;
 
-	float minRecHitEnergy = 0.2;
-    float minRecHitAmp = 1;	
+	float minRecHitEnergy = 2.0;
+    //float minRecHitAmp = 1;	
 	if( DEBUG ) std::cout << "Processing RecHits" << std::endl;
 	for (const auto & recHit : *recHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); }
     for (const auto & recHit : *recHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) frechits.push_back(recHit); }
@@ -256,8 +256,8 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	if( doTwoTier ){
     	for (const auto & recHit : *kuCCStcRecHitsEB_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
     	for (const auto & recHit : *kuCCStcRecHitsEE_ ){ if( recHit.energy() > minRecHitEnergy ) fccrechits.push_back(recHit); }
-        for (const auto & recHit : *unCCRecHitsEB_ ){ if( recHit.amplitude() > minRecHitAmp ) funccrechits.push_back(recHit); }
-        for (const auto & recHit : *unCCRecHitsEE_ ){ if( recHit.amplitude() > minRecHitAmp ) funccrechits.push_back(recHit); }
+        //for (const auto & recHit : *unCCRecHitsEB_ ){ if( recHit.amplitude() > minRecHitAmp ) funccrechits.push_back(recHit); }
+        //for (const auto & recHit : *unCCRecHitsEE_ ){ if( recHit.amplitude() > minRecHitAmp ) funccrechits.push_back(recHit); }
 	}//<<>>if( doTwoTier )
 
 // -- Process gedPhotons
@@ -271,9 +271,15 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	float phoMinSeedTime = -25.0;
     for( const auto & photon : *gedPhotons_ ){
 
+ 		float pho_pt  = photon.pt();
+ 		bool hoe = photon.hadronicOverEm() < 0.04596;
+ 		bool trkiso = photon.trkSumPtHollowConeDR04() < 1.694;
+ 		bool ecaliso = photon.hcalTowerSumEtConeDR04() < 24.032 + 0.01512*pho_pt + 2.259e-05*pho_pt*pho_pt;
+ 		bool hcaliso = photon.ecalRecHitSumEtConeDR04() < 2.876 + 0.004017*pho_pt;
+        bool passIdCut = hoe && trkiso && ecaliso && hcaliso;
 		//auto passIdCut = photon.photonID(phoCutLoose);
-        auto passIdCut = true;
-		auto minPhoPt = photon.pt() > phoMinPt;
+        //auto passIdCut = true;
+		auto minPhoPt = pho_pt > phoMinPt;
 		auto phoSeedTime = getPhotonSeedTime(photon);
 		auto timecut = phoSeedTime > phoMinSeedTime;
 		
@@ -439,7 +445,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	rhID.clear();
 	rhRtTime.clear();
 	rhCCTime.clear();
-    rhUnCCTime.clear();
+    //rhUnCCTime.clear();
 	//rhTimeErr, 
 	rhTOF.clear();
     rhEnergy.clear();
@@ -503,13 +509,13 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             //const auto rawamplitude = ( pedrms12 != 0 && adcToGeV != 0 ) ? (recHit.energy()/adcToGeV) : -99.0;
 
 			auto cctime = -999.0;
-            auto uncctime = -999.0;
+            //auto uncctime = -999.0;
 			auto ccisoot = false;
 			if( doTwoTier ){
 				for (const auto ccRecHit : fccrechits ){ 
 					if( getRawID(ccRecHit) == recHitID ){ 
 						cctime = ccRecHit.time(); 
-						uncctime = ccRecHit.nonCorrectedTime();
+						//uncctime = ccRecHit.nonCorrectedTime();
 						ccisoot = ccRecHit.checkFlag(EcalRecHit::kOutOfTime);
 						break; 
 					}//<<>>for (const auto ccRecHit : fccrechits )
@@ -527,7 +533,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	        //rhPosPhi.push_back(recHitPos.phi());
 	        rhRtTime.push_back(recHit.time());
 	        rhCCTime.push_back(cctime);
-            rhUnCCTime.push_back(uncctime);
+            //rhUnCCTime.push_back(uncctime);
 	        //if( DEBUG ) std::cout << " -- storing values FLAGS" << std::endl;
 	        rhEnergy.push_back(recHit.energy());
 			//rhRawAmp.push_back(rawamplitude);
@@ -552,6 +558,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	    }//<<>>for (const auto recHit : *recHitsEB_ )   
     }//<<>>if( doDiag )
 
+/*
 	if( DEBUG ) std::cout << "Processing Uncalibrated RecHits" << std::endl;
 
     unrhJitter.clear();
@@ -590,7 +597,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 				unrhEncNonJitter.push_back(encNonTime);
 				unrhEnergy.push_back(energy);
 
-/*
+/////////////////////////////////////////////////////////////////
 				auto amp = recHit.amplitude();
 				auto time = 25*recHit.jitter();
 				auto untime = 25*recHit.chi2();
@@ -637,13 +644,14 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
                     hist2d[6]->Fill( actdif, amp );
 
 				}//<<>>if( energy > ethres )
-*/
+//////////////////////////////////////////////////////////////////
 
 			}//<<>>if( isEB )
 
         }//<<>>for (const auto recHit : *funccrechits )   
     }//<<>>if( doTwoTier )
 
+*/
 
     if( DEBUG ) std::cout << " - enetering Photon loop" << std::endl;
 
@@ -1130,7 +1138,7 @@ void GammaResTool::beginJob(){
     	outTree->Branch("rhID", &rhID);
     	outTree->Branch("rhRtTime", &rhRtTime);
         outTree->Branch("rhCCTime", &rhCCTime);
-        outTree->Branch("rhUnCCTime", &rhUnCCTime);
+        //outTree->Branch("rhUnCCTime", &rhUnCCTime);
         outTree->Branch("rhTOF", &rhTOF);
         outTree->Branch("rhEnergy", &rhEnergy);
         //outTree->Branch("rhRawAmp", &rhRawAmp);
