@@ -68,7 +68,7 @@ def subcrab( runs, events, reqmem ):
         #inputJSON     = 'Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'
 
         #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
-
+        #inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
         #inputJSON    = ''
         #--------------------------------------------------------
         # This is the base config:
@@ -100,7 +100,7 @@ def subcrab( runs, events, reqmem ):
         config.Data.unitsPerJob  =  25000 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
-
+        #config.Data.unitsPerJob  =  100000 # 2024F cc test rereco
 
         #config.Data.outputDatasetTag = 'reducedRAW_EGamma_ntuple'
 	     
@@ -112,6 +112,8 @@ def subcrab( runs, events, reqmem ):
 
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
+
+            #['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD']
 
             #['/JetMET1/Run2024F-PromptReco-v1/MINIAOD'],  
             #['/JetMET1/Run2024F-ECAL_CC_HCAL_DI-v1/MINIAOD'],    
@@ -149,7 +151,7 @@ def subcrab( runs, events, reqmem ):
             #['/EGamma/Run2022F-PromptReco-v1/MINIAOD'], #						    360389 - 362167
             #['/EGamma/Run2022G-PromptReco-v1/MINIAOD']  # ? 2022 G Prompt 124X_dataRun3_Prompt_v10   	    362399 - 362760
 
-            ['/MET/Run2017D-17Nov2017-v1/MINIAOD']
+            #['/MET/Run2017D-17Nov2017-v1/MINIAOD']
             #['/MET/Run2017E-17Nov2017-v1/MINIAOD']
             #['/EGamma/Run2018D-22Jan2019-v2/MINIAOD']
 
@@ -180,6 +182,12 @@ def subcrab( runs, events, reqmem ):
 
                         # Dataset: /DoubleEG/Run2017-09Aug2019_UL2017-/MINIAOD
 
+            #['/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD'],
+            ['/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD'],
+            ['/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD'],
+            ['/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD'],
+            ['/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'],
+
             #['/DoubleEG/Run2017B-09Aug2019_UL2017-v1/MINIAOD'],
             #['/DoubleEG/Run2017C-09Aug2019_UL2017-v1/MINIAOD'],
             #['/DoubleEG/Run2017D-09Aug2019_UL2017-v1/MINIAOD'],
@@ -199,16 +207,19 @@ def subcrab( runs, events, reqmem ):
             #runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
             dataset	   = inDO[0].split('/')[3]
 
+            config.Data.allowNonValidInputDataset = True # speacial rereco pd
+
             #trial          = 'gammares_ratio_126_v2'
             #trial          = 'gammares_cc_140_v2'
             #trial          = 'gammares_ttcc_140_v5' # 24C and earlier only
             #trial          = 'gammares_mc'
             #trial          = 'gammares_llpana'
-            #trial          = 'gammares_r24fprompt'
-            #trial          = 'gammares_cali'
-            trial          = 'gammares_cali_test'
+            #trial          = 'gammares_r24f_cctest'
+            trial          = 'gammares_cali'
+            #trial          = 'gammares_cali_test'
 
-            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            #config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/kuncali/"+trial+"/"
             #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
             #config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
             #config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
@@ -223,7 +234,7 @@ def subcrab( runs, events, reqmem ):
 #>>>>>>>>>>>>>  2018 EOY
             #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>> 2024 tested
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v4', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
@@ -285,7 +296,8 @@ def submit_run():
         #subcrab( "357101-357268","",2500)#22C?
 	#subcrab( "360395-360415","",2500)#22F?
 
-        subcrab( "000000-999999","",2500)#MC
+        #subcrab( "378981-386951","",2500)#R3_2024
+        subcrab( "000000-999999","",2500)#MC - any
 
 ########################################################
 

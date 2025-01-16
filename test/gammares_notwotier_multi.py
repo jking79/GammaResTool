@@ -43,15 +43,15 @@ process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 #process.load("RecoLocalCalo.Configuration.hcalLocalReco_cff")#
 #process.load("EventFilter.HcalRawToDigi.HcalRawToDigi_cfi")#
 #process.load("EventFilter.EcalRawToDigi.EcalUnpackerMapping_cfi")#
-process.load("EventFilter.EcalRawToDigi.EcalUnpackerData_cfi")#
-process.load("RecoLuminosity.LumiProducer.bunchSpacingProducer_cfi")#
+#process.load("EventFilter.EcalRawToDigi.EcalUnpackerData_cfi")#
+#process.load("RecoLuminosity.LumiProducer.bunchSpacingProducer_cfi")#
 #process.load("Geometry.CaloEventSetup.CaloTowerConstituents_cfi")
 #process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 #process.load('Configuration.StandardSequences.L1Reco_cff')
-process.load('Configuration.StandardSequences.Reconstruction_cff')
+#process.load('Configuration.StandardSequences.Reconstruction_cff')
 #process.load('RecoLocalCalo.EcalRecProducers.ecalCPUUncalibRecHitProducer_cfi')#
 #process.load("RecoLocalCalo.EcalRecProducers.ecalMultiFitUncalibRecHit_cfi")
-process.load('GammaResTool.GammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
+#process.load('GammaResTool.GammaResTool.jwk_ku_ecalLocalRecoSequence_cff')
 #process.load('RecoVertex.BeamSpotProducer.BeamSpot_cff' )
 
 #process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
@@ -161,128 +161,32 @@ process.tree = cms.EDAnalyzer("GammaResTool",
    doTwoTier = cms.bool(options.doTwoTier), 
    doDiag = cms.bool(options.doDiag),
 
-   ## ecal kuRecHits
-   #kuRecHitsEB = cms.InputTag("kuEcalRecHit", "kuRecHitsEB"),
-   #kuRecHitsEE = cms.InputTag("kuEcalRecHit", "kuRecHitsEE"),
-
-   #kuStcRecHitsEB = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEB"),
-   #kuStcRecHitsEE = cms.InputTag("kuStcEcalRecHit", "kuStcRecHitsEE"),
-   #kuStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
-   #kuStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
-
    ## ecal Multi rechits
-
-   ##kuWtRecHitsEB = cms.InputTag("kuWtEcalRecHit", "kuWtRecHitsEB"),
-   ##kuWtRecHitsEE = cms.InputTag("kuWtEcalRecHit", "kuWtRecHitsEE"),
-
-   #kuWtStcRecHitsEB = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEB"),
-   #kuWtStcRecHitsEE = cms.InputTag("kuWtStcEcalRecHit", "kuWtStcRecHitsEE"),
 
    kuCCStcRecHitsEB = cms.InputTag("none", "none"),
    kuCCStcRecHitsEE = cms.InputTag("none", "none"),
 
-   #kuRtStcRecHitsEB = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEB"),
-   #kuRtStcRecHitsEE = cms.InputTag("kuStcEcalLHCRecHit", "kuStcRecHitsEE"),
    kuRtStcRecHitsEB = cms.InputTag("none", "none"),
    kuRtStcRecHitsEE = cms.InputTag("none", "none"),
 
-   ## ecal uncalib recHits
-   #ku_uncalibratedRecHitsEB = cms.InputTag("kuMfootEcalMultiFitUncalibRecHit","kuMfootEcalUncalibRecHitsEB"),
-   #ku_uncalibratedRecHitsEE = cms.InputTag("kuMfootEcalMultiFitUncalibRecHit","kuMfootEcalUncalibRecHitsEE"),
-
-   #uncalibratedRecHitsEB = cms.InputTag("ecalMultiFitUncalibRecHitBase","EcalUncalibRecHitsBaseEB"),
-   #uncalibratedRecHitsEE = cms.InputTag("ecalMultiFitUncalibRecHitBase","EcalUncalibRecHitsBaseEE"),
-
-   #uncalibratedRecHitsEB = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEB"),
-   #uncalibratedRecHitsEE = cms.InputTag("kuEcalMultiFitUncalibRecHit","kuEcalUncalibRecHitsEE"),
-
    ku_uncalibratedRecHitsEB = cms.InputTag("none","none"),
    ku_uncalibratedRecHitsEE = cms.InputTag("none","none"),
-
-   ## digis
-   #EBdigiCollection = cms.InputTag("ecalDigis","ebDigis"),
-   #EEdigiCollection = cms.InputTag("ecalDigis","eeDigis"),
 
 )
 
 
 # Set up the path
-#process.treePath = cms.Path(
 process.tree_step = cms.EndPath(
 	process.unpackedTracksAndVertices +
 	process.tree
 )
 
-process.ecalDigis = process.ecalEBunpacker.clone()
-process.ecalDigis.InputLabel = cms.InputTag('rawDataCollector')
-process.digiPath = cms.Path( process.ecalDigis )
-process.bunchSpacing = cms.Path( process.bunchSpacingProducer )
-#process.beamSpot = cms.Path( process.offlineBeamSpot )
-
-process.jwk_calolocalreco = cms.Sequence(
-				##process.ku_min_ecalLocalRecoSequence
-               	##process.ku_multi_ecalLocalRecoSequence
-                #process.kucc_only_ecalLocalRecoSequence
-               	#process.ku_reduced_multi_ecalLocalRecoSequence
-                process.ku_spike_nomulti_ecalLocalRecoSequence # vary on reduced
-               	##process.ku_ecalLocalRecoSequence
-               	##process.ecalLocalRecoSequence
-				##process.hcalLocalRecoSequence
-)
-
-process.jwk_localreco = cms.Sequence(
-				#process.bunchSpacingProducer+
-				#process.trackerlocalreco+
-				#process.muonlocalreco+
-				process.jwk_calolocalreco
-				#process.castorreco
-)
-
-process.jwk_highlevelreco = cms.Sequence(
-			    #process.egammaHighLevelRecoPrePF*
-                #process.particleFlowReco*
-                #process.egammaHighLevelRecoPostPF*
-                #process.muoncosmichighlevelreco*
-                #process.muonshighlevelreco *
-                #process.particleFlowLinks*
-                #process.jetHighLevelReco*
-                #process.metrecoPlusHCALNoise*
-                #process.btagging*
-                #process.recoPFMET*
-                #process.PFTau*
-                #process.reducedRecHits #*
-                #process.cosmicDCTracksSeq
-)
-
-process.jwk_reconstruction = cms.Sequence(
-		#process.localreco*
-        process.jwk_localreco
-		#process.globalreco*
-		#process.jwk_highlevelreco*
-		#process.logErrorHarvester
-)
-
 process.content = cms.EDAnalyzer("EventContentAnalyzer")
 process.content_step = cms.Path(process.content)
 
-#process.raw2digi_step = cms.Path(process.RawToDigi)
-#process.ecalraw2digi_step = cms.Path(process.jwk_digisunpacker)
-#process.L1Reco_step = cms.Path(process.L1Reco)
-process.reconstruction_step = cms.Path(process.jwk_reconstruction)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 
-process.schedule = cms.Schedule(
-		#process.bunchSpacing,
-        #process.beamSpot,
-		#process.digiPath,
-		#process.raw2digi_step,
-		#process.ecalraw2digi_step,
-      	#process.L1Reco_step,
-		#process.reconstruction_step,
-		#process.content_step,
-		#process.endjob_step,
-		process.tree_step
-)
+process.schedule = cms.Schedule( process.tree_step )
 
 ### Extra bits from other configs
 process.options = cms.untracked.PSet(

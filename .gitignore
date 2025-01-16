@@ -11,6 +11,8 @@ test/oldworkingArea/
 test/myWorkingArea/
 test/myWorkSpace/
 test/compWorkingArea/
+macros/*.obj
+macros/hist_maker_egammares_diag.obj
 *_log*.txt
 *.obj
 *.root

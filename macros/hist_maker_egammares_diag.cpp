@@ -493,6 +493,7 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
 
         std::cout << "Setting up For Main Loop." << std::endl;
         auto nEntries = fInTree->GetEntries();
+		//nEntries = ( nEntries < 10000000 ) ? nEntries : 10000000;
         if(debug) nEntries = 1000;
 		//std::cout << " !!!!!! Using redeuded event set to match jetmet tev jets !!!!!!" << std::endl; nEntries = 60000000;
         std::cout << "Proccessing " << nEntries << " entries." << std::endl;
@@ -593,11 +594,12 @@ void makehists::eventLoop( Long64_t entry ){
             if( DEBUG ) std::cout << " - Rechit Cali map info" << std::endl;
 			// icmap lookup only works with EB rhs !!!!!!
 			float rhRtCali = ( icmap[0] != NULL && rhIdInfo.ecal == EB ) ? icmap[0]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
-			//float caliRtTime = (*rhRtTime)[it]-rhRtCali;
-            float caliRtTime = (*rhCCTime)[it]-rhRtCali; if( caliRtTime < -25.0 ) caliRtTime = -26.0;
-            //bool isOOT = (*rhRtisOOT)[it];
-            bool isOOT = (*rhCCisOOT)[it];
-			bool isCCoot = (*rhCCisOOT)[it];
+			float caliRtTime = (*rhRtTime)[it]-rhRtCali;
+            //float caliRtTime = (*rhCCTime)[it]-rhRtCali; if( caliRtTime < -25.0 ) caliRtTime = -26.0;
+            bool isOOT = (*rhRtisOOT)[it];
+            //bool isOOT = (*rhCCisOOT)[it];
+			//bool isCCoot = (*rhCCisOOT)[it];
+            bool isCCoot = false;
             bool isRToot = (*rhRtisOOT)[it];
 
 			if( DEBUG ) std::cout << " - Rechit loop  1" << std::endl;
@@ -625,13 +627,13 @@ void makehists::eventLoop( Long64_t entry ){
             hist1d[91]->Fill((*rhpedrms12)[it]);
 
             bool underMinEnergy = (*rhEnergy)[it] < 5.0;
-            //bool rhTimeZero = (*rhRtTime)[it] == 0.0;
-            bool rhTimeZero = (*rhCCTime)[it] == 0.0;
+            bool rhTimeZero = (*rhRtTime)[it] == 0.0;
+            //bool rhTimeZero = (*rhCCTime)[it] == 0.0;
             bool isWeird = (*rhisWeird)[it];
             bool isDiWeird = (*rhisDiWeird)[it];
             bool hasHighSwissCross = (*rhSwCross)[it] > 0.96;
             if( not underMinEnergy ){ 	
-				if( rhTimeZero or isOOT or isWeird or isDiWeird or hasHighSwissCross) hist2d[126]->Fill((*rhEnergy)[it],caliRtTime);
+				if( rhTimeZero or isOOT or isWeird or isDiWeird or hasHighSwissCross ) hist2d[126]->Fill((*rhEnergy)[it],caliRtTime);
 				else hist2d[128]->Fill((*rhEnergy)[it],caliRtTime);
 				hist2d[127]->Fill((*rhEnergy)[it],caliRtTime);
 			}//<<>>if( not underMinEnergy )
@@ -649,8 +651,8 @@ void makehists::eventLoop( Long64_t entry ){
 			bool gid23( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true );
 			bool gidgt1( (*rhisGS6)[it] == true || (*rhisGS1)[it] == true );
 			bool gidall( true );
-			bool bothreco( (*rhCCTime)[it] > -25 );
-            //bool bothreco( true );
+			//bool bothreco( (*rhCCTime)[it] > -25 );
+            bool bothreco( true );
 			bool rt0cc1( isCCoot && not isRToot );
 			bool rt1cc0( isRToot && not isCCoot );
             bool rt1cc1( isRToot && isCCoot );
@@ -682,8 +684,8 @@ void makehists::eventLoop( Long64_t entry ){
 				if( isRToot ) hist1d[178]->Fill((*rhEnergy)[it]); else hist1d[176]->Fill((*rhEnergy)[it]);
 			}//<<>>if( (*rhisGS6)[it] == true || (*rhisGS1)[it] == true )
 	
-            if( bothreco && notWeird && rt1cc1 ){
-			//if( not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] ) ){
+            //if( bothreco && notWeird && rt1cc0 ){
+			if( not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] ) ){
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){//gid23 
 				//hist1d[167]->Fill((*rhEnergy)[it]);
 				hist2d[119]->Fill((*rhEnergy)[it],caliRtTime);
@@ -1456,8 +1458,9 @@ int main ( int argc, char *argv[] ){
         //auto indir = "/ecalTiming/gammares_llpana_pd/";
         //auto indir = "ecalTiming/gammares_ccval/";
         //auto indir = "ecalTiming/gammares_r24fprompt/";
-        auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_v3/";
+        //auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_v3/";
         //auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_oot3_v3/";
+        auto indir = "ecalTiming/gammares_r24f_cctest/";
 
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
@@ -1485,10 +1488,11 @@ int main ( int argc, char *argv[] ){
 
 		//auto outfilename = "egammares_diag_jetmet1_aod_tevjets_v3_gidgt1_rt1cc1_p3_kWDW_v21_diag.root";
         //auto outfilename = "egammares_diag_jetmet1_aod_tevjets_v3_gidgt1_rt1cc0_p12_kWDW_v21_diag.root";
-        auto outfilename = "egammares_diag_jetmet1_aod_tevjets_v3_gidgt1_rt1cc1_p12_kWDW_v21_diag.root";
+        //auto outfilename = "egammares_diag_jetmet1_aod_tevjets_v3_gidgt1_rt1cc1_p12_kWDW_v21_diag.root";
         //auto outfilename = "egammares_diag_jetmet1_aod_tevjets_v3_gidgt1_rt0cc0_p3_kWDW_v21_diag.root";
 
         //auto outfilename = "egammares_diag_jetmet1_aod_ccval_v3_gidgt1_kWDW_v21_diag.root";
+    	auto outfilename = "egammares_diag_miniaod_24f_CCHCALDIv3_gidgt1_kWDW_v21_diag.root";
 
         //auto fhtitle = "Run2024E 14_0_4 EB ";
 		//auto fhtitle = "Winter24 DY EB ";
@@ -1497,8 +1501,8 @@ int main ( int argc, char *argv[] ){
         //auto fhtitle = "MET MINIAOD 2017E ";
     	//auto fhtitle = "DEG AOD R17 ";
         //auto fhtitle = "EGM MINIAOD R18 ";
-        //auto fhtitle = "CCVal ";
-        auto fhtitle = "JetMet1 TeVJets ";
+        auto fhtitle = "CC HCAL DI v3 24F ";
+        //auto fhtitle = "JetMet1 TeVJets ";
         //auto fhtitle = "JetMet1 TeVJets kOOT gid1+ 10 ns";
 
 		makehists base;				

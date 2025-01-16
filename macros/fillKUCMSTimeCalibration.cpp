@@ -27,16 +27,19 @@ int main ( int argc, char *argv[] ){
     std::string inputfilename( "kucmsTimeCaliTestFile.txt" );
 
 	//-----////////// prep for making cali maps :
-    theCali.SetupIovMaps();
+    //theCali.SetupIovMaps();
     //-----//////////  making tt cali  :
-    theCali.setTTIov( r2ulTag );
-    theCali.makeTTCaliMapEGR( inputfilename );
+    //theCali.setTTIov( r2ulTag );
+    //theCali.makeTTCaliMapEGR( inputfilename );
     //-----//////////  making xtal cali :
-    theCali.setXIov( xiovtag );
-    theCali.makeXCaliMapEGR( inputfilename );
+    //theCali.setXIov( xiovtag );
+    //theCali.makeXCaliMapEGR( inputfilename );
 
-    // make smear maps
-
+    // make smear maps : 
+    //  - 2d res plot
+    //theCali.setXIov( xiovtag );
+	//theCali.plot2dResolutionEGR( inputfilename );
+	
     /////////////////////////////////////////////////////////////////////
     //-------------------------------------------------------------------
 	
