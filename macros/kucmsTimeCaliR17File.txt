@@ -1,0 +1,6 @@
+#blablabla 0 999999 testing
+egammares_DoubleEG_MINIAOD_Run2017B-31Mar2018_cali_v21.txt 0 999999 EG_EOY_MINI
+egammares_DoubleEG_MINIAOD_Run2017C-31Mar2018_cali_v21.txt 0 999999 EG_EOY_MINI
+egammares_DoubleEG_MINIAOD_Run2017D-31Mar2018_cali_v21.txt 0 999999 EG_EOY_MINI
+egammares_DoubleEG_MINIAOD_Run2017E-31Mar2018_cali_v21.txt 0 999999 EG_EOY_MINI
+egammares_DoubleEG_MINIAOD_Run2017F-31Mar2018_cali_v21.txt 0 999999 EG_EOY_MINI

@@ -794,8 +794,8 @@ int main ( int argc, char *argv[] ){
         //auto outfilename = "KURes_14011_v12_DY1JetsToLL_AODSIM_Met75_R17_Cali_FilterFit.root";
 		auto outfilename = "KURes_14011_v12_DEGPD_AOD_Run2017E_Cali_FilterFit_301487_304475.root";
 
-		bool filterRecHits = true;
-        //bool filterRecHits = false;
+		//bool filterRecHits = true;
+        bool filterRecHits = false;
 
         wc_ku_InterCali_aveRecHit_mini( indir, infilelist, outfilename, filterRecHits );
 

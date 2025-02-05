@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 // -*- C++ -*-
-//
+//`
 //
 // Original Author:  Jack W King III
 //         Created:  Fri, 20 Dec 2024
@@ -24,21 +24,47 @@ int main ( int argc, char *argv[] ){
     std::string r2ulTag( "r2ul" );
     std::string mctag( "mc" );
     std::string xiovtag( "prompt" );
-    std::string inputfilename( "kucmsTimeCaliTestFile.txt" );
 
-	//-----////////// prep for making cali maps :
-    //theCali.SetupIovMaps();
+    //std::string inputfilename( "kucmsTimeCaliTestFile.txt" ); // MET_AOD_R17_FULL 
+    std::string inputfilename( "kucmsTimeCaliR17File.txt" ); // EG_EOY_MINI
+
+	//std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");// input parameter!
+    std::string eosdir("root://cmseos.fnal.gov//store/user/lpcsusylep/jaking/");
+	//std::string indir("/ecalTiming/gammares_llpana_pd/");// input paramter !  
+    //std::string indir("/ecalTiming/gammares_llpana_mc/");// input paramter ! 
+    std::string indir("/kuncali/gammares_cali/");
+
+	theCali.SetEosDir(eosdir);
+	theCali.SetInDir(indir);
+
     //-----//////////  making tt cali  :
+    //theCali.SetupIovMaps();
     //theCali.setTTIov( r2ulTag );
-    //theCali.makeTTCaliMapEGR( inputfilename );
-    //-----//////////  making xtal cali :
     //theCali.setXIov( xiovtag );
-    //theCali.makeXCaliMapEGR( inputfilename );
+    //theCali.makeTTCaliMapEGR( inputfilename, true ); // true == run only subset of events
+    //theCali.makeTTCaliMapEGR( inputfilename );
+
+    //-----//////////  making xtal cali :
+    theCali.SetupIovMaps();
+    theCali.setTTIov( r2ulTag );
+    theCali.setXIov( xiovtag );
+    //theCali.makeXCaliMapEGR( inputfilename, true );
+    theCali.makeXCaliMapEGR( inputfilename );
 
     // make smear maps : 
     //  - 2d res plot
     //theCali.setXIov( xiovtag );
 	//theCali.plot2dResolutionEGR( inputfilename );
+    //theCali.plot2dResolutionEGR( inputfilename, false, false );// input, small, usecali
+
+	// make resolution paramters for smearing
+    //theCali.doResTimeFits();
+	//theCali.doResTimeFits( false, true );// doLocal, doNoCali
+
+	// plotting of mean time by run with calibraton : filename, start run, end run, usecali
+	//theCali.plotMeanRunTimeEGR( inputfilename, 303838, 304796 );
+    //theCali.plotMeanRunTimeEGR( inputfilename, 296399, 307554, true );
+	//theCali.makeTTDiffMaps();// make trigger tower diffrence maps
 	
     /////////////////////////////////////////////////////////////////////
     //-------------------------------------------------------------------

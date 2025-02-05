@@ -71,7 +71,8 @@ void TimeFitStruct::PrepFit() {
   // "GausN" == N Gaussians fit
   // "fm" == "fixed mean", i.e. for N Gaussian fit, all Gaussians share the same mu
   // "core" == mid point of range of fit is mean of the histogram, range is n times the std. dev of hist
-
+ 
+  varBinsX = false;
   // set tmp init vals
   Float_t hsum  = hist->Integral(varBinsX?"width":"");
   Float_t mu    = hist->GetMean();

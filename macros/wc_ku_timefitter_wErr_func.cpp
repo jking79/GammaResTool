@@ -482,7 +482,7 @@ void runTimeFitter(const std::string & infilename, const std::string & outfilete
   //GResultsMap["rms"]->Sumw2();
 
   // set bin content!
-  for (auto ibinX = 1; ibinX < fNBinsX; ibinX++){ 
+  for (auto ibinX = 1; ibinX <= fNBinsX; ibinX++){ 
     // get time fit
     auto & TimeFit = TimeFitStructMap[ibinX];
     //auto & GTimeFit = GTimeFitStructMap[ibinX];

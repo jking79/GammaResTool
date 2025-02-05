@@ -272,8 +272,8 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
     #c1.Update()
     #mg.Draw('AP')
 
-    lat_cms = '#bf{CMS} #it{Preliminary}' + ptitle[0]
-    #lat_cms = '#bf{CMS} #it{Work in Progress}' + ptitle[0]
+    #lat_cms = '#bf{CMS} #it{Preliminary}' + ptitle[0]
+    lat_cms = '#bf{CMS} #it{Work in Progress}' + ptitle[0]
     #lat_title = 'Run2018D 3206730-320824' #   7 fb^{-1} (#sqrt{s} = 13 TeV)'
     #lat_title = 'Run2018D 1Tier miniAOD'
     lat_title = ptitle[1]+' (13.6 TeV)'

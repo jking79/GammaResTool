@@ -1,1 +1,1 @@
-kuntuple_MET_p3_v21.txt 0 999999 MET_AOD_R17
+kuntuple_MET_p3_v21.txt 0 999999 MET_AOD_R17_FULL

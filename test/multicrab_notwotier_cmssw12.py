@@ -92,7 +92,7 @@ def subcrab( runs, events, reqmem ):
         #config.Data.useParent      = True
 	#config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
-        config.Data.lumiMask     = inputDir+inputJSON
+        #config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
@@ -183,10 +183,10 @@ def subcrab( runs, events, reqmem ):
                         # Dataset: /DoubleEG/Run2017-09Aug2019_UL2017-/MINIAOD
 
             #['/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD'],
-            ['/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD'],
-            ['/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD'],
-            ['/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD'],
-            ['/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'],
+            #['/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD'],
+            #['/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD'],
+            #['/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD'],
+            #['/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'],
 
             #['/DoubleEG/Run2017B-09Aug2019_UL2017-v1/MINIAOD'],
             #['/DoubleEG/Run2017C-09Aug2019_UL2017-v1/MINIAOD'],
@@ -194,15 +194,28 @@ def subcrab( runs, events, reqmem ):
             #['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/MINIAOD'],
             #['/DoubleEG/Run2017F-09Aug2019_UL2017-v1/MINIAOD'],
 
+            #['/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM'],
+        #['/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-4cores5k_102X_upgrade2018_realistic_v15-v1/MINIAODSIM'],
+            #['/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM'],
+            #['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM'],
+            #['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM'],
+
+            #['/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM'],
+            #['/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v2/AODSIM'],
+            ['/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM'],
+            ['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM'],
+            ['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM'],
+
 
 	    ]
  
         for inDO in inputDataAndOpts:
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
-            primaryDataset = inDO[0].split('/')[1]
-            #primaryDataset = (inDO[0].split('/')[1]).split('_TuneCP5')[0]
-            runEra         = inDO[0].split('/')[2]
+            #primaryDataset = inDO[0].split('/')[1]
+            primaryDataset = (inDO[0].split('/')[1]).split('_TuneCP5')[0]
+            #runEra         = inDO[0].split('/')[2]
+            runEra         = inDO[0].split('/')[2].split('-PU2017')[0]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
             #runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
             dataset	   = inDO[0].split('/')[3]
@@ -230,9 +243,11 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=globalTag=106X_dataRun2_v36', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
 #>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
-            config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>  2018 EOY
             #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            # MC 2017 aod
+            config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>> 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 

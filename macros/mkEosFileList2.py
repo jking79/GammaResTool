@@ -40,7 +40,8 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'ecalTiming/gammares_ecaldpg_tevjets_prompt_oot3_v3/'
 #command = eosll+mspc+'ecalTiming/gammares_llpana_pd/'
 #command = eosll+mdis+'kuncali/gammares_cali/'
-command = eosll+mspc+'ecalTiming/gammares_r24f_cctest/'
+#command = eosll+mspc+'ecalTiming/gammares_r24f_cctest/'
+command = eosll+mdis+'kuncali/gammares_cali/'
 
 #version = 'Run2018D'
 #version = 'GJets'
@@ -54,13 +55,13 @@ command = eosll+mspc+'ecalTiming/gammares_r24f_cctest/'
 #version = 'MET'
 #version = 'DoubleEG'
 #version = 'MINIAOD'
-version = 'EGamma1'
+#version = 'EGamma1'
 #version = 'none'
 #version = 'Run2017E'
 #version = 'JetMET1'
 #version = 'AOD'
 #version = 'Run2024G'
-
+version = 'Run2017F'
 
 rootfile = '.root'
 
@@ -86,12 +87,12 @@ rootfile = '.root'
 #dirselect = 'GJets'
 #dirselect = 'GJets_HT-100To200'
 #dirselect = 'DiPhotonJetsBox'
-#dirselect = 'Run2018C'
+#dirselect = 'Run2017B'
 #dirselect = 'MET'
-#dirselect = 'DoubleEG'
+dirselect = 'DoubleEG'
 #dirselect = 'MET_R17E_MET75'
 #dirselect = 'MINIAOD'
-dirselect = 'EGamma1'
+#dirselect = 'EGamma1'
 #dirselect = 'DY'
 #dirselect = '16'
 
@@ -161,7 +162,8 @@ for line2 in targdirs :
    
     select =  line2.split("Tune")
     #outfile = 'kuntuple_' + select[0] + '_p3_v21.txt'
-    outfile = 'egammares_' + select[0] + '_v21.txt'
+    #outfile = 'egammares_' + select[0] + '_v21.txt'
+    outfile = 'egammares_DoubleEG_MINIAOD_Run2017F-31Mar2018_cali_v21.txt'
     #print( outfile )
     outf = open( outfile, 'w' )
     for thefile in filelist:
