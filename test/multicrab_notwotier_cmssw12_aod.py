@@ -191,9 +191,15 @@ def subcrab( runs, events, reqmem ):
 
             #['/MET/Run2017B-17Nov2017-v1/AOD',''],#12.5
             #['/MET/Run2017C-17Nov2017-v1/AOD',''],#27.9
-            ['/MET/Run2017D-17Nov2017-v1/AOD',''],#5.3
+            #['/MET/Run2017D-17Nov2017-v1/AOD',''],#5.3
             #['/MET/Run2017E-17Nov2017-v1/AOD',''],#28.5
             #['/MET/Run2017F-17Nov2017-v1/AOD',''],#75.3
+
+            #['/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM',''],
+            #['/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v2/AODSIM',''],
+            #['/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
+            ['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
+            #['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
 
             #['/JetHT/Run2017F-17Nov2017-v1/AOD',''],# llpana
             #['/MET/Run2017E-17Nov2017-v1/AOD',''],# llpana
@@ -230,8 +236,9 @@ def subcrab( runs, events, reqmem ):
         for inDO in inputDataAndOpts:
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
-            primaryDataset = inDO[0].split('/')[1]
-            runEra         = inDO[0].split('/')[2]
+            primaryDataset = inDO[0].split('/')[1].split('TuneCP5')[0]
+            #runEra         = inDO[0].split('/')[2]
+            runEra         = inDO[0].split('/')[2].split('-')[0]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
             dataset	   = inDO[0].split('/')[3]
 
@@ -242,7 +249,7 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_llpana_pd'
             #trial          = 'gammares_llpana_mc'
             #trial          = 'gammares_llpana_qcd'
-            trial          = 'gammares_cali_test'
+            trial          = 'gammares_cali_mc'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             ##config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
@@ -259,13 +266,15 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # EF
             #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=False']] # G
 #>>>>>>>>>>>>>>>>>>>     #MET 2017E
-            config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1','outputFileName=output.root','doTwoTier=False','doDiag=True'] # MET 2017E
+            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1','outputFileName=output.root','doTwoTier=False','doDiag=True'] # MET 2017E
 #>>>>>>>>>>>>>>>>>>>     #GMSB
             #config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True'] # GMSB
 #>>>>>>>>>>>>>>>>>>>     #DoubleEG/Run2017*-17Nov2017-v1/AOD good for #globalTag=94X_dataRun2_ReReco_EOY17_v2
             #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v2','outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>>>>>>>     #/DY1JetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM
             #config.JobType.pyCfgParams   = ['globalTag=94X_mc2017_realistic_v11','outputFileName=output.root','doTwoTier=False','doDiag=True']
+            # MC 2017 aod
+            config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
 #------------------------------------------------------------------------------------------------------------------
             config.Data.inputDataset     = inDO[0]

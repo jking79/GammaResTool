@@ -200,13 +200,6 @@ def subcrab( runs, events, reqmem ):
             #['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM'],
             #['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15_ext1-v2/MINIAODSIM'],
 
-            #['/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM'],
-            #['/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v2/AODSIM'],
-            ['/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM'],
-            ['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM'],
-            ['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM'],
-
-
 	    ]
  
         for inDO in inputDataAndOpts:
@@ -246,8 +239,8 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>  2018 EOY
             #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-            # MC 2017 aod
-            config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            ### MC 2017 aod
+            ##config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>> 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 

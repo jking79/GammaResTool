@@ -464,9 +464,10 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
 	caliTFile = TFile::Open( caliTFileName.c_str(), "UPDATE" );
     caliTFile->cd();
 
-    curTag = "default";
-	curTTIov = "default";
-    curXIov = "default";
+    curTag = "EG_EOY_MINI";
+	// PD: EG_EOY_MINI    MC: RunIIFall17DRPremix 
+	curTTIov = "r2ul";
+    curXIov = "prompt";
 
 	eosDir = "root://cmseos.fnal.gov//store/user/jaking/";
 	inDir = "";
@@ -643,7 +644,7 @@ void KUCMSTimeCalibration::SetupIovMaps(){
 	iovMaps["prompt"] = promptIovMap;
 
 	std::map<int,int> mcIovMap;
-	mcIovMap[1] = 999999;
+	mcIovMap[0] = 999999;
 	iovMaps["mc"] = mcIovMap;
 
     float minttlumi = 1000000000;// in /ub
@@ -1456,16 +1457,17 @@ void KUCMSTimeCalibration::makeCaliMapsEGR( std::string inputFileName, bool doTT
 
 	}//<<>>while (std::getline(infilelist,infilestr))
 
-	std::cout << "Making Mean Maps from inpugt data " << doTT << std::endl;
+	std::cout << "Making Mean Maps from input data : doTT? " << doTT << std::endl;
 	// fill map hist -----------------------------------------------
 	int count = 0;
 	auto& calirunset = doTT ? TTCaliRunMapSet : CaliRunMapSet;
 	for( auto& calirun : calirunset ){ 
 		for( auto& runrange : calirun.second ){
 			auto& range = runrange.second;
-			std::cout << "For: " << std::to_string( runrange.first ) << std::endl;
-			if( range.updated ){ 
+			if( range.updated ){
+				std::cout << "For: " << std::to_string( runrange.first ) << std::endl; 
 				if( finalRun > 100000 ) range.lastRun = ( finalRun < range.endRun ) ? finalRun : range.endRun;
+				else range.lastRun = 999999;
 				range.makeMeanMap( false );
 				range.updated = false;
 			}//<<>>if( range.updated )

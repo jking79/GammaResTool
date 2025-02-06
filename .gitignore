@@ -23,4 +23,4 @@ macros/hist_maker_egammares_diag.obj
 __*
 !macros/ecal_config
 !macros/ecal_config/*.root
-macros/ecal_config/back*
+macros/back*
