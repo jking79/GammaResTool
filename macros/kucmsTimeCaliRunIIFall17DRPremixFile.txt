@@ -1,6 +1,0 @@
-#blablabla 0 999999 testing
-egammares_GJets_HT-40To100_AOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 RunIIFall17DRPremix
-egammares_GJets_HT-100To200_AOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 RunIIFall17DRPremix
-egammares_GJets_HT-200To400_AOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 RunIIFall17DRPremix
-egammares_GJets_HT-400To600_AOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 RunIIFall17DRPremix
-egammares_GJets_HT-600ToInf_AOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 RunIIFall17DRPremix

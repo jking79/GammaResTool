@@ -92,9 +92,9 @@ def subcrab( runs, events, reqmem ):
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
-        config.Data.unitsPerJob  =  25000 # MET 2017 AOD
+        #config.Data.unitsPerJob  =  25000 # MET 2017 AOD
         #config.Data.unitsPerJob  =  1500 # MC GMSB
-        #config.Data.unitsPerJob  =  15000 # MC QCD
+        config.Data.unitsPerJob  =  15000 # MC QCD
 
         #config.Data.unitsPerJob  =  300 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
@@ -198,8 +198,10 @@ def subcrab( runs, events, reqmem ):
             #['/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM',''],
             #['/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v2/AODSIM',''],
             #['/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
-            ['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
+            #['/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
             #['/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',''],
+
+            ['/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-RECOSIMstep_94X_mc2017_realistic_v10-v1/AODSIM',''],
 
             #['/JetHT/Run2017F-17Nov2017-v1/AOD',''],# llpana
             #['/MET/Run2017E-17Nov2017-v1/AOD',''],# llpana
@@ -251,7 +253,9 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_llpana_qcd'
             trial          = 'gammares_cali_mc'
 
-            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            #config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/kuncali/"+trial+"/"
+
             ##config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
             ##config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
             ##config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset

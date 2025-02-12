@@ -42,26 +42,26 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mdis+'kuncali/gammares_cali/'
 #command = eosll+mspc+'ecalTiming/gammares_r24f_cctest/'
 #command = eosll+mdis+'kuncali/gammares_cali/'
-command = eosll+mspc+'ecalTiming/gammares_cali_mc/'
+#command = eosll+mspc+'ecalTiming/gammares_cali_mc/'
+command = eosll+mdis+'kuncali/gammares_cali_mc/'
 
 rootfile = '.root'
 
 #dirselect = 'GMSB'
-#dirselect = 'AOD'
-#dirselect = 'WJetsToLNu_HT-800'
 #dirselect = 'QCD'
-#dirselect = 'DYJetsToLL_M-50'
 #dirselect = 'TTJets'
 #dirselect = 'JetHT'
 #dirselect = 'JetMET1'
-dirselect = 'GJets'
+#dirselect = 'GJets'
 #dirselect = 'DiPhotonJetsBox'
 #dirselect = 'Run2017B'
 #dirselect = 'MET'
 #dirselect = 'DoubleEG'
 #dirselect = 'MET_R17E_MET75'
-#dirselect = 'MINIAOD'
 #dirselect = 'EGamma1'
+#dirselect = 'ZJetsToNuNu'
+dirselect = 'DYJetsToLL'
+
 
 #dirselect = ''
 
@@ -77,9 +77,7 @@ dirselect = 'GJets'
 #version = 'EGamma1'
 #version = 'Run2017E'
 #version = 'JetMET1'
-#version = 'AOD'
-#version = 'Run2024G'
-#version = 'Run2017F'
+#version = 'ZJetsToNuNu'
 version = 'RunIIFall17DRPremix'
 
 debug = True
@@ -147,7 +145,7 @@ for line2 in targdirs :
     select =  line2.split("Tune")
     #outfile = 'kuntuple_' + select[0] + '_p3_v21.txt'
     #outfile = 'egammares_' + select[0] + '_v21.txt'
-    outfile = 'egammares_' + select[0] + 'AOD_RunIIFall17DRPremix_cali_v21.txt'
+    outfile = 'egammares_' + select[0] + 'MINIAOD_RunIIFall17DRPremix_cali_v21.txt'
     #print( outfile )
     outf = open( outfile, 'w' )
     for thefile in filelist:

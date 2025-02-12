@@ -139,6 +139,14 @@ def subcrab( runs, events, reqmem ):
             #['/DYto2L-4Jets_MLL-50_3J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
             #['/DYto2L-4Jets_MLL-50_4J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
 
+            ['/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            ['/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            ['/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            ['/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            ['/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            ['/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            ['/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+
             #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
 
             #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1 352499 - 355062    
@@ -206,7 +214,7 @@ def subcrab( runs, events, reqmem ):
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
             #primaryDataset = inDO[0].split('/')[1]
-            primaryDataset = (inDO[0].split('/')[1]).split('_TuneCP5')[0]
+            primaryDataset = (inDO[0].split('/')[1]).split('_13TeV')[0]
             #runEra         = inDO[0].split('/')[2]
             runEra         = inDO[0].split('/')[2].split('-PU2017')[0]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
@@ -239,8 +247,9 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>  2018 EOY
             #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-            ### MC 2017 aod
-            ##config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            ### MC 2017
+            config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+
 #>>>>>>>>>>>> 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
