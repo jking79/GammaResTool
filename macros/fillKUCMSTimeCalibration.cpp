@@ -85,20 +85,29 @@ int main ( int argc, char *argv[] ){
 
 	//theCali.LoadCaliHists( true );
     //theCali.plot2dResolutionEGR( inputfilename, false, false );// input, small, usecali
-	//theCali.setTargetTag("EG_EOY_MINI");	
-    //theCali.setTargetRun(300202);
-    //theCali.setTargetRun(304476);
-    //theCali.setSourceTag("DYJetsToLLRunIIFall17AOD");
-    //theCali.setSourceRun(0);
-    //theCali.plot2dResolutionEGR( inputfilename, false, true, true, "_v2" );// input, small, usecali, smear
+    //theCali.setSmearTag("EG300202_DYF17");
+    //theCali.plot2dResolutionEGR( inputfilename, false, true, true, "_v4" );// input, small, usecali, smear
 	//theCali.SaveCaliHists();
 
-	// make resolution paramters for smearing
+	// make resolution paramters for iov periods
+	//theCali.LoadCaliHists( true );
     //theCali.doResTimeFits();
-	theCali.LoadCaliHists( true );
-    theCali.load2DResHist( "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist_Smeared_v2" );
-	theCali.doResTimeFit( "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist_Smeared_v2" );
-	theCali.SaveCaliHists();
+    //theCali.SaveCaliHists();
+	//theCali.SaveCaliRunFile();	
+
+    // make resolution paramters for smearing
+    std::string sourceTag = "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist";
+	std::string run = "304476";
+	std::string destTag = "EG_EOY_MINI_" + run + "_X_ZEE_Data_Hist";
+	std::string smearTag = "EG" + run + "_DYF17";
+    theCali.makeSmearTag( sourceTag, destTag, smearTag );
+	theCali.SaveSmearFile();
+
+	//theCali.LoadCaliHists( true );
+	//std::string histName = "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist_Smeared_v4";
+    //theCali.load2DResHist( histName );
+	//theCali.doResTimeFit( histName );
+	//theCali.SaveCaliHists();
 
 	// plotting of mean time by run with calibraton : filename, start run, end run, usecali
 	//theCali.plotMeanRunTimeEGR( inputfilename, 303838, 304796 );

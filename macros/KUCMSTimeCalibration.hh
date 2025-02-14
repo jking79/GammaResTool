@@ -64,6 +64,20 @@ struct lumiRunStruct {
 
 //---------------------------------------------------------------------------------------------------------------------
 
+struct smearTagStruct {
+
+    smearTagStruct(){}
+    smearTagStruct( float tnoise, float tstoch, float tstant )
+        : noise(tnoise), stoch(tstoch), stant(tstant) {}
+
+    float noise;
+    float stoch;
+    float stant;
+
+};//<<>>smearTagStruct
+
+//---------------------------------------------------------------------------------------------------------------------
+
 struct caliHistStruct {
     
     caliHistStruct(){}
@@ -275,7 +289,7 @@ void ProfileTimeFit::DoFit(){
 
     fit->SetParName(0,"N");      
 	fit->SetParameter(0,norm); 
-	fit->SetParLimits(0,norm/2,norm*10);
+	fit->SetParLimits(0,norm/10,norm*10);
     fit->SetParName(1,"#mu");    
 	fit->SetParameter(1,mu); 
 	//fit->SetParLimits(1,-0.03,0.03);
@@ -283,11 +297,11 @@ void ProfileTimeFit::DoFit(){
     fit->SetParName(2,"#sigma"); 
 	fit->SetParameter(2,sigma); 
 	//fit->SetParLimits(2,0,1);
-    fit->SetParLimits(2,0,sigma*10);
+    fit->SetParLimits(2,sigma/10,sigma*10);
 
-    std::cout << " - Fit > Range: ( " << lowerBound << " to " << upperBound;
-    std::cout << " ) N: " << norm << "(" << norm/2 << "t" << norm*10 << ") Mu: " << mu;
-    std::cout  << " (-0.03t0.03) s: " << sigma << " (0t1)" << std::endl;
+    std::cout << " - Fit > Mu: " << mu << " ( " << lowerBound << " to " << upperBound << " )";
+    std::cout << " Norm: " << norm << "( " << norm/10 << " to " << norm*10 << " )";
+    std::cout  << " Sigma: " << sigma << "( " << sigma/10 << " to " << sigma*10 << " )" << std::endl;
 
     std::cout << " -- fiting " << std::endl;
   	profileHist->Fit(fit->GetName(),"RBQO");
@@ -327,6 +341,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     std::string caliRunConfig;
     std::string caliTTConfig;
     std::string caliTFileName;
+    std::string caliSmearConfig;
 
     std::string xtalHistMapName;
     std::string ttHistMapName;
@@ -342,10 +357,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     std::string curXIov;
 	std::string curTag; // used to change rereco version or campaian calibrations are for
 
-    std::string targetTag;
-	int targetRun;
-    std::string sourceTag;
-    int sourceRun;
+    std::string smearTag;
 
 	std::string xBinStr;
     std::string yBinStr;
@@ -363,6 +375,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 	std::map<std::string,caliHistStruct> CaliHists; // str is label for specific calibration histogram - stored as ref in calirunmap
     std::map<std::string,std::map<int,lumiRunStruct>> lumiRunMaps;// str is settag, int is run - ref for maps - give lumi by run
     std::map<std::string,std::map<int,int>> iovMaps; // < tag, < start run, end rn >>
+
+    std::map<std::string,smearTagStruct> SmearTagSet;
 
 	bool updated;
 
@@ -404,12 +418,12 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     float getCalibration( uInt rhid, int run )
 			{ return getCalibration( rhid, run, curTag ); };
 	//tag indicates which smear to use
-	float getSmearedTime(  float rhtime, float rhamp, int crun, std::string ctag, int srun, std::string stag );
+	float getSmearedTime(  float rhtime, float rhamp, std::string stag );
     float getSmearedTime(  float rhtime, float rhamp )
-            { return getSmearedTime( rhtime, rhamp, targetRun, targetTag, sourceRun, sourceTag ); };
-    float getSmrdCalibTime( float rhtime, float rhamp, uInt rhid, int crun, std::string ctag, int srun, std::string stag );
-    float getSmrdCalibTime( float rhtime, float rhamp, uInt rhid )
-			{ return getSmrdCalibTime( rhtime, rhamp, rhid, targetRun, targetTag, sourceRun, sourceTag ); }; 
+            { return getSmearedTime( rhtime, rhamp, smearTag ); };
+    float getSmrdCalibTime( float rhtime, float rhamp, uInt rhid, int run, std::string ctag, std::string stag );
+    float getSmrdCalibTime( float rhtime, float rhamp, uInt rhid, int run )
+			{ return getSmrdCalibTime( rhtime, rhamp, rhid, run, curTag, smearTag ); }; 
 
 	float getTTCali( uInt rhid, int run, std::string tag );
 
@@ -423,10 +437,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     void setXIov( std::string tag ){ curXIov = tag; };
     void setTTIov( std::string tag ){ curTTIov = tag; };
 
-    void setTargetTag( std::string tag ){ targetTag = tag; };
-    void setTargetRun( int run ){ targetRun = run; };
-    void setSourceTag( std::string tag ){ sourceTag = tag; };
-    void setSourceRun( int run ){ sourceRun = run; };
+    void setSmearTag( std::string tag ){ smearTag = tag; };
 
     void SetXBinStr( std::string xbins ){ xBinStr = xbins; };
     void SetYBinStr( std::string ybins ){ yBinStr = ybins; };
@@ -447,6 +458,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     void doResTimeFit( std::string histName );
 	void load2DResHist( std::string histName );
 
+    void makeSmearTag( std::string sourceName, std::string destName, std::string smearTag );
+
 	void plotMeanRunTimeEGR( std::string inputFileName, int srun, int erun, bool usecali = true );
     void makeTTDiffMaps();
 
@@ -466,6 +479,7 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
     detIDConfigEE = caliFileDir + "fullinfo_v2_detids_EE.txt";
 	caliRunConfig = caliFileDir + "caliRunConfig.txt";
     caliTTConfig = caliFileDir + "caliTTConfig.txt";
+    caliSmearConfig = caliFileDir + "caliSmearConfig.txt";
 
     xtalHistMapName = "_X_";
     ttHistMapName = "_TT_";
@@ -482,9 +496,7 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
 	curTTIov = "r2ul";
     curXIov = "prompt";
 
-	targetTag = "EG_EOY_MINI";
-	targetRun = 300202;
-	sourceTag = "none";
+	smearTag = "EG300202_DYF17";
 
 	eosDir = "root://cmseos.fnal.gov//store/user/jaking/";
 	inDir = "";
@@ -505,9 +517,10 @@ KUCMSTimeCalibration::KUCMSTimeCalibration(){
     getRandom = new TRandom();
     getRandom->SetSeed(0);
 
-    std::cout << " - reading in TT & X cali run files " << std::endl;
+    std::cout << " - reading in TTrun, Xrun, & smear cali files " << std::endl;
 	ReadCaliRunFile();
 	ReadTTRunFile();
+	ReadSmearFile();
 
     //std::cout << " - loading cali hists " << std::endl;
 	LoadCaliHists();
@@ -820,6 +833,40 @@ void KUCMSTimeCalibration::SaveTTRunFile(){
 	outfile.close();
 
 }//<<>>void ReadTimeCaliTagFile()
+
+void KUCMSTimeCalibration::ReadSmearFile(){
+
+    std::cout << " - Reading SmearFile " << caliSmearConfig << std::endl;
+    std::ifstream infile( caliSmearConfig, std::ios::in);
+    if( not infile.is_open() ){ std::cout << " -- " << caliSmearConfig << " not opened. "  << std::endl; return; }
+    std::string tag;
+    float noise, stoch, stant;
+    while( infile >> tag >> noise >> stoch >> stant ){
+        std::cout << " -- " << tag << " " << noise << " " << stoch <<  " " << stant << std::endl;
+        SmearTagSet[tag] = { noise, stoch, stant };
+    }//<<>>while (infile >>
+    infile.close();
+
+}//<<>>void KUCMSTimeCalibration::ReadSmearFile()
+
+void KUCMSTimeCalibration::SaveSmearFile(){
+
+    std::cout << " - Saving SmearFile " << std::endl;
+    std::ofstream outfile( caliSmearConfig, std::ios::out | std::ios::trunc );
+    if( not outfile.is_open() ){ std::cout << "Failed to open file !!! " << std::endl; return; }
+    for( auto& smeartag : SmearTagSet ){
+
+        std::string tag = smeartag.first;
+		float noise = smeartag.second.noise;
+        float stoch = smeartag.second.stoch;
+        float stant = smeartag.second.stant;
+
+        outfile << tag << " " << noise << " " << stoch << " " << stant << std::endl;
+
+    }//<<>>for( auto& calirunmap : SmearTagSet )
+    outfile.close();
+
+}//<<>>void SaveSmearFile()
 
 //std::string ttfilename = ttHistMapName+name+std::to_string(run);
 //		MeanMap + pd/camp/tag name + start run  + TT/X ?
@@ -1233,51 +1280,37 @@ float KUCMSTimeCalibration::getTTCali( uInt rhid, int run, std::string tag ){
 
 }//<<>>float KUCMSTimeCalibration::getCalibration( std::string tag )
 
-//std::map<std::string,smearRunStruct> smearRunMap; // map of smear paramerts
-//  smearRunStruct .....
-//    std::string sourceTag;
-//    std::string targetTag;
-//    int startRun;
-//    int endRun;
-//    smearParameters smear;
-//
-//};//<<>>smearRunMap
-//struct smearParameters {
+//struct smearTagStruct {
 //
 //    float noise;
-//    float stochastic;
-//    float constant;
+//    float stoch;
+//    float stant;
 //
 //};//smearParameters
-//  change  -- source tag -> dest tag  : ? check got to worse ?
-//  ctag == PD ( data ) stag == MC
+//std::map<std::string,smearTagStruct> SmearTagSet;
 //  do mutiple combos 
 
-float KUCMSTimeCalibration::getSmearedTime( float rhtime, float rhamp, int crun, std::string ctag, int srun, std::string stag  ){
+float KUCMSTimeCalibration::getSmearedTime( float rhtime, float rhamp, std::string stag  ){
 
-    double stnoise = CaliRunMapSet[stag][srun].noise;
-    double ststoch = CaliRunMapSet[stag][srun].stoch;
-    double ststant = CaliRunMapSet[stag][srun].stant;
+    double stnoise = SmearTagSet[stag].noise;
+    double ststoch = SmearTagSet[stag].stoch;
+    double ststant = SmearTagSet[stag].stant;
     //std::cout << " stag smearing : " << stnoise << " " << ststoch << " " << ststant << " " << srun << std::endl;
-    double ctnoise = CaliRunMapSet[ctag][crun].noise;
-    double ctstoch = CaliRunMapSet[ctag][crun].stoch;
-    double ctstant = CaliRunMapSet[ctag][crun].stant;
-    //std::cout << " ctag smearing : " << ctnoise << " " << ctstoch << " " << ctstant << " " << crun << std::endl;
-	double noise = pow(ctnoise,2) - pow(stnoise,2);
-	double stoch = ( ststoch > 0 && ctstoch > 0 ) ? pow(ctstoch,2) - pow(ststoch,2) : 0;
-    double stant = pow(ctstant,2) - pow(ststant,2);
+	double noise = pow(stnoise,2);
+	double stoch = ( ststoch > 0 ) ? pow(ststoch,2) : 0;
+    double stant = pow(ststant,2);
     double resolution = std::sqrt( ( noise/pow(rhamp,2) + stoch/rhamp  + 2*stant )/2 );
 	//std::cout << " getSmearedTime : " << resolution << " " << noise << " " << stoch << " " << stant << std::endl;
-    if( resolution <= 0 ){ std::cout << "No smearing values set for this tag : c " << ctag << " s " << stag << std::endl; return rhtime; }
+    if( resolution <= 0 ){ std::cout << "No smearing values set for this tag : " << stag << std::endl; return rhtime; }
     float smearedtime = getRandom->Gaus( rhtime, resolution );
     return smearedtime;
 
 }//<<>>float KUCMSTimeCalibration::getSmearedTime( std::string tag , float time, uInt rhid )
 
-float KUCMSTimeCalibration::getSmrdCalibTime( float rhtime, float rhamp, uInt rhid, int crun, std::string ctag, int srun, std::string stag ){
+float KUCMSTimeCalibration::getSmrdCalibTime( float rhtime, float rhamp, uInt rhid, int crun, std::string ctag, std::string stag ){
 
     float crhtime = rhtime - getCalibration( rhid, crun, ctag );
-    float smrdCalibTime = getSmearedTime( crhtime, rhamp, crun, ctag, srun, stag );
+    float smrdCalibTime = getSmearedTime( crhtime, rhamp, stag );
     return smrdCalibTime;
 
 }//<<>>float KUCMSTimeCalibration::getSmearedTime( std::string tag , float time, uInt rhid )
@@ -1563,8 +1596,8 @@ void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName, bool 
             return;
         }//<<>>if( CaliRunMapSet.find(tag) == TTCaliRunMapSet.end() )
 
-		if( smear && ( CaliRunMapSet.find(targetTag) == CaliRunMapSet.end() ) ){
-            std::cout << " No Cali maps for this target tag !!" << std::endl;
+		if( smear && ( SmearTagSet.find(smearTag) == SmearTagSet.end() ) ){
+            std::cout << " No Smear tag found !!" << std::endl;
             return;
         }//<<>>if( CaliRunMapSet.find(tag) == TTCaliRunMapSet.end() )
 
@@ -1773,7 +1806,7 @@ SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
 
   	std::string f2DHistName = hist2D->GetName();;
 	std::cout << "Running time fitter : " << f2DHistName << std::endl;
-	bool doSterm = false;
+	bool doSterm = true;
 	
   	std::vector<float> fXBins;
 	//std::cout << " -- " << xBinStr << std::endl;
@@ -1868,18 +1901,22 @@ SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
 
     	std::cout << " Bin " << ibinX  <<  " : " << fXBins[ibinX-1] << "-" << fXBins[ibinX];
     	std::cout << " : no guass: " << results.sigma << " err: " << results.esigma << std::endl;
+	
+		if( results.sigma <= 0 ) continue; 
 
     	ResultsMap["chi2ndf"]->SetBinContent( ibinX, results.chi2ndf );
     	ResultsMap["chi2prob"]->SetBinContent( ibinX, results.chi2prob );
     	ResultsMap["mu"]->SetBinContent( ibinX, results.mu );
     	ResultsMap["mu"]->SetBinError( ibinX, results.emu );
-    	ResultsMap["sigma"]->SetBinContent( ibinX, results.sigma );
-    	ResultsMap["sigma"]->SetBinError( ibinX, results.esigma );
+		if( results.esigma < results.sigma/10 ){
+    		ResultsMap["sigma"]->SetBinContent( ibinX, results.sigma );
+    		ResultsMap["sigma"]->SetBinError( ibinX, results.esigma );
+		}//<<>>if( results.esigma < 0.01 )
     	ResultsMap["occ"]->SetBinContent( ibinX, results.occ );
     	ResultsMap["occ"]->SetBinError( ibinX, std::sqrt(results.occ) );
     	ResultsMap["rms"]->SetBinContent( ibinX, results.rms );
     	ResultsMap["rms"]->SetBinError( ibinX, 0 );
-    
+ 
   	}//<<>>for (auto ibinX = 1; ibinX <= fNBinsX; ibinX++)
 
     for( auto& profile : profileHists ){ profile.second.profileHist->Write(); profile.second.deleteHists();}
@@ -1897,8 +1934,8 @@ SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
   	auto& hist = ResultsMap["sigma"];
   	//auto x_low = hist->GetXaxis()->GetBinLowEdge( hist->GetXaxis()->GetFirst() );
   	//auto x_up  = hist->GetXaxis()->GetBinUpEdge( hist->GetXaxis()->GetLast() );
-	float x_low = 75;
-	float x_up = 750;
+	float x_low = 25;
+	float x_up = 1800;
   	std::string histname = hist->GetName();
   	std::string formname = histname+"_form";
   	std::string fitname  = histname+"_fit";
@@ -1990,6 +2027,126 @@ void KUCMSTimeCalibration::doResTimeFit( std::string histName ){
 	} else std::cout << " -- No Such hist entry !! " << std::endl;
 
 }//<<>>void KUCMSTimeCalibration::doResTimeFit( std::string histName )
+
+void KUCMSTimeCalibration::makeSmearTag( std::string sourceName, std::string destName, std::string smearTag ){
+
+    std::cout << "Make Semar Tag : " << smearTag << std::endl;
+    bool doSterm = true;
+
+    std::string outfilename = caliFileDir + smearTag + "_resfit.root";
+    TFile* smearTFile = TFile::Open( outfilename.c_str(), "UPDATE" );
+
+    std::string sinfilename = caliFileDir + sourceName + "_resfit.root";
+    TFile* sourceTFile = TFile::Open( sinfilename.c_str(), "READ" );
+    if( not sourceTFile ){ std::cout << "Failed to open : " << sinfilename << std::endl; return; }
+
+    std::string dinfilename = caliFileDir + destName + "_resfit.root";
+    TFile* destTFile = TFile::Open( dinfilename.c_str(), "READ" );
+	if( not destTFile ){ std::cout << "Failed to open : " << dinfilename << std::endl; return; }
+
+    std::string fTitle = "#Delta(Photon Seed Time) [ns] vs. A_{eff}/#sigma_{n} (EBEB)";
+    std::string fXTitle = "A_{eff}/#sigma_{n} (EBEB)";
+    std::string fTimeText = "t_{1}-t_{2}";
+    std::string fSigmaVarText = "A_{eff}/#sigma_{n}";
+
+    std::vector<float> fXBins;
+    setBins( xBinStr, fXBins );
+    int fNBinsX = fXBins.size();
+    int nXbins = fNBinsX - 1;
+    const auto xbins = &fXBins[0];
+
+	smearTFile->cd();
+    std::string sigtext = "#sigma("+fTimeText+") [ns]";
+    std::string sigName = smearTag+"_sigma";
+    std::string sigTitle = fTitle+" "+sigtext+";"+fXTitle+";"+sigtext;
+    TH1F* Results = new TH1F(sigName.c_str(),sigTitle.c_str(),nXbins,xbins);
+    Results->Sumw2();
+
+	sourceTFile->cd();
+    std::string sourceHName = sourceName+"_sigma";
+	TH1F* Source = (TH1F*)sourceTFile->Get(sourceHName.c_str());
+    if( not Source ){ std::cout << "Failed to open : " << sourceHName << std::endl; return; }
+
+	destTFile->cd();
+    std::string destHName = destName+"_sigma";
+    TH1F* Dest = (TH1F*)destTFile->Get(destHName.c_str());
+    if( not Dest ){ std::cout << "Failed to open : " << destHName << std::endl; return; }
+
+    for (auto ibinX = 1; ibinX < fNBinsX; ibinX++){
+
+		float ssigma = Source->GetBinContent( ibinX );
+        float sserr = Source->GetBinError( ibinX );
+        float dsigma = Dest->GetBinContent( ibinX );
+        float dserr = Dest->GetBinError( ibinX );
+		
+		if( ssigma <=0 || dsigma <= 0 ) continue;
+		float sigma = std::sqrt( pow(dsigma,2) - pow(ssigma,2) );
+        float serr = std::sqrt( pow((dsigma*dserr/sigma),2) + pow((ssigma*sserr/sigma),2) );
+		std::cout << " - smear sigma: " << sigma << " <- " << dsigma << " qd " << ssigma << " err " << serr << std::endl; 
+        if( sigma <= 0 ) continue;
+
+        Results->SetBinContent( ibinX, sigma );
+        Results->SetBinError( ibinX, serr );
+
+    }//<<>>for (auto ibinX = 1; ibinX <= fNBinsX; ibinX++)
+
+    // Prep sigma fit
+    //----------------------TimeFitter::PrepSigmaFit(FitInfo);
+    //std::cout << "Prepping sigma fit for: " << f2DHistName << std::endl;
+    float nLower = 0;
+    float nVal = 50;
+    float nUpper = 100;
+    float cLower = 0;
+    float cVal = 0.5;
+    float cUpper = 1;
+    // get input hist
+    float x_low = 25;
+    float x_up = 1800;
+    std::string histname = Results->GetName();
+    std::string formname = histname+"_form";
+    std::string fitname  = histname+"_fit";
+    //std::cout << "Prepping sigma fit for: " << histname << std::endl;
+    std::string fitformstr;
+    if( doSterm ) fitformstr = "sqrt((([0]*[0])/(x*x))+(2*[1]*[1])+([2]*[2]/x))";
+    else fitformstr = "sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))";
+    auto form = new TFormula(formname.c_str(),fitformstr.c_str());
+    auto fit = new TF1(fitname.c_str(),form->GetName(),x_low,x_up);
+    fit->SetParName( 0, "N" );
+    fit->SetParameter( 0, nVal );
+    fit->SetParLimits( 0, nLower, nUpper );
+    fit->SetParName( 1, "C" );
+    fit->SetParameter( 1, cVal );
+    fit->SetParLimits( 1, cLower, cUpper );
+    if( doSterm ) fit->SetParName( 2, "S" );
+    if( doSterm ) fit->SetParameter( 2, 1.0 );
+    if( doSterm ) fit->SetParLimits( 2, 0.0, 10.0 );
+    fit->SetLineColor(Results->GetLineColor());
+    Results->Fit(fit->GetName(),"RBQO");
+
+    float noise = fit->GetParameter(0);
+    float enoise = fit->GetParError (0);
+    float stant = fit->GetParameter(1);
+    float estant = fit->GetParError (1);
+    float stoch = doSterm ? fit->GetParameter(2) : -99;
+    float estoch = doSterm ? fit->GetParError (2) : -99;
+    std::cout << "Sigma fit resutls: " << std::endl;
+    std::cout << " noise " << noise << " +/- " << enoise;
+    std::cout << " stoch " << stoch << " +/- " << estoch;
+    std::cout << " stant " << stant << " +/- " << estant << std::endl;
+
+	SmearTagSet[smearTag] = { noise, stoch, stant };
+
+	smearTFile->cd();
+	Results->Write();
+
+	delete Results;
+    delete form;
+    delete fit;
+    smearTFile->Close();
+	sourceTFile->Close();
+	destTFile->Close();
+
+}//<<>>void KUCMSTimeCalibration::makeSmearTag( std::string histName )
 
 void KUCMSTimeCalibration::plotMeanRunTimeEGR( std::string inputFileName, int srun, int erun, bool usecali ){
 
