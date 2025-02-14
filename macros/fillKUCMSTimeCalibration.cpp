@@ -7,7 +7,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "KUCMSTimeCalibration.hh"
+#include "ecal_config/KUCMSTimeCalibration.hh"
 // ------------------------------------------- main function ------------------------------------------------------------
 int main ( int argc, char *argv[] ){
 
@@ -96,12 +96,12 @@ int main ( int argc, char *argv[] ){
 	//theCali.SaveCaliRunFile();	
 
     // make resolution paramters for smearing
-    std::string sourceTag = "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist";
-	std::string run = "304476";
-	std::string destTag = "EG_EOY_MINI_" + run + "_X_ZEE_Data_Hist";
-	std::string smearTag = "EG" + run + "_DYF17";
-    theCali.makeSmearTag( sourceTag, destTag, smearTag );
-	theCali.SaveSmearFile();
+    //std::string sourceTag = "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist";
+	//std::string run = "304476";
+	//std::string destTag = "EG_EOY_MINI_" + run + "_X_ZEE_Data_Hist";
+	//std::string smearTag = "EG" + run + "_DYF17";
+    //theCali.makeSmearTag( sourceTag, destTag, smearTag );
+	//theCali.SaveSmearFile();
 
 	//theCali.LoadCaliHists( true );
 	//std::string histName = "DYJetsToLLRunIIFall17AOD_0_X_ZEE_Data_Hist_Smeared_v4";
