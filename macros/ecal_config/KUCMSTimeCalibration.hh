@@ -417,6 +417,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 	float getCalibration( uInt rhid, int run, std::string tag  ); // tag indicates which calibration set to use
     float getCalibration( uInt rhid, int run )
 			{ return getCalibration( rhid, run, curTag ); };
+	float getCalibTime( float rhtime, uInt rhid, int run )
+			{ return rhtime - getCalibration( rhid, run ); };
 	//tag indicates which smear to use
 	float getSmearedTime(  float rhtime, float rhamp, std::string stag );
     float getSmearedTime(  float rhtime, float rhamp )
