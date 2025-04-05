@@ -64,11 +64,11 @@ def subcrab( runs, events, reqmem ):
         #inputJSON    = 'Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
 
         #inputJSON     = 'Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
-        inputJSON     = 'Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'
+        #inputJSON     = 'Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'
         #inputJSON     = 'Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'
 
         #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
-        #inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
+        inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
         #inputJSON    = ''
         #--------------------------------------------------------
         # This is the base config:
@@ -89,18 +89,19 @@ def subcrab( runs, events, reqmem ):
         #config.JobType.inputFiles  = [ inputDir+inputPaths , inputDir+inputFilters , inputDir+inputFlags ]
 
         config.Data.inputDataset = None
+        config.Data.partialDataset = True
         #config.Data.useParent      = True
 	#config.Data.secondaryInputDataset = secInputPaths
         #config.Data.useParent      = False
-        #config.Data.lumiMask     = inputDir+inputJSON
+        config.Data.lumiMask     = inputDir+inputJSON
         #config.Data.splitting    = 'LumiBased'
         config.Data.splitting    = 'EventAwareLumiBased'
         #config.Data.splitting    = 'Automatic'
 
-        config.Data.unitsPerJob  =  25000 # for auto job splitting
+        #config.Data.unitsPerJob  =  25000 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
-        #config.Data.unitsPerJob  =  100000 # 2024F cc test rereco
+        config.Data.unitsPerJob  =  100000 # 2024F cc test rereco
 
         #config.Data.outputDatasetTag = 'reducedRAW_EGamma_ntuple'
 	     
@@ -126,6 +127,9 @@ def subcrab( runs, events, reqmem ):
 	    #['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
             #['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
             #['/EGamma1/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T
+            #['/EGamma1/Run2024F-PromptReco-v1/MINIAOD'],
+            ['/EGamma0/CMSSW_15_0_0_pre2-141X_dataRun3_Prompt_frozen_v4_RV266_2024_Data_ECALCCTiming_RelVal_2024D-v1/MINIAOD'],
+            #['/EGamma0/CMSSW_15_0_0_pre1-141X_dataRun3_Prompt_frozen_v4_STD_2024_Data_RelVal_2024D-v1/MINIAOD'],
 
             #['/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
             #['/DYto2L-4Jets_MLL-50_2J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
@@ -139,13 +143,16 @@ def subcrab( runs, events, reqmem ):
             #['/DYto2L-4Jets_MLL-50_3J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
             #['/DYto2L-4Jets_MLL-50_4J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer23MiniAODv4-130X_mcRun3_2023_realistic_v14-v3/MINIAODSIM'], #
 
-            ['/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-            ['/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-            ['/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-            ['/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-            ['/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-            ['/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-            ['/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+            #['/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+
+            #['/GJ-4Jets_HT-600_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'],
+            #['/DYto2L_M-50_TuneCP5_13p6TeV_pythia8/Run3Winter24MiniAOD-KeepSi_133X_mcRun3_2024_realistic_v8-v2/MINIAODSIM'],
 
             #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
 
@@ -165,11 +172,6 @@ def subcrab( runs, events, reqmem ):
 
                         # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/MINIAOD
 
-            #['/EGamma/Run2018A-12Nov2019_UL2018-v2/MINIAOD'],
-            #['/EGamma/Run2018B-12Nov2019_UL2018-v2/MINIAOD'],
-            #['/EGamma/Run2018C-12Nov2019_UL2018-v2/MINIAOD'],
-            #['/EGamma/Run2018D-12Nov2019_UL2018-v4/MINIAOD'],
-
             #['/EGamma/Run2018A-15Feb2022_UL2018-v1/MINIAOD'],
             #['/EGamma/Run2018B-15Feb2022_UL2018-v1/MINIAOD'],
             #['/EGamma/Run2018C-15Feb2022_UL2018-v1/MINIAOD'],
@@ -177,6 +179,10 @@ def subcrab( runs, events, reqmem ):
 
             # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/AOD
 
+            #['/EGamma/Run2018A-12Nov2019_UL2018-v2/MINIAOD'],
+            #['/EGamma/Run2018B-12Nov2019_UL2018-v2/MINIAOD'],
+            #['/EGamma/Run2018C-12Nov2019_UL2018-v2/MINIAOD'],
+            #['/EGamma/Run2018D-12Nov2019_UL2018-v8/MINIAOD'],
 
                         # Dataset: /DoubleEG/Run2016-21Feb2020_UL2016-/MINIAOD
 
@@ -213,10 +219,10 @@ def subcrab( runs, events, reqmem ):
         for inDO in inputDataAndOpts:
             # inDO[0] is of the form /A/B/C. Since A+B is unique for each inDS, use this in the CRAB request name.
 	         #print( inDO[0] )
-            #primaryDataset = inDO[0].split('/')[1]
-            primaryDataset = (inDO[0].split('/')[1]).split('_13TeV')[0]
+            primaryDataset = inDO[0].split('/')[1]
+            #primaryDataset = (inDO[0].split('/')[1]).split('_Tune')[0]
             #runEra         = inDO[0].split('/')[2]
-            runEra         = inDO[0].split('/')[2].split('-PU2017')[0]
+            runEra         = inDO[0].split('/')[2].split('-')[0]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
             #runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
             dataset	   = inDO[0].split('/')[3]
@@ -229,11 +235,14 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_mc'
             #trial          = 'gammares_llpana'
             #trial          = 'gammares_r24f_cctest'
-            trial          = 'gammares_cali'
-            #trial          = 'gammares_cali_test'
+            #trial          = 'gammares_cali'
+            #trial          = 'gammares_24mc'
+            #trial          = 'gammares_r24f_prompt'
+            trial          = 'gammares_r25_val'
+            #trial          = 'gammares_ECAL_CC_HCAL_DI-v3'
 
-            #config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
-            config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/kuncali/"+trial+"/"
+            config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
+            #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/kuncali/"+trial+"/"
             #config.General.requestName   = trial+"_"+primaryDataset+"_"+runEra+"_"+runs+"_"+dataset
             #config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_"+runs+"_dispho"
             #config.Data.outputDatasetTag = runEra+"_"+runs+"_"+dataset
@@ -242,17 +251,19 @@ def subcrab( runs, events, reqmem ):
 
 #>>>>>>>>>>>>>  Run2 UL 16/17/18
             #config.JobType.pyCfgParams   = ['globalTag=globalTag=106X_dataRun2_v36', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-
+            #config.JobType.pyCfgParams   = ['globalTag=globalTag=106X_dataRun2_v20', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
             #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 #>>>>>>>>>>>>>  2018 EOY
             #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
             ### MC 2017
-            config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
 #>>>>>>>>>>>> 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-
+            config.JobType.pyCfgParams   = ['globalTag=141X_dataRun3_HLT_frozen_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            ## MC Run3Winter24
+            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
             ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4','doTwoTier=False','doDiag=False']  

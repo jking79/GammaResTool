@@ -72,7 +72,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',75,500,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',100,2250,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',100,700,2)
-        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,3000,3)
+        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,800,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,375,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',100,750,0,3)
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',6,100,2)
@@ -164,7 +164,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
             binwidth = float(orighist.GetBinWidth(bn))
             binstart = float(orighist.GetBinLowEdge(bn))
             #binmid = thebinmid[n][bn-1]  #float(orighist.GetBinCenter(bn))
-            if binval > 0.0 :     
+            if binval > 0.0 and binerr < binval/10 :     
             #goodpoint = binerr < (binval/5.0) and binerr != 0
             #if goodpoint :
                 if( sxtal ):  
@@ -193,11 +193,11 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #h1[n].GetXaxis().SetTitle(layout['xtitle'])
         #h1[n].GetYaxis().CenterTitle(True)
         #h1[n].GetYaxis().SetTitle(layout['ytitle'])
-#       k = [kMagenta+2,kBlue+1,kAzure+4,kBlack,kYellow+1,kViolet+7,kOrange+7,kRed+2,kGreen+3, kGray]
+        k = [kMagenta+2,kBlue+1,kAzure+4,kBlack,kYellow+1,kViolet+7,kOrange+7,kRed+2,kGreen+3, kGray]
         #k = [kMagenta+2,kGreen+2,kYellow+1,kBlue+2,kRed+2,kAzure+4,kBlack,kViolet+7,kOrange+7,kGreen+3,kRed+4,kBlue+4,kGreen+2,kAzure+4,kMagenta+2,kGreen+2]
         #k = [kMagenta+2,kGreen+2,kBlue+2,kRed+2,kAzure+4,kViolet+7,kOrange+7,kGreen+3,kRed+4,kBlue+4,kGreen+2,kAzure+4,kMagenta+2,kGreen+2,kBlack]
         #k = [kBlue+4,kBlue+1,kGreen+4,kYellow+3,kAzure+4,kViolet+7,kOrange+7,kGreen+3]
-        k = [kSpring-7,kSpring+3,kAzure+3,kAzure-7]
+        #k = [kSpring-7,kSpring+3,kAzure+3,kAzure-7]
         #k = [kBlack]
         #k = [kGray+2,kGray+3,kGray+4,kBlack]
         #k = [kGreen+2,kBlue+2,kMagenta+2,kRed+2]
@@ -404,10 +404,10 @@ ytitle = '#sigma(t_{1}-t_{2}) [ns]'
 #ytitle = ''
 #htitle = 'A_{eff}/#sigma_{n} vs #sigma_{#delta_{t}}'
 htitle = ''
-islogx = True
-#islogx = False
-islogy = True
-#islogy = False
+#islogx = True
+islogx = False
+#islogy = True
+islogy = False
 
 gll_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : islogx, 'logy' : islogy, 'legtitle' : legtitle }
 loc_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : islogx, 'logy' : islogy, 'legtitle' : legtitle + li_legtitle }
@@ -436,13 +436,13 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24C_iov3_goldjson_resplots/egres_Run2024C_goldjson_eg01_380066_380238_140_v10_resplots.root'
 #
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24D_Full_nojson_resplots/egres_Run2024D_nojson_eg01_Full_140_v10_resplots.root'
-##egres_r3_24_EG01_v12 = '../../res_files/egmres_24D_Full_nojson_cali_resplots/egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots.root'
+egres_r3_24_EG01_v12 = '../../res_files/egmres_24D_Full_nojson_cali_resplots/egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots.root'
 #
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24CD_Full_mixed_resplots/egres_Run2024CD_mixed_eg01_Full_140_v10_resplots.root'
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24CD_Full_mixed_cali_resplots/egres_Run2024CD_mixed_eg01_Full_cali_140_v10_resplots.root'
-#egres_r3_24_EG01_v12 = '../../res_files/egmres_24E_test_resplots/egres_Run2024E_test_140_v10_resplots.root'
+egres_r3_24_EG01_v12 = '../../res_files/egmres_24E_test_resplots/egres_Run2024E_test_140_v10_resplots.root'
 ##egres_r3_23d_part_EG1_v12 = '../../res_files/egmres_23D_partial_nojson_resplots/egres_Run2023D_SF_140_v10_resplots.root'
-#egres_r3_23d_part_EG1_v12 = '../../res_files/egmres_23D_partial_nojson_cali_resplots/egres_Run2023D_SF_140_v10_resplots.root'
+egres_r3_23d_part_EG1_v12 = '../../res_files/egmres_23D_partial_nojson_cali_resplots/egres_Run2023D_SF_140_v10_resplots.root'
 #
 #hl_r3_24C = [
 #    ["SRO_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU"],
@@ -461,6 +461,14 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 #    #["DRO_CC_Data_Hist_sigma","",egres_r3_23d_part_EG1_v12,"DRU"],
 #    ["ZEE_CC_Data_Hist_sigma","",egres_r3_23d_part_EG1_v12,"ZEE"],
 #]
+
+hl_r3_24d_part_rtvcc = [
+    ["SRO_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU RT"],
+    ["ZEE_Data_Hist_sigma","",egres_r3_24_EG01_v12,"ZEE RT"],
+    ["SRO_CC_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU CC"],
+    ["ZEE_CC_Data_Hist_sigma","",egres_r3_24_EG01_v12,"ZEE CC"],
+]
+
 #
 ##ptitle=[' 2024C 379415-380238','','#splitline{EBEB}{5 GeV Cali}'] #{GT 106X_dataRun2_v28}'
 ##ptitle=[' 2024C 379367-379543','','#splitline{EBEB}{ }'] #{GT 106X_dataRun2_v28}'
@@ -473,18 +481,22 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 ##ptitle=[' 2024E 381384','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}'
 #ptitle=[' 2024D 370293-370580','','#splitline{Ratio timing}{EBEB CCGT}'] #{GT 106X_dataRun2_v28}'
 #ptitle_cc=[' 2024D 370293-370580','','#splitline{CC timing}{EBEB CCGT}'] #{GT 106X_dataRun2_v28}'
+ptitle=[' 370293-370580','','#splitline{EBEB}{Run 2024D}'] #{GT 106X_dataRun2_v28}'
 #
 #y = [ 0.4, 0.04 ]
+y = [ 0.4, 0.05 ]
 #x = [ 50.0, 1200.0 ]
-#l = [ 0.8,0.75,0.925,0.9 ]
-#t = [0.175,0.44,0.0,0.175,0.24]
+x = [ 50.0, 800.0 ]
+l = [ 0.8,0.65,0.925,0.9 ]
+t = [0.175,0.44,0.0,0.175,0.26]
 ##outname = 'downloads/tr_hl_r3_24c_gold_v7'
 ##outname = 'downloads/tr_hl_r3_24e_test_v7'
 #outname = 'downloads/tr_hl_r3_24d_part_ccgt_v7'
 #outname_cc = 'downloads/tr_hl_r3_24d_part_ccgt_v7_cc'
+outname = 'downloads/tr_hl_r3_24d_part_trvcc_ccgt_v7'
 #dostack(hl_r3_24d_part, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_r3_24d_part_cc, outname_cc, date, Ic_layout, ptitle_cc,  y, x, l, t)
-
+dostack(hl_r3_24d_part_rtvcc, outname, date, Ic_layout, ptitle,  y, x, l, t)
 
 
 #
@@ -882,16 +894,16 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 #l = [ 0.8,0.75,0.925,0.9 ]
 #t = [0.175,0.44,0.0,0.175,0.24]
 #ptitle=[' 2018 316241-316457','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}']
-ptitle=['','','#splitline{ECAL Barrel}{}'] #{GT 106X_dataRun2_v28}']
+#ptitle=['','','#splitline{ECAL Barrel}{}'] #{GT 106X_dataRun2_v28}']
 #ptitle=[' 316241-316457','','#splitline{EBEB}{Same RO}'] #{GT 106X_dataRun2_v28}'
-y = [ 0.7, 0.03 ] 
-x = [ 70.0, 3000.0 ]
-l = [ 0.6,0.65,0.925,0.9 ]
-t = [0.175,0.825,0.0,0.175,0.29]
+#y = [ 0.7, 0.03 ] 
+#x = [ 70.0, 3000.0 ]
+#l = [ 0.6,0.65,0.925,0.9 ]
+#t = [0.175,0.825,0.0,0.175,0.29]
 #t = [0.325,0.82,0.0,0.175,0.28]
-outname = 'downloads/tr_kucc_18As_v25_approval'
+#outname = 'downloads/tr_kucc_18As_v25_approval'
 #outname = 'downloads/tr_kucc_18As_v25_noOOTcorr_comp'
-dostack(hl_v25_gack_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
+#dostack(hl_v25_gack_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_v25_gack_OOTcorr_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_v25_gack_adtvOOT_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #

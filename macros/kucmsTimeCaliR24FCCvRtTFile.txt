@@ -1,0 +1,1 @@
+egammares_DoubleEG_MINIAOD_ECAL_CC_HCAL_DI-v3_Run2024F_filelist.txt 0 999999 r324fcc

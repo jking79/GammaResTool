@@ -588,6 +588,9 @@ void makehists::eventLoop( Long64_t entry ){
 		if( DEBUG ) std::cout << " -- Looping rh info " << std::endl;
 		for( int it=0; it < (*rhEnergy).size(); it++){
 
+
+			//if( (*rhEnergy)[it] > 20.0 ) continue;
+
 			if( DEBUG ) std::cout << " - Rechit Cali info" << std::endl;
 			auto rhIdInfo = DetIDMap[(*rhID)[it]];
 			if( doEBOnly && rhIdInfo.ecal != EB ) continue;
@@ -598,12 +601,13 @@ void makehists::eventLoop( Long64_t entry ){
             //float caliRtTime = (*rhCCTime)[it]-rhRtCali; if( caliRtTime < -25.0 ) caliRtTime = -26.0;
             bool isOOT = (*rhRtisOOT)[it];
             //bool isOOT = (*rhCCisOOT)[it];
-			//bool isCCoot = (*rhCCisOOT)[it];
-            bool isCCoot = false;
+			bool isCCoot = (*rhCCisOOT)[it];
+            //bool isCCoot = false;
             bool isRToot = (*rhRtisOOT)[it];
 
 			if( DEBUG ) std::cout << " - Rechit loop  1" << std::endl;
         	hist1d[67]->Fill((*rhRtTime)[it]);
+            hist1d[68]->Fill((*rhCCTime)[it]);
             hist1d[70]->Fill(caliRtTime);
             if( DEBUG ) std::cout << " - Rechit loop  1a" << std::endl;
             hist1d[72]->Fill(rhRtCali);
@@ -685,8 +689,10 @@ void makehists::eventLoop( Long64_t entry ){
 			}//<<>>if( (*rhisGS6)[it] == true || (*rhisGS1)[it] == true )
 	
             //if( bothreco && notWeird && rt1cc0 ){
-			if( not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] ) ){
-            if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){//gid23 
+        	//if( bothreco ){
+			//if( not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] ) ){
+            //if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){//gid23 
+            if( (*rhisGS6)[it] == false && (*rhisGS1)[it] == false ){//gid23
 				//hist1d[167]->Fill((*rhEnergy)[it]);
 				hist2d[119]->Fill((*rhEnergy)[it],caliRtTime);
 				if( isOOT == true ) hist2d[118]->Fill((*rhEnergy)[it],caliRtTime);
@@ -747,7 +753,7 @@ void makehists::eventLoop( Long64_t entry ){
 			}//<<>>if( isSpike )
 			if( DEBUG ) std::cout << " - Rechit loop  4" << std::endl;
 
-            }//<<>>if( bothreco )
+            //}//<<>>if( bothreco )
 
 
 		}//<<>>for( int it=0; it < (*rhEnergy).size(); it++)
@@ -1222,7 +1228,8 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[65] = new TH1D("seedAmplitude_Glo0",addstr(fHTitle,"seedAmplitude_Glo0").c_str(),1000,0,1000);
     hist1d[66] = new TH1D("seedAmplitude_Glo1",addstr(fHTitle,"seedAmplitude_Glo1").c_str(),1000,0,1000);
 
-    hist1d[67] = new TH1D("rhTimeUnCali",addstr(fHTitle,"rhTimeUnCali").c_str(),500,-25,25);
+    hist1d[67] = new TH1D("rhTime",addstr(fHTitle,"rhTime").c_str(),500,-25,25);
+    hist1d[68] = new TH1D("rhTimeUnCorr",addstr(fHTitle,"rhTimeUnCorr").c_str(),500,-25,25);
     hist1d[70] = new TH1D("rhTimeCali",addstr(fHTitle,"rhTimeCali").c_str(),500,-25,25);
     hist1d[72] = new TH1D("rhCali",addstr(fHTitle,"rhCali").c_str(),500,-25,25);
 
@@ -1460,7 +1467,9 @@ int main ( int argc, char *argv[] ){
         //auto indir = "ecalTiming/gammares_r24fprompt/";
         //auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_v3/";
         //auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_oot3_v3/";
-        auto indir = "ecalTiming/gammares_r24f_cctest/";
+        //auto indir = "ecalTiming/gammares_r24f_cctest/";
+        //auto indir = "ecalTiming/gammares_24mc/";
+        auto indir = "ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/";
 
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
@@ -1473,7 +1482,8 @@ int main ( int argc, char *argv[] ){
         //auto infilename = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_noCali_plotfilelist.txt";
         //auto infilename = "master_list_files/egammares_JetMET1_MINIAOD_CCVal_v2_noCali_plotfilelist.txt";
         //auto infilename = "master_list_files/egammares_JetMET1_MINIAOD_r24fprompt_v2_noCali_plotfilelist.txt";
-		auto infilename = "master_list_files/egammares_JetMET1_AOD_tevjets_v2_noCali_plotfilelist.txt";
+		//auto infilename = "master_list_files/egammares_JetMET1_AOD_tevjets_v2_noCali_plotfilelist.txt";
+        auto infilename = "egammares_Run3Winter24MiniAOD_v2_noCali_plotfilelist.txt";
 
         //auto outfilename = "egammares_diag_23D_370496_370580_tt_exp3_v12_EB.root";
         //auto outfilename = "egammares_diag_winter24_DYto2L-4Jets_MLL-50_1J_v12_EB.root";
@@ -1492,7 +1502,9 @@ int main ( int argc, char *argv[] ){
         //auto outfilename = "egammares_diag_jetmet1_aod_tevjets_v3_gidgt1_rt0cc0_p3_kWDW_v21_diag.root";
 
         //auto outfilename = "egammares_diag_jetmet1_aod_ccval_v3_gidgt1_kWDW_v21_diag.root";
-    	auto outfilename = "egammares_diag_miniaod_24f_CCHCALDIv3_gidgt1_kWDW_v21_diag.root";
+    	//auto outfilename = "egammares_diag_miniaod_24f_CCHCALDIv3_gidgt1_kWDW_v21_diag.root";
+        //auto outfilename = "egammares_diag_GJ_4Jets_Run3Winter24MiniAOD_gidgt1_kWDW_v21_diag.root";
+        auto outfilename = "egammares_diagECAL_CC_HCAL_DI-v3_ccvuncor_kWDW_v21_diag.root";
 
         //auto fhtitle = "Run2024E 14_0_4 EB ";
 		//auto fhtitle = "Winter24 DY EB ";
@@ -1501,9 +1513,11 @@ int main ( int argc, char *argv[] ){
         //auto fhtitle = "MET MINIAOD 2017E ";
     	//auto fhtitle = "DEG AOD R17 ";
         //auto fhtitle = "EGM MINIAOD R18 ";
-        auto fhtitle = "CC HCAL DI v3 24F ";
+        //auto fhtitle = "CC HCAL DI v3 24F ";
         //auto fhtitle = "JetMet1 TeVJets ";
-        //auto fhtitle = "JetMet1 TeVJets kOOT gid1+ 10 ns";
+        //auto fhtitle = "JetMet1 TeVJets kOOT gid1+ 10 ns ";
+        //auto fhtitle = "GJ_4Jets Run3Winter24MiniAOD "; 
+        auto fhtitle = "ECAL_CC_HCAL_DI-v3 ";
 
 		makehists base;				
         base.llpgana_hist_maker( indir, infilename, outfilename, fhtitle );

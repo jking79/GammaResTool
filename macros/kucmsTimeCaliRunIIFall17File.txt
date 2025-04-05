@@ -13,4 +13,4 @@
 #egammares_ZJetsToNuNu_HT-600To800_13TeV-madgraphMINIAOD_RunIIFall17MiniAODv2_cali_v21.txt 0 999999 RunIIFall17MiniAODv2
 #egammares_ZJetsToNuNu_HT-800To1200_13TeV-madgraphMINIAOD_RunIIFall17MiniAODv2_cali_v21.txt 0 999999 RunIIFall17MiniAODv2
 #
-egammares_DYJetsToLL_M-50_MINIAOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 DYJetsToLLRunIIFall17AOD
+#egammares_DYJetsToLL_M-50_MINIAOD_RunIIFall17DRPremix_cali_v21.txt 0 999999 DYJetsToLLRunIIFall17AOD

@@ -33,13 +33,17 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'ecalTiming/gammares_ttcc_131_v11_diag/EGamma0/'
 #command = eosll+mdis+'ecalTiming/EGamma/'
 #command = eosll+mspc+'EGamma/'
-command = eosll+mspc+'ecalTiming/gammares_cali_mc/'
+#command = eosll+mspc+'ecalTiming/gammares_cali_mc/'
+#command = eosll+mspc+'ecalTiming/gammares_24mc/'
+command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
 
-version = ''
+#version = ''
 #version = '_v11_'
 #version = '_noOOTAmp_'
 #version = '_wthOOTAmp_'
-version = 'GJets'
+#version = 'GJets'
+#version = 'GJ-4Jets'
+version = 'EGamma1'
 
 rootfile = '.root'
 
@@ -55,7 +59,9 @@ rootfile = '.root'
 #dirselect = 'GMSB_L-100TeV_'
 #dirselect = 'QCD_HT700to1000'
 #dirselect = 'gammares'
-dirselect = 'GJets'
+#dirselect = 'GJets'
+#dirselect = 'GJ-4Jets'
+dirselect = 'EGamma1'
 
 #debug = True
 debug = False

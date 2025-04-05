@@ -161,6 +161,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	using namespace edm;
 
 	bool storeEvent(true);
+	bool ccNative(true);
 
 // -- Consume Tokens --------------------------------------------
 	if( DEBUG ) std::cout << "Consume Tokens -------------------------------------------- " << std::endl;
@@ -391,6 +392,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 				}//if( getRawID(ccRecHit) == recHitID )
 			}//for (const auto & ccRecHit : fccrechits )
         }//if( doTwoTier )
+		if( not doTwoTier && ccNative ) cctime = recHit.nonCorrectedTime();
 
         const auto isEB = getIsEB(recHit);
         //if( DEBUG ) std::cout << " -- proccesing EBEE info" << std::endl;
@@ -521,6 +523,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 					}//<<>>for (const auto ccRecHit : fccrechits )
 				}//<<>>for (const auto ccRecHit : fccrechits )
 			}//if( doTwoTier )
+			if( not doTwoTier && ccNative ) cctime = recHit.nonCorrectedTime();
 	
 	        //if( DEBUG ) std::cout << " -- storing values BASE" << std::endl;
 	
@@ -749,14 +752,22 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             auto pho1Eta = gloPhotons[first].eta();
             auto pho1Phi = gloPhotons[first].phi();
             auto pho1Pt = gloPhotons[first].pt();
-            auto pho1E = gloPhotons[first].energy();
+            //auto pho1E = gloPhotons[first].energy();
+			auto pho1px = gloPhotons[first].px();
+            auto pho1py = gloPhotons[first].py();
+            auto pho1pz = gloPhotons[first].pz();
+			auto pho1E = std::sqrt( pho1px*pho1px + pho1py*pho1py + pho1pz*pho1pz );
 			TLorentzVector pho1vec;
 			pho1vec.SetPtEtaPhiE(pho1Pt, pho1Eta, pho1Phi, pho1E);
 			for( int second(first+1); second < nGloPhos; second++ ){
 				auto pho2Eta = gloPhotons[second].eta();
 				auto pho2Phi = gloPhotons[second].phi();
                 auto pho2Pt = gloPhotons[second].pt();
-                auto pho2E = gloPhotons[second].energy();
+                //auto pho2E = gloPhotons[second].energy();
+            	auto pho2px = gloPhotons[second].px();
+            	auto pho2py = gloPhotons[second].py();
+            	auto pho2pz = gloPhotons[second].pz();
+                auto pho2E = std::sqrt( pho2px*pho2px + pho2py*pho2py + pho2pz*pho2pz );
 				TLorentzVector pho2vec;
 				TVector3 pho2vec3(pho2Pt, pho2Eta, pho2Phi); 
 				pho2vec.SetPtEtaPhiE(pho2Pt, pho2Eta, pho2Phi, pho2E);
