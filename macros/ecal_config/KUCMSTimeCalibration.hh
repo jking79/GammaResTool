@@ -450,7 +450,11 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     void SetXBinStr( std::string xbins ){ xBinStr = xbins; };
     void SetYBinStr( std::string ybins ){ yBinStr = ybins; };
 	void SetEosDir( std::string eosdir ){ eosDir = eosdir; }
-    void SetInDir( std::string indir ){ inDir = indir; }
+    void SetInDir( std::string indir ){ inDir = indir; };
+
+	void Set2DResTFileName( std::string name ){ cali2DResPlotsTFileName = name; };
+    void SetCaliTFileName( std::string name ){ caliTFileName = name; };
+    void SetCaliFileDir( std::string name ){ caliFileDir = name; };
 
 	// function to create calibration and smear information 
 	// make TT maps from egamma res ntuple from lpc/jwk space
@@ -696,7 +700,7 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
 	mcIovMap[0] = 999999;
 	iovMaps["mc"] = mcIovMap;
 
-    float minttlumi = 500000000;// in /ub
+    float minttlumi =  500000000;// in /ub
     float minxlumi = 10000000000;// in /ub
     std::string r2ulTagTT( "r2ultt" );
     std::string r2ulTagX( "r2ulx" );
@@ -2401,8 +2405,8 @@ inline SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
   	//auto x_up  = hist->GetXaxis()->GetBinUpEdge( hist->GetXaxis()->GetLast() );
 	float x_low = 75;
 	float x_up = 1800;
-	//if( lowEnergy ){ x_low = 5; x_up = 1200; }
-    if( lowEnergy ){ x_low = 1; x_up = 120; }
+	if( lowEnergy ){ x_low = 5; x_up = 1800; }
+    if( lowEnergy && useEffEnergy ){ x_low = 1; x_up = 120; }
 
   	std::string histname = hist->GetName();
   	std::string formname = histname+"_form";

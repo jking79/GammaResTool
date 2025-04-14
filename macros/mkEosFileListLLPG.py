@@ -36,6 +36,9 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'ecalTiming/gammares_cali_mc/'
 #command = eosll+mspc+'ecalTiming/gammares_24mc/'
 command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
+command = eosll+mspc+'ecalTiming/gammares_r24f_prompt/'
+command = eosll+mspc+'ecalTiming/gammares_r25_val/'
+
 
 #version = ''
 #version = '_v11_'
@@ -43,7 +46,7 @@ command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
 #version = '_wthOOTAmp_'
 #version = 'GJets'
 #version = 'GJ-4Jets'
-version = 'EGamma1'
+version = ''
 
 rootfile = '.root'
 
@@ -61,10 +64,10 @@ rootfile = '.root'
 #dirselect = 'gammares'
 #dirselect = 'GJets'
 #dirselect = 'GJ-4Jets'
-dirselect = 'EGamma1'
+dirselect = 'EGamma0'
 
-#debug = True
-debug = False
+debug = True
+#debug = False
 
 #deep = True
 deep = False

@@ -229,7 +229,9 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     std::vector<Double_t> fYBins;
     Bool_t fYVarBins = false;//dummy not used;
     //string ybinstr("CONSTANT 1920 -3 3");
-    string ybinstr("CONSTANT 600 -3 3");
+    //string ybinstr("CONSTANT 600 -3 3");
+    //string ybinstr("CONSTANT 120 -3 3");
+    string ybinstr("CONSTANT 720 -9 9");
     string fZTitle("");
 
     setBins(xbinstr,fXBins,fXVarBins);
@@ -239,9 +241,9 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
     const auto ybins = &fYBins[0];
     int nMyBins = fXBins.size()-1;
 
-    int tdiv = 240;
-    float tstart = -3.0;
-    float tend = 3.0;
+    int tdiv = 720;
+    float tstart = -9.0;
+    float tend = 9.0;
 
     int ediv = 720;
     float eend = 3600;
@@ -326,6 +328,10 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
         std::string erunstr;
         std::string subdir;
         ss >> infilename >> califilename >> srunstr >> erunstr >> subdir;
+		char hash('#');
+		char space(' ');
+		char checkchar = ( not infilename.empty() ) ? infilename[0] : space;
+		if( checkchar == hash || checkchar == space ) continue;
         std::cout << "open input file : " << infilename << std::endl;
         std::cout << "open input cali : " << califilename << std::endl;
 		auto srun = std::stoi(srunstr);
@@ -542,8 +548,8 @@ void plot2dResolution( std::string indir, std::string infilelistname, std::strin
             double gdtserr1 = timeErr1*timeErr1+seedTimeICE1[1]*seedTimeICE1[1];
             double gdterr = sqrt(gdtserr0+gdtserr1);
 
-		    auto le_cut = ((*resE)[0]>=10)&&((*resE)[0]<=120)&&((*resE)[1]>=10)&&((*resE)[1]<=120);
-            auto ge_cut = ((*resE)[2]>=10)&&((*resE)[2]<=120)&&((*resE)[3]>=10)&&((*resE)[3]<=120);
+		    auto le_cut = ((*resE)[0]>=2)&&((*resE)[0]<=120)&&((*resE)[1]>=2)&&((*resE)[1]<=120);
+            auto ge_cut = ((*resE)[2]>=2)&&((*resE)[2]<=120)&&((*resE)[3]>=2)&&((*resE)[3]<=120);
 	        auto leta_cut = (L0EB == ECAL::EB)&&(L1EB == ECAL::EB);
             auto geta_cut = (G0EB == ECAL::EB)&&(G1EB == ECAL::EB);
             auto goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0; 
@@ -679,7 +685,8 @@ int main ( int argc, char *argv[] ){
         //std::string xbinstr("VARIABLE 60 80 100 120 150 180 240 320 400 480 560 640 800 1600 3200");
         //std::string xbinstr("VARIABLE 60 120 180 240 300 360 420 480 540 600 690 780 960 1260 1740 2220 3200");
         //std::string xbinstr("VARIABLE 60 120 180 240 300 420 510 600 780 960 1260 1740 2220 3200");
-        std::string xbinstr("VARIABLE 25 50 75 100 125 150 175 200 225 250 300 400 600 1000 1800"); // ZEE
+        //std::string xbinstr("VARIABLE 25 50 75 100 125 150 175 200 225 250 300 400 600 1000 1800"); // ZEE
+        std::string xbinstr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200 1800" ); // : xa
 		bool useAmp(true);
         //std::string xbinstr("VARIABLE 0 10 12 14 16 18 20 22 24 26 30 34 40 48 62 78 120");
         //bool useAmp(false);
@@ -696,7 +703,9 @@ int main ( int argc, char *argv[] ){
 			//std::string indir = "jaking/ecalTiming/gammares_llpana_v2/MET/";
 			//std::string indir = "jaking/ecalTiming/gammares_llpana_pd/";
             //std::string indir = "jaking/ecalTiming/gammares_llpana/";
-            std::string indir = "jaking/ecalTiming/gammares_llpana_mc/";
+            //std::string indir = "jaking/ecalTiming/gammares_llpana_mc/";
+    		std::string indir("jaking/ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/");
+    		//std::string indir("jaking/ecalTiming/gammares_r24f_prompt/");
 
             //std::string infilelistname = "list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_reso_plotfilelist.txt";
             //std::string infilelistname = "list_files/egammares_MetPD_nocali_AOD_Run2017E-17Nov2017v2_reso_plotfilelist.txt";
@@ -715,7 +724,8 @@ int main ( int argc, char *argv[] ){
             //std::string infilelistname = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_Cali_plotfilelist.txt";
             //std::string infilelistname = "master_list_files/kuntuple_QCDHT_Met75_R17_v20_infileslist.txt";
             //std::string infilelistname = "master_list_files/kuntuple_QCDHT100200_Met75_R17_v20_plotfileslist.txt";
-            std::string infilelistname = "master_list_files/egammares_DYJetsToLL_Met75_R17_v20_plotfilelist.txt";
+            //std::string infilelistname = "master_list_files/egammares_DYJetsToLL_Met75_R17_v20_plotfilelist.txt";
+            std::string infilelistname = "egammares_DEG_CCvRT_R24_v20_plotfilelist.txt";
 
             //std::string outfilename = "egres_MetPD_AOD_Run2017E_Cali_Fltr_304475_14011_v12_resplots";
             //std::string outfilename = "egres_MetPD_AOD_Run2017E_noCali_Full_14011_v12_resplots";
@@ -729,9 +739,10 @@ int main ( int argc, char *argv[] ){
             //std::string outfilename = "egres_EgmPD_MINIAOD_Run2018D_324305_327239_Filter_14011_v12_resplots";
             //std::string outfilename = "egres_QCD_AODSIM_Met75_R17_FilterFit_14011_v12_resplots";
             //std::string outfilename = "egres_QCDHT100200_AODSIM_Met75_R17_FilterFit_14011_v12_resplots";
-            std::string outfilename = "egres_DY1JetsToLL_AODSIM_R17_FilterFit_Smear_v3_ZBins_14011_v12_resplots";
+            //std::string outfilename = "egres_DY1JetsToLL_AODSIM_R17_FilterFit_Smear_v3_ZBins_14011_v12_resplots";
             //std::string outfilename = "egres_DEGPD_AOD_Run2017F_v2_Cali_FilteredFit_ZBins_Full_14011_v12_resplots";
             //std::string outfilename = "egres_DEGPD_AOD_Run2017EF_v2_Cali_FilteredFit_ZBins_Full_14011_v12_resplots";
+            std::string outfilename = "egres_DEGPD_AODSIM_R24_ECAL_v3_14011_v12_resplots";
 
             std::string tvarname = ""; //argv[4];
 			std::string calimapname = "infile"; //argv[5];
@@ -745,14 +756,14 @@ int main ( int argc, char *argv[] ){
             //auto leta = std::stoi(argv[9]);
             //auto heta = std::stoi(argv[10]);
       		plot2dResolution( indir, infilelistname, outfilename, tvarname, calimapname, isd_type, useAmp, xbinstr, noise, constant );
-            float rnoise = 0.0;// no smearing term
-            float rconstant = 0.0;// no smearing term
+            //float rnoise = 0.0;// no smearing term
+            //float rconstant = 0.0;// no smearing term
             //float rnoise = 14.0;// smearing term
             //float rconstant = 0.1083;// smearing term  
-			std::string fitInFile = outfilename + ".root";
-			runTimeFitter( fitInFile, outfilename, "SRO_Data_Hist", xbinstr, rnoise, rconstant );
-            runTimeFitter( fitInFile, outfilename, "DRO_Data_Hist", xbinstr, rnoise, rconstant );
-            runTimeFitter( fitInFile, outfilename, "ZEE_Data_Hist", xbinstr, rnoise, rconstant );
+			//std::string fitInFile = outfilename + ".root";
+			//runTimeFitter( fitInFile, outfilename, "SRO_Data_Hist", xbinstr, rnoise, rconstant );
+            //runTimeFitter( fitInFile, outfilename, "DRO_Data_Hist", xbinstr, rnoise, rconstant );
+            //runTimeFitter( fitInFile, outfilename, "ZEE_Data_Hist", xbinstr, rnoise, rconstant );
 //void runTimeFitter(const std::string fInFileName, const std::string fOutFileText, const std::string f2DHistName, const std::string & inplotname, std::string xbinstr, float noise, float constant ){
 
         //}//<<>>//if( argc != 7 )
