@@ -114,7 +114,7 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            #['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD']
+            ['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD'],
 
             #['/JetMET1/Run2024F-PromptReco-v1/MINIAOD'],  
             #['/JetMET1/Run2024F-ECAL_CC_HCAL_DI-v1/MINIAOD'],    
@@ -127,8 +127,8 @@ def subcrab( runs, events, reqmem ):
 	    #['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
             #['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
             #['/EGamma1/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T
-            #['/EGamma1/Run2024F-PromptReco-v1/MINIAOD'],
-            ['/EGamma0/CMSSW_15_0_0_pre2-141X_dataRun3_Prompt_frozen_v4_RV266_2024_Data_ECALCCTiming_RelVal_2024D-v1/MINIAOD'],
+            ['/EGamma1/Run2024F-PromptReco-v1/MINIAOD'],
+            #['/EGamma0/CMSSW_15_0_0_pre2-141X_dataRun3_Prompt_frozen_v4_RV266_2024_Data_ECALCCTiming_RelVal_2024D-v1/MINIAOD'],
             #['/EGamma0/CMSSW_15_0_0_pre1-141X_dataRun3_Prompt_frozen_v4_STD_2024_Data_RelVal_2024D-v1/MINIAOD'],
 
             #['/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v2/MINIAODSIM'], #
@@ -221,8 +221,8 @@ def subcrab( runs, events, reqmem ):
 	         #print( inDO[0] )
             primaryDataset = inDO[0].split('/')[1]
             #primaryDataset = (inDO[0].split('/')[1]).split('_Tune')[0]
-            #runEra         = inDO[0].split('/')[2]
-            runEra         = inDO[0].split('/')[2].split('-')[0]
+            runEra         = inDO[0].split('/')[2]
+            #runEra         = inDO[0].split('/')[2].split('-')[0]
             #runEra         = ((inDO[0].split('/')[2]).split('_')[0]+'_'+(inDO[0].split('/')[2]).split('_')[1]).split('-PU')[0] # MC
             #runEra         = (inDO[0].split('/')[2]).split('-133X')[0]
             dataset	   = inDO[0].split('/')[3]
@@ -238,8 +238,9 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_cali'
             #trial          = 'gammares_24mc'
             #trial          = 'gammares_r24f_prompt'
-            trial          = 'gammares_r25_val'
+            #trial          = 'gammares_r25_val'
             #trial          = 'gammares_ECAL_CC_HCAL_DI-v3'
+            trial          = 'gammares_DPG'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/kuncali/"+trial+"/"
@@ -260,8 +261,8 @@ def subcrab( runs, events, reqmem ):
             #config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
 
 #>>>>>>>>>>>> 2024 tested
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-            config.JobType.pyCfgParams   = ['globalTag=141X_dataRun3_HLT_frozen_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #config.JobType.pyCfgParams   = ['globalTag=141X_dataRun3_HLT_frozen_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
             ## MC Run3Winter24
             #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested

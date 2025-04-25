@@ -129,6 +129,7 @@ class CaliRunClass : public KUCMSRootHelperBaseClass {
 	bool updated;
 	bool has2DResMap;
 	bool hasResParams;
+	bool isExternal;
 
     std::map<uInt,sumCnt> sumCntMap;
     std::map<uInt,float> meanMap;
@@ -143,7 +144,7 @@ class CaliRunClass : public KUCMSRootHelperBaseClass {
 
 inline CaliRunClass::CaliRunClass( std::string tmpxtalmap, int tstart, int tend, int last, float tlumi )
 	: histMapName(tmpxtalmap), startRun(tstart), endRun(tend), lastRun(last), lumi(tlumi) 
-	{ isNew = true; updated = false; has2DResMap = false; hasResParams = false; noise = 0; stoch = 0; stant = 0; }
+	{ isNew = true; isExternal = false; updated = false; has2DResMap = false; hasResParams = false; noise = 0; stoch = 0; stant = 0; }
 
 inline void CaliRunClass::makeMeanMap( bool filter ){
 
@@ -209,6 +210,8 @@ struct TimeFitResult {
     float chi2ndf;
     float chi2prob;
     float sigma;
+    float sigmaHigh;
+    float sigmaLow;
     float esigma;
     float occ;
     float rms;
@@ -239,6 +242,8 @@ class ProfileTimeFit {
   	TH1F* profileHist;
   	TFormula* form;
   	TF1* fit;
+    TF1* fitHigh;
+    TF1* fitLow;
 	TimeFitResult results;
 
     // helper functions for making fits to variables
@@ -259,6 +264,22 @@ inline void ProfileTimeFit::DoFit(){
 
   	// set tmp init vals
   	auto hsum = profileHist->Integral();
+	if( hsum == 0 ){
+		std::cout << " -- !!!!!! Intergral is Zero !!!!!!!! " << std::endl;
+    	results.mu = 0;
+    	results.emu = 0;
+    	results.chi2ndf = 0;
+    	results.chi2prob = 0;
+    	results.sigma = 10;
+    	results.sigmaHigh = 0;
+    	results.sigmaLow = 0;
+    	results.esigma = 10;
+    	results.occ = 0;
+    	results.rms = 0;
+    	results.std = 0;
+		return;
+	}//<<>>if( hsum == 0 )
+
   	float mu = profileHist->GetMean();
   	float sigma = profileHist->GetStdDev();
   	float rms = profileHist->GetRMS();
@@ -269,14 +290,20 @@ inline void ProfileTimeFit::DoFit(){
 
     std::cout << " -- setting paramters " << std::endl;
   	// range vars   ? names ?
-  	float sigrange = 2.0;
-  	float lowerBound = mu - sigrange*sigma;
-  	float upperBound = mu + sigrange*sigma;
+  	//float sigrange = 2.0;
+  	float lowerBound = mu - 2*sigma;
+  	float upperBound = mu + 2*sigma;
+	float lowerHBound = mu - 4*sigma;
+    float upperHBound = mu + 4*sigma;
+    float lowerLBound = mu - 1*sigma;
+    float upperLBound = mu + 1*sigma;
 
   	// names for fits and formulas
   	std::string histname = profileHist->GetName();
   	std::string formname = histname+"_formula";
   	std::string fitname  = histname+"_fit";
+    std::string fitnameH  = histname+"_fitHigh";
+    std::string fitnameL  = histname+"_fitLow";
 
     //if( lowerBound < -1.0 ) lowerBound = -0.5;
     //if( upperBound > 1.0 ) upperBound = 0.5;
@@ -286,6 +313,8 @@ inline void ProfileTimeFit::DoFit(){
     std::cout << " -- setting form and fit " << std::endl;
     form = new TFormula(formname.c_str(),"[0]*exp(-0.5*((x-[1])/[2])**2)");
     fit  = new TF1(fitname.c_str(),form->GetName(),lowerBound,upperBound);
+    fitHigh  = new TF1(fitnameH.c_str(),form->GetName(),lowerHBound,upperHBound);
+    fitLow  = new TF1(fitnameL.c_str(),form->GetName(),lowerLBound,upperLBound);
 
     fit->SetParName(0,"N");      
 	fit->SetParameter(0,norm); 
@@ -299,12 +328,38 @@ inline void ProfileTimeFit::DoFit(){
 	//fit->SetParLimits(2,0,1);
     fit->SetParLimits(2,sigma/10,sigma*10);
 
+    fitHigh->SetParName(0,"N");
+    fitHigh->SetParameter(0,norm);
+    fitHigh->SetParLimits(0,norm/10,norm*10);
+    fitHigh->SetParName(1,"#mu");
+    fitHigh->SetParameter(1,mu);
+    //fitHigh->SetParLimits(1,-0.03,0.03);
+    fitHigh->SetParLimits(1,lowerHBound,upperHBound);
+    fitHigh->SetParName(2,"#sigma");
+    fitHigh->SetParameter(2,sigma);
+    //fitHigh->SetParLimits(2,0,1);
+    fitHigh->SetParLimits(2,sigma/10,sigma*10);
+
+    fitLow->SetParName(0,"N");
+    fitLow->SetParameter(0,norm);
+    fitLow->SetParLimits(0,norm/10,norm*10);
+    fitLow->SetParName(1,"#mu");
+    fitLow->SetParameter(1,mu);
+    //fitLow->SetParLimits(1,-0.03,0.03);
+    fitLow->SetParLimits(1,lowerLBound,upperLBound);
+    fitLow->SetParName(2,"#sigma");
+    fitLow->SetParameter(2,sigma);
+    //fitLow->SetParLimits(2,0,1);
+    fitLow->SetParLimits(2,sigma/10,sigma*10);
+
     std::cout << " - Fit > Mu: " << mu << " ( " << lowerBound << " to " << upperBound << " )";
     std::cout << " Norm: " << norm << "( " << norm/10 << " to " << norm*10 << " )";
     std::cout  << " Sigma: " << sigma << "( " << sigma/10 << " to " << sigma*10 << " )" << std::endl;
 
     std::cout << " -- fiting " << std::endl;
   	profileHist->Fit(fit->GetName(),"RBQO");
+    profileHist->Fit(fitHigh->GetName(),"RBQO");
+    profileHist->Fit(fitLow->GetName(),"RBQO");
 
     std::cout << " -- setting results " << std::endl;
     results.mu = fit->GetParameter(1);
@@ -312,10 +367,15 @@ inline void ProfileTimeFit::DoFit(){
     results.chi2ndf = fit->GetChisquare();
     results.chi2prob = fit->GetProb();
     results.sigma = fit->GetParameter(2);
+    results.sigmaHigh = fitHigh->GetParameter(2);
+    results.sigmaLow = fitLow->GetParameter(2);
     results.esigma = fit->GetParError (2);
     results.occ = hsum;
     results.rms = rms;
     results.std = sigma;
+
+    std::cout << " - Fit Sigma: " << results.sigma << " +/- " << results.esigma;
+    std::cout << " ( low " << results.sigmaLow << " high " << results.sigmaHigh << " ) " << std::endl;
 
 }//<<>>void ProfileTimeFit::DoFit()
 
@@ -384,6 +444,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 	bool updated;
 	bool lowEnergy;
 	bool useEffEnergy;
+    bool externalCali;
 
     TRandom* getRandom;
 
@@ -405,6 +466,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 
     void LoadCaliHists( bool stayOpen = false, bool makeNew = false );// loads up all starting info
     void SaveCaliHists();// save existing calimaphists to root TFile -- used if CaliHits left open
+	void LoadExtCali( std::string calihist, std::string mapname, std::string tag, int startr, int endr );
 
 	// use to create calibration files and add to DB
 	// work in progress - still thinking this area trhough
@@ -477,8 +539,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     void makeTTDiffMaps();
 
 	void setUseEffEnergy( bool setting ){ useEffEnergy = setting; };
-	void setLowEnergy( bool setting )
-			{ lowEnergy = setting; if( lowEnergy ){ xBinStr = "VARIABLE 0.2 0.5 1 2 5 10 15 20 25 50"; yBinStr = "CONSTANT 1200 -3 3"; } }; 
+	void setLowEnergy( bool setting ){ lowEnergy = setting; }; 
+	void useExtCali( bool ext ){ externalCali = ext; };
 
 };//<<>>class KUCMSTimeCalibration : KUCMSRootHelperBaseClass
 
@@ -532,6 +594,7 @@ inline KUCMSTimeCalibration::KUCMSTimeCalibration( bool stayOpen, bool makeNew )
 	maptypes = {"_MeanMap","_ErrMap","_SumMap","_Sum2Map","_OccMap"};
 
 	updated = false;
+	externalCali = false;
 
     std::cout << " - setup DetID & IOV Maps " << std::endl;
     SetupDetIDsEB();
@@ -627,6 +690,7 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
 //2016F  	277992	278239 
 //2016G  	278820	278969
 //2016H 	281613	283830
+// iov  253984 284044
 // lumi 273158 284044
 
     //promptIovMap[293999] = 296398;
@@ -641,6 +705,7 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
 //2017D  	302031	302393
 //2017E   	303832	304616
 //2017F  	305044	305081
+// iov  296399 306460
 // lumi 297050 306460
 
     //promptIovMap[307555] = 314766;
@@ -654,14 +719,17 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
     promptIovMap[322718] = 323412;
     promptIovMap[323413] = 324305;
     promptIovMap[324306] = 325172;
+    promptIovMap[327239] = 356513;//25/11/2018
 
 //2018A		315257	316993
 //2018B		317435	317435
 //2018C 	319756	320038
 //2018D	    320673	322356
+// iov  314767 315343
 // lumi 315257 325172
 
-    promptIovMap[327239] = 356513;//25/11/2018
+//Run 3
+
     promptIovMap[356514] = 357289;
     promptIovMap[357290] = 358883;
     promptIovMap[358884] = 359420;
@@ -670,13 +738,42 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
     promptIovMap[360982] = 361416;
     promptIovMap[361417] = 362522;
     promptIovMap[362523] = 367094;//24/11/2022
-    promptIovMap[367095] = 367515;
+    promptIovMap[367095] = 367190;//EOY 2022
+
+// 2022
+
+    promptIovMap[367191] = 367515;
     promptIovMap[367516] = 367882;
     promptIovMap[367884] = 368825;
     promptIovMap[368826] = 369801;
     promptIovMap[369802] = 369912;
     promptIovMap[369913] = 370496;
-    promptIovMap[370497] = 372308;
+    //promptIovMap[370497] = 372308;// CC period only?
+	promptIovMap[370497] = 373577;
+	promptIovMap[373578] = 378745;// EOY 2023
+
+/// 2023
+
+    promptIovMap[378746] = 381306;//CC? 
+    promptIovMap[381307] = 382007;//ratio timing algorithm 28/05/2024
+    promptIovMap[382008] = 382298;
+    promptIovMap[382299] = 382721;
+	promptIovMap[382722] = 383362;
+    promptIovMap[383363] = 383755;
+    promptIovMap[383756] = 384187;
+    promptIovMap[384188] = 384412;
+    promptIovMap[384413] = 384755;
+    promptIovMap[384756] = 385152;
+    promptIovMap[385153] = 385727;
+    promptIovMap[385728] = 386662;
+    promptIovMap[386663] = 387741;
+    promptIovMap[387742] = 390755;
+    promptIovMap[390756] = 999999;// EOY 2024
+
+// 2024
+
+/*
+ 	// CC calibration periods in 2024
     promptIovMap[372309] = 372750;//"29/08/2023";//cc start
     promptIovMap[372751] = 373539;
     promptIovMap[373540] = 374564;
@@ -693,21 +790,36 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
     promptIovMap[382008] = 382208;
     promptIovMap[382209] = 382959;
     promptIovMap[382960] = 385285;
-    promptIovMap[385286] = 999999;//"06/09/2024";
+    promptIovMap[385286] = 386951;//"06/09/2024";
+    promptIovMap[386952] = 999999;
+*/
+
 	iovMaps["prompt"] = promptIovMap;
 
 	std::map<int,int> mcIovMap;
 	mcIovMap[0] = 999999;
 	iovMaps["mc"] = mcIovMap;
 
-    float minttlumi =  500000000;// in /ub
-    float minxlumi = 10000000000;// in /ub
+	//float ttlumi = 0.36; // in /fb
+	//float xlumi = 9.0; // in /fb
+	//float fb_to_ub = 1000000000;
+    //float minttlumi =  fb_to_ub * ttlumi; // in /ub
+    //float minxlumi = fb_to_ub * xlumi; // in /ub
+    float minttlumi =  0.36; // in /fb
+    float minxlumi = 9.0; // in /fb
+
     std::string r2ulTagTT( "r2ultt" );
     std::string r2ulTagX( "r2ulx" );
     std::string r2ulLumiTag( "r2ul" );
-    std::string lumiUL16Config = "UL2016_runlumi.txt";
-    std::string lumiUL17Config = "UL2017_runlumi.txt";
-    std::string lumiUL18Config = "UL2018_runlumi.txt";
+    //std::string lumiUL16Config = "UL2016_runlumi.txt";
+    //std::string lumiUL17Config = "UL2017_runlumi.txt";
+    //std::string lumiUL18Config = "UL2018_runlumi.txt";
+    std::string lumiUL16Config = "brilcalc_lumi_2016.txt";
+    std::string lumiUL17Config = "brilcalc_lumi_2017.txt";
+    std::string lumiUL18Config = "brilcalc_lumi_2018.txt";
+    std::string lumi22Config = "brilcalc_lumi_2022.txt";
+    std::string lumi23Config = "brilcalc_lumi_2023.txt";
+    std::string lumi24Config = "brilcalc_lumi_2024.txt";
 
     ReadLumiFile( caliFileDir+lumiUL16Config, r2ulLumiTag );
     ReadLumiFile( caliFileDir+lumiUL17Config, r2ulLumiTag );
@@ -726,38 +838,59 @@ inline void KUCMSTimeCalibration::SetupIovMap( std::string tag, float minLumi ){
 	int start = 0;
 	int end = 0;
 	int prev = 0;
-	int curxiov = 0;
+	int oldrun = 0;
+    int curxiovend = 0;
 	float lumisum = 0;
-	int current = 0;
+	int currentrun = 0;
 	std::map<int,int> theIovMap;
 	auto promptIovMap = iovMaps["prompt"];
+	// go through runs by lumi and add up lumi > check for end conditions
 	for( auto& lumirun : lumiRunMaps[curLumiTag] ){
-		current = lumirun.second.run;
-		if( newrange ){ 
+		currentrun = lumirun.second.run;
+		if( newrange ){ // if we are starting a new range - find curent iov period for this run and set end/start of periods
 			prev = start;
-			start = ( prev == 0 ) ? current : theIovMap[prev] + 1; 
+			start = ( prev == 0 ) ? currentrun : theIovMap[prev] + 1;
+			int iovbound = ( start < oldrun ) ? oldrun : start;
+			oldrun = 0;
 			newrange = false;
-			for( auto& xiov : promptIovMap ){ if( start >= xiov.first && start <= xiov.second ){ curxiov = xiov.first; break; } } 
+			for( auto& xiov : promptIovMap ){ 
+				if( iovbound >= xiov.first && iovbound <= xiov.second ){ 
+                    curxiovend = xiov.second; 
+					break; 
+				}//<<>>if( start >= xiov.first && start <= xiov.second )
+			}//<<>>for( auto& xiov : promptIovMap ) 
 		}//<<>>if( newrange )
-		if( lumirun.second.run > promptIovMap[curxiov] ){
-			end = current - 1;
-			if( end <= start ) end = start;
-			if( lumisum + lumirun.second.lumi < minLumi ){ theIovMap[prev] = end; start = prev; } 
-			else { theIovMap[start] = end; }
-			newrange = true;
-			lumisum = 0;
+		if( currentrun > curxiovend ){ // tack small portion to previous and start new run period with this run
+			if( prev > 0 ){
+				end = curxiovend;
+				if( end <= start ) end = start;
+				theIovMap[prev] = end;
+				start = prev;
+				oldrun = currentrun;
+				lumisum = lumirun.second.lumi;
+				newrange = true;
+			}//<<>>if( prev > 0 )
+			else { 
+				for( auto& xiov : promptIovMap ){
+                	if( currentrun >= xiov.first && currentrun <= xiov.second ){
+                    	curxiovend = xiov.second;
+                    	break;
+                	}//<<>>if( start >= xiov.first && start <= xiov.second )
+            	}//<<>>for( auto& xiov : promptIovMap ) 
+            }//<<>>else { if( prev > 0 ){ 
 		} else {
 			lumisum += lumirun.second.lumi;
 			if( lumisum > minLumi ){ 
-				end = current - 1;
+				end = currentrun;
 				if( end <= start ) end = start;
-				theIovMap[start] = end; 
+				theIovMap[start] = end;
+				oldrun = 0;
+				lumisum = 0; 
 				newrange = true;
-				lumisum = 0;
 			}//<<>>if( lumisum > minTTLumi )
 		}//<<>>if( lumirun.second.run > promptIovMap[curxiov] )
 	}//<<>>for( auto& lumirun : lumiRunMap )
-	if( not newrange ) theIovMap[prev] = current;
+	if( not newrange ) theIovMap[prev] = currentrun;
 	iovMaps[tag] = theIovMap;		
 
 	for( auto& iov : theIovMap ){ std::cout << "Iov map " << tag << " : " << iov.first << " " << iov.second << std::endl; }
@@ -829,6 +962,7 @@ inline void KUCMSTimeCalibration::SaveCaliRunFile(){
 
 		std::string tag = calirunmap.first;
 		for( auto& calirunsct : calirunmap.second ){
+			if( calirunsct.second.isExternal ) continue;
 
             std::string mapName = calirunsct.second.histMapName;		
 			int srun = calirunsct.second.startRun;
@@ -1098,6 +1232,7 @@ inline void KUCMSTimeCalibration::makeCaliHists(){
     std::cout << "Making CaliHists from CaliRunMapSet" << std::endl;
     for( auto& calirunmap : CaliRunMapSet ){
         for( auto& calirunsct : calirunmap.second ){
+			if( calirunsct.second.isExternal ) continue;
 			std::string tfilename( calirunsct.second.histMapName );
 			//std::string tfilename = calirunmap.first + "_" + std::to_string( calirunsct.first ) + xtalHistMapName;
 			//calirunsct.second.histMapName = tfilename;
@@ -1233,6 +1368,7 @@ inline void KUCMSTimeCalibration::makeCaliMaps(){
 	//TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),171,-85.5,85.5,360,0.5,360.5);
     for( auto& calirunmap : CaliRunMapSet ){
         for( auto& calirunsct : calirunmap.second ){
+			if( calirunsct.second.isExternal ) continue;
             //std::string tfilename = calirunsct.second.histMapName + "_" + std::to_string( calirunsct.first ) + xtalHistMapName;
 			std::string tfilename = calirunsct.second.histMapName;
 			//std::cout << " -- opening : " << tfilename << std::endl;
@@ -1307,6 +1443,50 @@ inline void KUCMSTimeCalibration::makeCaliMaps(){
 
 }//<<>>void KUCMSTimeCalibration::makeCaliMaps()
 
+void KUCMSTimeCalibration::LoadExtCali( std::string calihist, std::string mapname, std::string tag, int startr, int endr ){
+
+    std::cout << " - Loading External Cali Map : " << mapname << std::endl;
+	//std::cout << " --- found : " << tfilename << std::endl;
+	
+	TFile* histTFile = TFile::Open( calihist.c_str(), "READ" );
+
+	std::string caliMapName = mapname;
+    std::string mfilename = "AveXtalRecTimeEBMap";
+    std::string ofilename = "AveXtalOccEBMap";
+    std::string efilename = "AveXtalRecTimeErrEBMap";
+	TH2F* mhist = (TH2F*)histTFile->Get(mfilename.c_str());
+    TH2F* ohist = (TH2F*)histTFile->Get(ofilename.c_str());
+    TH2F* ehist = (TH2F*)histTFile->Get(efilename.c_str());
+
+    CaliRunMapSet[tag][startr] = { mapname, startr, endr, endr, 0 };
+    CaliRunMapSet[tag][startr].isNew = false;
+    CaliRunMapSet[tag][startr].isExternal = true;
+    CaliRunMapSet[tag][startr].has2DResMap = false;
+    CaliRunMapSet[tag][startr].hasResParams = false;
+    CaliRunMapSet[tag][startr].noise = 0;
+	CaliRunMapSet[tag][startr].stoch = 0;
+    CaliRunMapSet[tag][startr].stant = 0;
+	
+    for( int ieta = 1; ieta < 172; ieta++ ){
+    	for( int iphi = 1; iphi < 361; iphi++ ){
+        	//std::cout << " -- Processing : " << ieta << " " << iphi;
+            int i1 = ieta - 86;
+            if( i1 == 0 ) continue;
+            uInt detid = InvDetIDMap[iphi][i1][ECAL::EB];
+            int occ = ohist->GetBinContent(ieta,iphi);
+            if( occ == 0 ) continue;
+            //std::cout << " " << detid << " " << sum << " " << sum2;
+            CaliRunMapSet[tag][startr].sumCntMap[detid] = { 0, 0, occ };
+            float mean  = mhist->GetBinContent(ieta,iphi);
+            float error  = ehist->GetBinContent(ieta,iphi);
+            //std::cout << " " << mean << " " << error << " " << std::endl;
+            CaliRunMapSet[tag][startr].meanMap[detid] = mean;
+            CaliRunMapSet[tag][startr].errMap[detid] = error;
+        }//<<>>for( int iphi = 1; iphi < 361; iphi++ )
+    }//<<>>for( int ieta = 1; ieta < 172; ieta++ )
+
+}//<<>>void KUCMSTimeCalibration::LoadExtCali( std::string calihist, std::string mapname, std::string tag )
+
 inline uInt KUCMSTimeCalibration::getTTId( uInt detId ){
 
 	int ttphi = 1 + int( DetIDMap[detId].i1 - 1 )/5;
@@ -1356,7 +1536,7 @@ inline float KUCMSTimeCalibration::getCalibration( uInt rhid, int run, std::stri
     //if( not validCurrentTag ){ std::cout << "No current tag set." << std::endl; return 0.f; }
     if( DetIDMap[rhid].ecal != ECAL::EB ) return 999.f;
     float xtaltime = -1000.f;
-	float ttcali = getTTCali( rhid, run, tag );
+	float ttcali = ( externalCali ) ? 0.f : getTTCali( rhid, run, tag );
     for( auto& calirunmap : CaliRunMapSet[tag] ){
 		int endrun = calirunmap.second.endRun;
 		int startrun = calirunmap.second.startRun;	
@@ -1892,10 +2072,13 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
                                 bool ge_cut = ((*resE)[2]>=lB)&&((*resE)[2]<=uB)&&((*resE)[3]>=lB)&&((*resE)[3]<=uB);
                                 bool leta_cut = (idinfoL0.ecal == ECAL::EB)&&(idinfoL1.ecal == ECAL::EB);
                                 bool geta_cut = (idinfoG0.ecal == ECAL::EB)&&(idinfoG1.ecal == ECAL::EB);
-                                bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0;
-                                bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0;
+                                //bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0;
+                                //bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0;
+                                bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0 && (*resRtTime)[0] != (*resRtTime)[1];
+                                bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0 && (*resRtTime)[2] != (*resRtTime)[3];
                                 bool goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
                                 bool goodGloRHs = (*resRhID)[2] != 0 && (*resRhID)[3] != 0;
+								//if( 
 
                                 bool isd_cut = idinfoL0.TT == idinfoL1.TT; // true = same, fasle = different
                                 bool levent_good = le_cut && leta_cut && goodLocRHs && goodLocTime;
@@ -2184,6 +2367,7 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
                                 double lyf1 = (*resRtTime)[1]-seedTimeIC10;
                                 double gyf0 = (*resRtTime)[2]-seedTimeIC01;
                                 double gyf1 = (*resRtTime)[3]-seedTimeIC11;
+
                                 if( smear ){
                                     std::cout << "Times are smeared !!!!!" << std::endl;
 
@@ -2200,8 +2384,8 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
                                 bool ge_cut = ((*resE)[2]>=lB)&&((*resE)[2]<=uB)&&((*resE)[3]>=lB)&&((*resE)[3]<=uB);
                                 bool leta_cut = (idinfoL0.ecal == ECAL::EB)&&(idinfoL1.ecal == ECAL::EB);
                                 bool geta_cut = (idinfoG0.ecal == ECAL::EB)&&(idinfoG1.ecal == ECAL::EB);
-                                bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0;
-                                bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0;
+                                bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0 && (*resRtTime)[0] != (*resRtTime)[1];
+                                bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0 && (*resRtTime)[2] != (*resRtTime)[3];
                                 bool goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
                                 bool goodGloRHs = (*resRhID)[2] != 0 && (*resRhID)[3] != 0;
 
@@ -2344,10 +2528,10 @@ inline SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
   	//--------------TimeFitter::Fit1DHists(FitInfo);
   	std::cout << "Fitting profile hists for: " << f2DHistName << std::endl;
   	// get inputs/outputs
-  	auto mapSize = profileHists.size();
+  	//auto mapSize = profileHists.size();
 	//auto testhist = profileHists[1].profileHist;
   	//auto intgral = profileHists[1].profileHist->Integral();
-	auto name = profileHists[2].profileHist->GetName();
+	//auto name = profileHists[2].profileHist->GetName();
 	//std::cout << " -- Profile Map size : " << name << std::endl;
   	for (int ibinX = 1; ibinX < fNBinsX; ibinX++){
 		profileHists[ibinX].DoFit();	
@@ -2365,8 +2549,13 @@ inline SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
     	//if( profile.isEmpty() ) continue;
     	TimeFitResult results = profile.GetFitResult();
 
+		float herr = std::abs( results.sigmaHigh - results.sigma );
+        float lerr = std::abs( results.sigmaLow - results.sigma ); 
+		float serr = ( herr > lerr ) ? herr : lerr;
+		//float serr = results.esigma;		
+
     	std::cout << " Bin " << ibinX  <<  " : " << fXBins[ibinX-1] << "-" << fXBins[ibinX];
-    	std::cout << " : no guass: " << results.sigma << " err: " << results.esigma << std::endl;
+    	std::cout << " : no guass: " << results.sigma << " err: " << serr << std::endl;
 	
 		if( results.sigma <= 0 ) continue; 
 
@@ -2374,9 +2563,9 @@ inline SigmaFitResult KUCMSTimeCalibration::runTimeFitter( TH2F* hist2D ){
     	ResultsMap["chi2prob"]->SetBinContent( ibinX, results.chi2prob );
     	ResultsMap["mu"]->SetBinContent( ibinX, results.mu );
     	ResultsMap["mu"]->SetBinError( ibinX, results.emu );
-		if( results.esigma < results.sigma/10 ){
+		if( results.esigma < results.sigma/2 ){
     		ResultsMap["sigma"]->SetBinContent( ibinX, results.sigma );
-    		ResultsMap["sigma"]->SetBinError( ibinX, results.esigma );
+            ResultsMap["sigma"]->SetBinError( ibinX, serr );
 		}//<<>>if( results.esigma < 0.01 )
     	ResultsMap["occ"]->SetBinContent( ibinX, results.occ );
     	ResultsMap["occ"]->SetBinError( ibinX, std::sqrt(results.occ) );

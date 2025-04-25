@@ -12,8 +12,10 @@ options = VarParsing('python')
 #options.register('globalTag','140X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','133X_mcRun3_2024_realistic_v10',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabbe used');
 #options.register('globalTag','94X_mc2017_realistic_v11',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag toe used');
-options.register('globalTag','106X_dataRun2_v36',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
+#options.register('globalTag','106X_dataRun2_v36',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 #options.register('globalTag','94X_dataRun2_ReReco_EOY17_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tae used');
+options.register('globalTag','140X_dataRun3_Prompt_v3',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
+#options.register('globalTag','141X_dataRun3_HLT_frozen_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
@@ -84,8 +86,11 @@ process.source = cms.Source("PoolSource",
         #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/e0bd624f-b25d-48f0-890c-1340ea1eb666.root',
         #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/f7b05c22-6939-429c-9a83-51cf69cdedc1.root',
         #'root://cms-xrd-global.cern.ch//store/data/Run2018B/EGamma/MINIAOD/15Feb2022_UL2018-v1/2560000/11B9426C-D91F-304B-87A1-054DD706ED4C.root',
-        'root://cms-xrd-global.cern.ch//store/data/Run2018B/EGamma/MINIAOD/UL2018_MiniAODv2-v1/50000/C2FAC52C-9570-454C-B93D-865F3502E49A.root',
+        #'root://cms-xrd-global.cern.ch//store/data/Run2018B/EGamma/MINIAOD/UL2018_MiniAODv2-v1/50000/C2FAC52C-9570-454C-B93D-865F3502E49A.root',
+        'root://cms-xrd-global.cern.ch//store/data/Run2024F/EGamma1/MINIAOD/PromptReco-v1/000/383/767/00000/dd87543d-31ea-45f2-8c92-c2781cc244ba.root',
 
+        #'root://cms-xrd-global.cern.ch//store/data/Run2024F/EGamma1/MINIAOD/ECAL_CC_HCAL_DI-v3/110000/8a9d0194-f315-4498-a85c-10b9a67882a3.root',
+        #'root://cms-xrd-global.cern.ch//store/data/Run2017C/DoubleEG/MINIAOD/09Aug2019_UL2017-v1/260000/F049E2F7-7D20-994F-A4E1-574BE8C0F415.root',
         #'root://cms-xrd-global.cern.ch//store/data/Run2017D/MET/MINIAOD/17Nov2017-v1/60000/C2906A84-83EC-E711-AA33-008CFAC93BD8.root',
 
 	),
@@ -103,9 +108,10 @@ process.source = cms.Source("PoolSource",
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100000))
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag

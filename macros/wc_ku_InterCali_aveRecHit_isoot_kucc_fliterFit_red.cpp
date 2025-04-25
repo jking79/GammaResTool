@@ -359,7 +359,8 @@ void wc_ku_InterCali_aveRecHit_mini( string indir, string infilelistname, string
     	std::string instr;
         auto fInTree = new TChain(treename.c_str());
         std::cout << "Adding files to TChain." << std::endl;
-		const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+		//const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+        const std::string eosdir("root://cmseos.fnal.gov//store/user/lpcsusylep/jaking/");
 		//const std::string eosdir("root://cmseos.fnal.gov//store/user/");	
         while (std::getline(infile,instr)){
 			auto tfilename = eosdir + indir + instr;
@@ -769,7 +770,8 @@ int main ( int argc, char *argv[] ){
         //auto indir = "ecalTiming/gammares_llpana/";
         //auto indir = "/ecalTiming/gammares_llpana_mc/"; 
         //auto indir = "/ecalTiming/gammares_r24f_prompt/";
-        auto indir = "/ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/";
+        //auto indir = "/ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/";
+		auto indir = "/kuncali/gammares_cali/"; // group space
 
         //auto infilelist = "master_list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_reso_califilelist.txt";
 		//auto infilelist = "master_list_files/egammares_MetPD_MINIAOD_Run2017E_304475_califilelist.txt";
@@ -783,7 +785,8 @@ int main ( int argc, char *argv[] ){
         //auto infilelist = "master_list_files/kuntuple_QCDHT100200_Met75_R17_v20_infileslist.txt";
         //auto infilelist = "master_list_files/egammares_DYJetsToLL_Met75_R17_v20_califilelist.txt";
         //auto infilelist = "master_list_files/egammares_DEGPD_AOD_Run2017E_califilelist.txt";
-        auto infilelist = "kucmsTimeCaliR24FCCvRt_Cali_TFile.txt";
+        //auto infilelist = "kucmsTimeCaliR24FCCvRt_Cali_TFile.txt";
+        auto infilelist = "kucmsTimeCaliR17File_Cali.txt";
 
         //auto outfilename = "KURes_14011_v12_MetPD_AOD_Run2017E_Cali_FilterFit_Full.root";
         //auto outfilename = "KURes_14011_v12_MetPD_MINIAOD_Run2017E_Cali_Filtered_304475.root";
@@ -796,7 +799,8 @@ int main ( int argc, char *argv[] ){
         //auto outfilename = "KURes_14011_v12_QCDHT100200_AODSIM_Met75_R17_Cali_FilterFit.root";
         //auto outfilename = "KURes_14011_v12_DY1JetsToLL_AODSIM_Met75_R17_Cali_FilterFit.root";
 		//auto outfilename = "KURes_14011_v12_DEGPD_AOD_Run2017E_Cali_FilterFit_301487_304475.root";
-        auto outfilename = "KURes_14011_v12_DEGPD_MiniAOD_ECAL_CC_HCAL_DI-v3_Cali.root";
+        //auto outfilename = "KURes_14011_v12_DEGPD_MiniAOD_ECAL_CC_HCAL_DI-v3_Cali.root";
+        auto outfilename = "KURes_14011_v12_DEGPD_MiniAOD_Run2017Full_Cali.root";
 
 		//bool filterRecHits = true;
         bool filterRecHits = false;

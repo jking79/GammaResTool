@@ -362,6 +362,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         // Local : 0,1 ; Z->ee : 2,3
         std::vector<uint>  resRhID;
         std::vector<float> resAmp, resE, resRtTime, resCCTime, resTOF;
+        std::vector<bool> resGS6, resGS1; 
 		// res1 & res2 local, resZ global
         std::vector<uint>  res1RhID;
         std::vector<float> res1Amp, res1E, res1RtTime, res1CCTime, res1TOF;
