@@ -373,7 +373,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     rhRtTime.clear();
     rhCCTime.clear();
     //rhUnCCTime.clear();
-    //rhTimeErr, 
+    rhTimeErr.clear(); 
     rhTOF.clear();
     rhEnergy.clear();
     rhAmp.clear();
@@ -484,6 +484,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
             	//rhUnCCTime.push_back(uncctime);
             	//if( DEBUG ) std::cout << " -- storing values FLAGS" << std::endl;
             	rhEnergy.push_back(recHit.energy());
+				rhTimeErr.push_back(recHit.timeError());
             	//rhRawAmp.push_back(rawamplitude);
             	rhAmp.push_back(amplitude);
             	//energyError()
@@ -1215,6 +1216,7 @@ void GammaResToolAod::beginJob(){
         outTree->Branch("rhTOF", &rhTOF);
         outTree->Branch("rhEnergy", &rhEnergy);
         //outTree->Branch("rhRawAmp", &rhRawAmp);
+        outTree->Branch("rhTimeError", &rhTimeErr);
 
         outTree->Branch("rhIsUsed", &rhIsUsed);
 	    outTree->Branch("rhRtisOOT", &rhRtisOOT);

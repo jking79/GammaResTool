@@ -127,7 +127,7 @@ def subcrab( runs, events, reqmem ):
 	    #['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
             #['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
             #['/EGamma1/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T
-            ['/EGamma1/Run2024F-PromptReco-v1/MINIAOD'],
+            #['/EGamma1/Run2024F-PromptReco-v1/MINIAOD'],
             #['/EGamma0/CMSSW_15_0_0_pre2-141X_dataRun3_Prompt_frozen_v4_RV266_2024_Data_ECALCCTiming_RelVal_2024D-v1/MINIAOD'],
             #['/EGamma0/CMSSW_15_0_0_pre1-141X_dataRun3_Prompt_frozen_v4_STD_2024_Data_RelVal_2024D-v1/MINIAOD'],
 

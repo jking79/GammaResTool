@@ -142,6 +142,18 @@ float GammaResTool::getPhotonSeedTime( pat::Photon photon ){
 
 }//<<>>float GammaResTool::getPhotonSeedTime( pat::Photon )
 
+float GammaResTool::getPhotonSeedEnergy( pat::Photon photon ){
+
+    const auto & phosc = photon.superCluster().isNonnull() ? photon.superCluster() : photon.parentSuperCluster();
+    const auto & seedDetId = phosc->seed()->seed(); // get seed detid
+    const auto recHits = ((seedDetId.subdetId() == EcalSubdetector::EcalBarrel) ? recHitsEB_ : recHitsEE_); // which recHits to use
+    const auto seedHit = recHits->find(seedDetId); // get the underlying rechit
+    const auto seedEnergy = ((seedHit != recHits->end()) ? seedHit->energy() : -9999.f);
+    //if( DEBUG && seedTime == -9999.f ) std::cout << "Bad Photon seed time !!!! " << std::endl;
+    return seedEnergy;
+
+}//<<>>float GammaResTool::getPhotonSeedEnergy( pat::Photon )
+
 int GammaResTool::getRhIdx( uInt rhDetID, std::vector<uInt> rhID ){
 
     //b_rhID->GetEntry(entry);
@@ -271,6 +283,10 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     //string phoCutLoose("cutBasedPhotonID-Fall17-94X-V1-loose");//2018
 	float phoMinPt = 5.0;
 	float phoMinSeedTime = -25.0;
+	phoColPt.clear();
+	phoColEnergy.clear();
+    phoColSTime.clear();
+    phoColSEnergy.clear();
     for( const auto & photon : *gedPhotons_ ){
 
         //auto passIdCut = photon.photonID(phoCutLoose);
@@ -287,7 +303,14 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		auto timecut = phoSeedTime > phoMinSeedTime;
 		
 		if( DEBUG ) std::cout << " - pho time cut : " << phoSeedTime << " passID: " << passIdCut << " pt: " << photon.pt() << std::endl;
-        if( passIdCut && timecut && minPhoPt ){ fphotons.push_back(photon); if( DEBUG ) std::cout << " - >> Photon Passed " << std::endl; }
+        if( passIdCut && timecut && minPhoPt ){ 
+			fphotons.push_back(photon); 
+			if( DEBUG ) std::cout << " - >> Photon Passed " << std::endl; 
+			phoColPt.push_back( pho_pt );
+			phoColEnergy.push_back( photon.energy() );
+			phoColSTime.push_back( phoSeedTime );
+			phoColSEnergy.push_back( getPhotonSeedEnergy(photon) );
+		}//<<>>if( passIdCut && timecut && minPhoPt )
 		//if( classcut && timecut ){ fphotons.push_back(photon); phoOOT.push_back(false); }
 
     }//<<>>for( const auto photon : *gedPhotons_ )
@@ -455,7 +478,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	rhRtTime.clear();
 	rhCCTime.clear();
     //rhUnCCTime.clear();
-	//rhTimeErr, 
+	rhTimeErr.clear(); 
 	rhTOF.clear();
     rhEnergy.clear();
 	rhAmp.clear();
@@ -546,6 +569,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
             //rhUnCCTime.push_back(uncctime);
 	        //if( DEBUG ) std::cout << " -- storing values FLAGS" << std::endl;
 	        rhEnergy.push_back(recHit.energy());
+			rhTimeErr.push_back(recHit.timeError());
 			//rhRawAmp.push_back(rawamplitude);
             rhAmp.push_back(amplitude);
 	        //energyError()
@@ -1118,6 +1142,8 @@ void GammaResTool::beginJob(){
     outTree->Branch("resRtTime", &resRtTime);
     outTree->Branch("resCCTime", &resCCTime);
     outTree->Branch("resTOF", &resTOF);
+    outTree->Branch("resGS6", &resGS6);
+    outTree->Branch("resGS1", &resGS1);
 
     outTree->Branch("res1RhID", &res1RhID);
     outTree->Branch("res1Amp", &res1Amp);
@@ -1165,6 +1191,7 @@ void GammaResTool::beginJob(){
         outTree->Branch("rhTOF", &rhTOF);
         outTree->Branch("rhEnergy", &rhEnergy);
         //outTree->Branch("rhRawAmp", &rhRawAmp);
+		outTree->Branch("rhTimeError", &rhTimeErr);
 
 	    outTree->Branch("rhRtisOOT", &rhRtisOOT);
         outTree->Branch("rhCCisOOT", &rhCCisOOT);
@@ -1201,6 +1228,11 @@ void GammaResTool::beginJob(){
         outTree->Branch("phoDiDr", &phoDiDr);
         outTree->Branch("phoDiPhi", &phoDiPhi);
         outTree->Branch("phoDiEta", &phoDiEta);
+
+        outTree->Branch("phoColPt", &phoColPt);
+        outTree->Branch("phoColEnergy", &phoColEnergy);
+        outTree->Branch("phoColSTime", &phoColSTime);
+        outTree->Branch("phoColSEnergy", &phoColSEnergy);
 
 	}//<<>>if( doDiag )
 

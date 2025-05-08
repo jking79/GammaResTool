@@ -35,10 +35,10 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'EGamma/'
 #command = eosll+mspc+'ecalTiming/gammares_cali_mc/'
 #command = eosll+mspc+'ecalTiming/gammares_24mc/'
-command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
-command = eosll+mspc+'ecalTiming/gammares_r24f_prompt/'
-command = eosll+mspc+'ecalTiming/gammares_r25_val/'
-
+#command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
+#command = eosll+mspc+'ecalTiming/gammares_r24f_prompt/'
+#command = eosll+mspc+'ecalTiming/gammares_r25_val/'
+command = eosll+mspc+'ecalTiming/gammares_DPG/EGamma1/'
 
 #version = ''
 #version = '_v11_'
@@ -64,7 +64,8 @@ rootfile = '.root'
 #dirselect = 'gammares'
 #dirselect = 'GJets'
 #dirselect = 'GJ-4Jets'
-dirselect = 'EGamma0'
+#dirselect = 'ECAL_CC'
+dirselect = 'PromptReco'
 
 debug = True
 #debug = False
@@ -109,7 +110,7 @@ for thesubdir in subdirlist1 :
 		command3 = command+thesubdir+subdir+'/'
 		subdir3 = bashout( command3 ).rstrip().splitlines()
 		for subsubdir in subdir3 : 
-			subdirlist2.append(thesubdir+subdir+'/'+subsubdir+'/0000/')
+			subdirlist2.append(thesubdir+subdir+'/'+subsubdir+'/')
 
 
 if debug : print( subdirlist2 )

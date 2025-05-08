@@ -445,6 +445,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 	bool lowEnergy;
 	bool useEffEnergy;
     bool externalCali;
+    bool useGSwitch;
 
     TRandom* getRandom;
 
@@ -541,6 +542,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 	void setUseEffEnergy( bool setting ){ useEffEnergy = setting; };
 	void setLowEnergy( bool setting ){ lowEnergy = setting; }; 
 	void useExtCali( bool ext ){ externalCali = ext; };
+    void useGainSwitch( bool gs ){ useGSwitch = gs; };
 
 };//<<>>class KUCMSTimeCalibration : KUCMSRootHelperBaseClass
 
@@ -595,6 +597,7 @@ inline KUCMSTimeCalibration::KUCMSTimeCalibration( bool stayOpen, bool makeNew )
 
 	updated = false;
 	externalCali = false;
+    useGSwitch = false;
 
     std::cout << " - setup DetID & IOV Maps " << std::endl;
     SetupDetIDsEB();
@@ -1848,6 +1851,10 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
     std::vector<float>   *resRtTime;
     std::vector<float>   *resTOF;
 
+   	std::vector<unsigned int> *rhID;
+   	std::vector<bool>    *rhisGS6;
+   	std::vector<bool>    *rhisGS1;
+
     // List of branches
     TBranch        *b_run;   //!
     TBranch        *b_resRhID;   //!
@@ -1855,6 +1862,10 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
     TBranch        *b_resE;   //!
     TBranch        *b_resRtTime;   //!
     TBranch        *b_resTOF;   //!
+
+    TBranch        *b_rhID;   //!
+  	TBranch        *b_rhisGS6;   //!
+   	TBranch        *b_rhisGS1;   //!
 
 	std::string nocalistr("_NoCali");
     std::string smearstr("_Smeared");
@@ -1928,12 +1939,20 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
         resRtTime = 0;
         resTOF = 0;
 
+   		rhID = 0;
+   		rhisGS6 = 0;
+   		rhisGS1 = 0;
+
         fInTree->SetBranchAddress( "run", &run, &b_run );   //!
         fInTree->SetBranchAddress( "resRhID", &resRhID, &b_resRhID );   //!
         fInTree->SetBranchAddress( "resAmp", &resAmp, &b_resAmp);   //!
         fInTree->SetBranchAddress( "resE", &resE, &b_resE);   //!
         fInTree->SetBranchAddress( "resRtTime", &resRtTime, &b_resRtTime);   //!
         fInTree->SetBranchAddress( "resTOF" , &resTOF, &b_resTOF);   //!
+
+        fInTree->SetBranchAddress("rhID", &rhID, &b_rhID);
+        fInTree->SetBranchAddress("rhisGS6", &rhisGS6, &b_rhisGS6);
+        fInTree->SetBranchAddress("rhisGS1", &rhisGS1, &b_rhisGS1);
 
         std::cout << " Getting calibration values and plotting" << std::endl;
 
@@ -1961,6 +1980,11 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
             b_resE->GetEntry(entry);   //!
             b_resRtTime->GetEntry(entry);   //!
             b_resTOF->GetEntry(entry);   //!
+
+			b_rhisGS6->GetEntry(entry);   //!
+			b_rhisGS1->GetEntry(entry);   //!
+			b_rhID->GetEntry(entry);   //!
+			int nRecHits = rhID->size();
 
             if( ( ((*resRhID)[0]) == 0 ) && ( ((*resRhID)[3]) == 0 ) ) continue;
 
@@ -2027,7 +2051,19 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
                                 auto idinfoL1 = DetIDMap[(*resRhID)[1]];
                                 auto idinfoG0 = DetIDMap[(*resRhID)[2]];
                                 auto idinfoG1 = DetIDMap[(*resRhID)[3]];
-									
+						
+								std::vector<bool> isGainId1 = {true,true,true,true};
+								if( useGSwitch ){
+									for( int resrhit = 0; resrhit < 4; resrhit++ ){
+										for( int rhit = 0; rhit < nRecHits; rhit++ ){
+											if( (*resRhID)[resrhit] == (*rhID)[rhit] ){
+												isGainId1[resrhit] = not ( (*rhisGS1)[rhit] || (*rhisGS6)[rhit] );
+												break;
+											}//<>if( (*resRhID)[rhit] == (*resRhID)[resrhit] )
+										}//<<>>for( int resrhit = 0; resrhit < nResRecHits; resrhi++ )
+									}//<<>>for( int rhit = 0; rhit < 4; rhit++ )
+								}//<<>>if( useGSwitch )
+
                                 float seedTimeIC00 = ( usecali ) ? getCalibration( (*resRhID)[0], run, tag ) : 0;
                                 float seedTimeIC10 = ( usecali ) ? getCalibration( (*resRhID)[1], run, tag ) : 0;
                                 float seedTimeIC01 = ( usecali ) ? getCalibration( (*resRhID)[2], run, tag ) : 0;
@@ -2070,6 +2106,14 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
 
                                 bool le_cut = ((*resE)[0]>=lB)&&((*resE)[0]<=uB)&&((*resE)[1]>=lB)&&((*resE)[1]<=uB);
                                 bool ge_cut = ((*resE)[2]>=lB)&&((*resE)[2]<=uB)&&((*resE)[3]>=lB)&&((*resE)[3]<=uB);
+								if( useGSwitch ){
+									le_cut = isGainId1[0] && isGainId1[1] && (*resE)[0] >= lB && (*resE)[1] >= lB;
+									ge_cut = isGainId1[2] && isGainId1[3] && (*resE)[2] >= lB && (*resE)[3] >= lB;
+                                	std::cout << "GSL: " << isGainId1[0] << " " << isGainId1[1] << " ";
+                                	std::cout << (*resE)[0] << " " << (*resE)[1] << " " << le_cut << std::endl;
+                                	std::cout << "GSZ: " << isGainId1[2] << " " << isGainId1[3] << " ";
+                                	std::cout << (*resE)[2] << " " << (*resE)[3] << " " << ge_cut << std::endl;
+								}//<<>>if( useGSwitch )
                                 bool leta_cut = (idinfoL0.ecal == ECAL::EB)&&(idinfoL1.ecal == ECAL::EB);
                                 bool geta_cut = (idinfoG0.ecal == ECAL::EB)&&(idinfoG1.ecal == ECAL::EB);
                                 //bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0;
@@ -2129,6 +2173,15 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
 
 }//<<>> void plot2dResolution( std::string indir, std::string infilelistname, 
 
+/*
+
+inline int KUCMSTimeCalibration::getGainId( unsigned int rhID ){
+
+
+
+}
+*/
+
 inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName, bool scale, bool usecali, bool smear, std::string ext ){
 
     std::cout << "Creating 2D Resolution Hist from EgammaRes Ntuples " << std::endl;
@@ -2146,7 +2199,7 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
 
     float lB = 10; // lower and upper limits of energies for rechits used
     float uB = 120; // lower and upper limits of energies for rechits used
-    if( lowEnergy ){ lB = 1; }
+    if( lowEnergy ){ lB = 1; uB = 120; }
 
     std::cout << " -- use low energy : " << lowEnergy << std::endl;
     std::cout << " -- xbins : " << xBinStr << std::endl;
@@ -2161,6 +2214,10 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
     std::vector<float>   *resRtTime;
     std::vector<float>   *resTOF;
 
+    std::vector<unsigned int> *rhID;
+    std::vector<bool>    *rhisGS6;
+    std::vector<bool>    *rhisGS1;
+
     // List of branches
     TBranch        *b_run;   //!
     TBranch        *b_resRhID;   //!
@@ -2168,6 +2225,10 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
     TBranch        *b_resE;   //!
     TBranch        *b_resRtTime;   //!
     TBranch        *b_resTOF;   //!
+
+    TBranch        *b_rhID;   //!
+    TBranch        *b_rhisGS6;   //!
+    TBranch        *b_rhisGS1;   //!
 
     std::string nocalistr("_NoCali");
     std::string smearstr("_Smeared");
@@ -2241,12 +2302,20 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
         resRtTime = 0;
         resTOF = 0;
 
+        rhID = 0;
+        rhisGS6 = 0;
+        rhisGS1 = 0;
+
         fInTree->SetBranchAddress( "run", &run, &b_run );   //!
         fInTree->SetBranchAddress( "resRhID", &resRhID, &b_resRhID );   //!
         fInTree->SetBranchAddress( "resAmp", &resAmp, &b_resAmp);   //!
         fInTree->SetBranchAddress( "resE", &resE, &b_resE);   //!
         fInTree->SetBranchAddress( "resRtTime", &resRtTime, &b_resRtTime);   //!
         fInTree->SetBranchAddress( "resTOF" , &resTOF, &b_resTOF);   //!
+
+        fInTree->SetBranchAddress("rhID", &rhID, &b_rhID);
+        fInTree->SetBranchAddress("rhisGS6", &rhisGS6, &b_rhisGS6);
+        fInTree->SetBranchAddress("rhisGS1", &rhisGS1, &b_rhisGS1);
 
         std::cout << " Getting calibration values and plotting" << std::endl;
 
@@ -2274,6 +2343,11 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
             b_resE->GetEntry(entry);   //!
             b_resRtTime->GetEntry(entry);   //!
             b_resTOF->GetEntry(entry);   //!
+
+            b_rhisGS6->GetEntry(entry);   //!
+            b_rhisGS1->GetEntry(entry);   //!
+            b_rhID->GetEntry(entry);   //!
+            int nRecHits = rhID->size();
 
             if( ( ((*resRhID)[0]) == 0 ) && ( ((*resRhID)[3]) == 0 ) ) continue;
 
@@ -2337,6 +2411,18 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
                                 auto idinfoG0 = DetIDMap[(*resRhID)[2]];
                                 auto idinfoG1 = DetIDMap[(*resRhID)[3]];
 
+                                std::vector<bool> isGainId1 = {true,true,true,true};
+                                if( useGSwitch ){
+                                    for( int resrhit = 0; resrhit < 4; resrhit++ ){
+                                        for( int rhit = 0; rhit < nRecHits; rhit++ ){
+                                            if( (*resRhID)[resrhit] == (*rhID)[rhit] ){
+                                                isGainId1[resrhit] = not ( (*rhisGS1)[rhit] || (*rhisGS6)[rhit] );
+                                                break;
+                                            }//<>if( (*resRhID)[rhit] == (*resRhID)[resrhit] )
+                                        }//<<>>for( int resrhit = 0; resrhit < nResRecHits; resrhi++ )
+                                    }//<<>>for( int rhit = 0; rhit < 4; rhit++ )
+                                }//<<>>if( useGSwitch )
+
                                 float seedTimeIC00 = ( usecali ) ? getCalibration( (*resRhID)[0], run, tag ) : 0;
                                 float seedTimeIC10 = ( usecali ) ? getCalibration( (*resRhID)[1], run, tag ) : 0;
                                 float seedTimeIC01 = ( usecali ) ? getCalibration( (*resRhID)[2], run, tag ) : 0;
@@ -2382,6 +2468,10 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
 
                                 bool le_cut = ((*resE)[0]>=lB)&&((*resE)[0]<=uB)&&((*resE)[1]>=lB)&&((*resE)[1]<=uB);
                                 bool ge_cut = ((*resE)[2]>=lB)&&((*resE)[2]<=uB)&&((*resE)[3]>=lB)&&((*resE)[3]<=uB);
+                                if( useGSwitch ){
+                                    le_cut = isGainId1[0] && isGainId1[1] && (*resE)[0] >= lB && (*resE)[1] >= lB;
+                                    ge_cut = isGainId1[2] && isGainId1[3] && (*resE)[2] >= lB && (*resE)[3] >= lB;
+                                }//<<>>if( useGSwitch )
                                 bool leta_cut = (idinfoL0.ecal == ECAL::EB)&&(idinfoL1.ecal == ECAL::EB);
                                 bool geta_cut = (idinfoG0.ecal == ECAL::EB)&&(idinfoG1.ecal == ECAL::EB);
                                 bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0 && (*resRtTime)[0] != (*resRtTime)[1];
@@ -2396,9 +2486,14 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
                                 if(debug) std::cout << " - Fill 2D Hist" << std::endl;
 								
 								if( debug && ( levent_good || gevent_good ) ){ for( int didx = 0; didx < 4; didx++ ){
+                                //if( ( levent_good || gevent_good ) ){ for( int didx = 0; didx < 4; didx++ ){
                 					std::cout << "Run " << run << " id " << (*resRhID)[didx]; 
                                     std::cout << " Amp " << (*resAmp)[didx] << " E " << (*resE)[didx];
                 					std::cout << " Rt " << (*resRtTime)[didx]  << " TOF " << (*resTOF)[didx] << std::endl;
+                                    std::cout << "GSL: " << isGainId1[0] << " " << isGainId1[1] << " ";
+                                    std::cout << (*resE)[0] << " " << (*resE)[1] << " " << le_cut << std::endl;
+                                    std::cout << "GSZ: " << isGainId1[2] << " " << isGainId1[3] << " ";
+                                    std::cout << (*resE)[2] << " " << (*resE)[3] << " " << ge_cut << std::endl;
             					}}//<<>>for( int didx = 0; didx < 4; didx++ ){
 
 								if( levent_good && debug ){ 

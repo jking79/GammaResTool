@@ -58,9 +58,10 @@ int main ( int argc, char *argv[] ){
     //std::string indir("/kuncali/gammares_cali_mc/");
     //std::string indir("/kuncali/gammares_cali/");
     //std::string indir("/ecalTiming/gammares_cali_mc/");
-    std::string indir("ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/");
+    //std::string indir("ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/");
     //std::string indir("ecalTiming/gammares_r24f_prompt/");
     //std::string indir("ecalTiming/gammares_r25_val/");
+    std::string indir("ecalTiming/gammares_DPG/EGamma1/");
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -157,16 +158,20 @@ int main ( int argc, char *argv[] ){
     theCali.SetInDir(indir);
     theCali.setLowEnergy( true );
     //theCali.setUseEffEnergy( true );
-    theCali.setUseEffEnergy( false );
+    theCali.useGainSwitch( true );
+	//theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 60 80 100 125 150 175 200 225 250 300 400 600" ); // : xr
     //theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200 1800" ); // : xa
+    //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25.0 30.0 40.0 50.0 70.0 90.0" ); // xer
     //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 22.5 25.0 30.0 40.0 60.0 120.0" ); // xea
- 	theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1000 1200 1800" ); // : ecal
+    //theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 60 80 100 125 150 175 200 225 250 300 400 600" ); // : ecal real
+ 	theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1200 1600 2200" ); // : xgs ecal
     //////theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 1800" ); // xj : justin
     //////theCali.SetXBinStr( "VARIABLE 5 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200" ); // xb : * w/LE
 	//--------------------------------------------------------
 	// my cali time profile?
     //theCali.SetYBinStr( "CONSTANT 1800 -9 9" ); // jack  ( 10 ps )
     theCali.SetYBinStr( "CONSTANT 240 -3 3" ); // ecal ( 25 ps )
+    //theCali.SetYBinStr( "CONSTANT 480 -6 6" ); // ecal ( 25 ps )
     ////theCali.SetYBinStr( "CONSTANT 720 -9 9" ); // ( 25 ps )
     //theCali.SetYBinStr( "CONSTANT 360 -9 9" ); // ( 50 ps  )
     //theCali.SetYBinStr( "CONSTANT 240 -12 12" ); ( 100 ps )
@@ -184,8 +189,9 @@ int main ( int argc, char *argv[] ){
     //theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_egr17ef_xea_pm9b180_v327" );// scale, cali, smear
     //theCali.plot2dResolutionEGR( inputfilename, true, true, false, "_egr17ef_xea_pm3b180_v417" );// scale, cali, smear
     //theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_xa_pm9b720_r325" );// scale, cali, smear
-	//theCali.plot2dResolutionEGR( inputfilename, true, true, false, "_deg24fval_xa_pm9b1800_v417" );
-	theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fccval_xa_pm3b240_v417" );
+	//theCali.plot2dResolutionEGR( inputfilename, true, true, false, "_deg24fval_xa_pm9b1800_v501" );
+	//theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fprmt_xgs_pm3b240_v508" );
+    theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fcc_xgs_pm3b240_v508" );
 
     // extended range resfit
     //KUCMSTimeCalibration theCali;
