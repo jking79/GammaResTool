@@ -52,8 +52,9 @@ struct DetIDStruct {
 
 void SetupDetIDsEB( std::map<UInt_t,DetIDStruct> &DetIDMap ){
 
+	const std::string inDir("/uscms/home/jaking/nobackup/el8/ecaltiming/CMSSW_14_0_11/src/GammaResTool/GammaResTool/macros/ecal_config/");
     const std::string detIDConfigEB("fullinfo_v2_detids_EB.txt");
-    std::ifstream infile( detIDConfigEB, std::ios::in);
+    std::ifstream infile( inDir+detIDConfigEB, std::ios::in);
     unsigned int cmsswId, dbID;
     int hashedId, iphi, ieta, absieta, FED, SM, TT25, iTT, strip5, Xtal, phiSM, etaSM;
 	float phi, eta;
@@ -70,8 +71,9 @@ void SetupDetIDsEB( std::map<UInt_t,DetIDStruct> &DetIDMap ){
 
 void SetupDetIDsEE( std::map<UInt_t,DetIDStruct> &DetIDMap ){
 
+    const std::string inDir("/uscms/home/jaking/nobackup/el8/ecaltiming/CMSSW_14_0_11/src/GammaResTool/GammaResTool/macros/ecal_config/");
     const std::string detIDConfigEE("fullinfo_v2_detids_EE.txt");
-    std::ifstream infile( detIDConfigEE, std::ios::in);
+    std::ifstream infile( inDir+detIDConfigEE, std::ios::in);
     unsigned int cmsswId, dbID;
     int hashedId, side, ix, iy, SC, iSC, Fed, TTCCU, strip, Xtal, quadrant;
 	float phi, eta;

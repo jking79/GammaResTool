@@ -1,0 +1,5 @@
+egammares_DoubleEG_MINIAOD_ECAL_CC_HCAL_DI-v3_Run2024F_filelist2.txt 0 999999 r324fcc
+#egammares_DoubleEG_MINIAOD_Prompt_Run2024F_filelist2.txt 0 999999 r324fpmt
+##egammares_DoubleEG_MINIAOD_ECAL_CC_HCAL_DI-v3_Run2024F_filelist.txt 0 999999 r324fcc
+##gammares_r24f_prompt_EGamma1_MINIAOD_Run2024F_filelist.txt 0 999999 r324fpmt
+##gammares_r25_Validation_EGamma0_MINIAOD_filelist.txt 0 999999 r325val

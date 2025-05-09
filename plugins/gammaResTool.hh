@@ -214,6 +214,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
       	static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 		float getPhotonSeedTime( pat::Photon );
+        float getPhotonSeedEnergy( pat::Photon );
 		int getRhIdx( uInt rhDetID, std::vector<uInt> rhID );
 
 	private:
@@ -362,6 +363,7 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         // Local : 0,1 ; Z->ee : 2,3
         std::vector<uint>  resRhID;
         std::vector<float> resAmp, resE, resRtTime, resCCTime, resTOF;
+        std::vector<bool> resGS6, resGS1; 
 		// res1 & res2 local, resZ global
         std::vector<uint>  res1RhID;
         std::vector<float> res1Amp, res1E, res1RtTime, res1CCTime, res1TOF;
@@ -391,6 +393,8 @@ class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
         std::vector<int>    phoNTrkSolidConeDR04, phoNTrkHollowConeDR04, phoSelType;
 		std::vector<std::vector<uInt>> phoRhIds;
 		float phoDiMass, phoDiAngle, phoDiDr, phoDiPhi, phoDiEta;
+
+		std::vector<float>  phoColPt, phoColEnergy, phoColSTime, phoColSEnergy; 
 
 	//};//<<>>class GammaResTool : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
 

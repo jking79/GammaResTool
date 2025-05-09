@@ -71,8 +71,9 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',75,2250,2)
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',75,500,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',100,2250,2)
-        #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',100,700,2)
-        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,3000,3)
+        #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',25,300,2)
+        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',10,400,2)
+        #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',25,250,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,375,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',100,750,0,3)
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',6,100,2)
@@ -89,9 +90,9 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #hfit.SetParLimits(1,0.02,1.0)
         #hfit.SetParameter(1,0.05)
         #hfit.SetParLimits(1,0.001,1.0)
-        hfit.SetParName(2,'S')
-        hfit.SetParameter(2,5.0)
-        hfit.SetParLimits(2,0.0,25.0)
+        #hfit.SetParName(2,'S')
+        #hfit.SetParameter(2,5.0)
+        #hfit.SetParLimits(2,0.0,25.0)
 
     mg = TMultiGraph();
 
@@ -164,7 +165,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
             binwidth = float(orighist.GetBinWidth(bn))
             binstart = float(orighist.GetBinLowEdge(bn))
             #binmid = thebinmid[n][bn-1]  #float(orighist.GetBinCenter(bn))
-            if binval > 0.0 :     
+            if binval > 0.0 and binerr < binval :     
             #goodpoint = binerr < (binval/5.0) and binerr != 0
             #if goodpoint :
                 if( sxtal ):  
@@ -186,18 +187,20 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
 #       print( h1 )
 
         h1[n].UseCurrentStyle()
-        h1[n].SetMarkerStyle(n+25)
+        h1[n].SetMarkerStyle(n+20)
         #h1[n].SetMarkerStyle(6)
         #h1[n].SetTitle(layout['title'])
         #h1[n].GetXaxis().CenterTitle(True)
         #h1[n].GetXaxis().SetTitle(layout['xtitle'])
         #h1[n].GetYaxis().CenterTitle(True)
         #h1[n].GetYaxis().SetTitle(layout['ytitle'])
-#       k = [kMagenta+2,kBlue+1,kAzure+4,kBlack,kYellow+1,kViolet+7,kOrange+7,kRed+2,kGreen+3, kGray]
+        #k = [kMagenta+2,kBlue+1,kAzure+4,kBlack,kYellow+1,kViolet+7,kOrange+7,kRed+2,kGreen+3, kGray]
         #k = [kMagenta+2,kGreen+2,kYellow+1,kBlue+2,kRed+2,kAzure+4,kBlack,kViolet+7,kOrange+7,kGreen+3,kRed+4,kBlue+4,kGreen+2,kAzure+4,kMagenta+2,kGreen+2]
         #k = [kMagenta+2,kGreen+2,kBlue+2,kRed+2,kAzure+4,kViolet+7,kOrange+7,kGreen+3,kRed+4,kBlue+4,kGreen+2,kAzure+4,kMagenta+2,kGreen+2,kBlack]
         #k = [kBlue+4,kBlue+1,kGreen+4,kYellow+3,kAzure+4,kViolet+7,kOrange+7,kGreen+3]
-        k = [kSpring-7,kSpring+3,kAzure+3,kAzure-7]
+        #k = [kViolet-1,kViolet-6,kSpring-1,kSpring-6]
+        #k = [kSpring-7,kSpring+3,kAzure+3,kAzure-7]
+        k = [kAzure+2,kAzure-7,kSpring-7,kSpring+3]
         #k = [kBlack]
         #k = [kGray+2,kGray+3,kGray+4,kBlack]
         #k = [kGreen+2,kBlue+2,kMagenta+2,kRed+2]
@@ -243,17 +246,17 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         if dofit : 
                  paramn.append(str(abs(hfit.GetParameter(0))))
                  paramc.append(str(abs(hfit.GetParameter(1))))
-                 params.append(str(abs(hfit.GetParameter(2))))
+                 #params.append(str(abs(hfit.GetParameter(2))))
                  pne = hfit.GetParError(0)
                  pce = hfit.GetParError(1)
-                 pse = hfit.GetParError(2)
-                 #print('Fit info',paramn[n],pne,paramc[n],pce)
-                 print('Fit info',paramn[n],pne,paramc[n],pce,params[n],pse)
+                 #pse = hfit.GetParError(2)
+                 print('Fit info',paramn[n],pne,paramc[n],pce)
+                 #print('Fit info',paramn[n],pne,paramc[n],pce,params[n],pse)
                  if pne < 0.01 : pne = 0.01
                  if pce < 0.0001 : pce = 0.0001
                  parnerror.append(str(pne))
                  parcerror.append(str(pce))
-                 parserror.append(str(pse))
+                 #parserror.append(str(pse))
                  #print( 'C: ' + param + ' +/- ' + parerror )
                  #lat_param = '#color['+str(k[n])+']{N : ' + paramn[0:4] + ' #pm ' + parnerror[0:4] + ' [ns]  C : ' + paramc[0:6] + ' #pm ' + parcerror[0:6] + ' [ns]}'
                  #lat.SetTextSize(0.03);
@@ -303,10 +306,10 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
     #lat_cms = '#bf{CMS} #it{Work in Progress}' + ptitle[0]
     #lat_title = 'Run2018D 3206730-320824' #   7 fb^{-1} (#sqrt{s} = 13 TeV)'
     #lat_title = 'Run2018D 1Tier miniAOD'
-    lat_title = ptitle[1]+' (13 TeV)'
+    lat_title = ptitle[1]+' (13.6 TeV)'
     #lat_title = ptitle[1]+' (13.8 TeV)'
-    #lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + 2C^{2}'
-    lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + #frac{S^{2}}{A_{eff}/#sigma_{n}} + 2C^{2}'
+    lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + 2C^{2}'
+    #lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + #frac{S^{2}}{A_{eff}/#sigma_{n}} + 2C^{2}'
     #lat_form = '#sigma^{2}_{i} = (N/Eeff)^{2} + 2C^{2}'
     #lat.SetTextSize(0.045);
     #lat.SetTextFont(132);
@@ -332,7 +335,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
             #lat_param ='#color['+str(k[l])+']{N : '+paramn[l][0:4]+' #pm '+parnerror[l][0:4]+' [ns]  C : '+paramc[l][0:6]+' #pm '+parcerror[l][0:6]+' }'
             lat_param =	'#color['+str(k[l])+']{'
             lat_param = lat_param + 'N : '+paramn[l][0:4]+' #pm '+parnerror[l][0:3]+' [ns]   '
-            lat_param = lat_param + 'S : '+params[l][0:3]+' #pm '+parserror[l][0:3]+' [ns]   '
+            #lat_param = lat_param + 'S : '+params[l][0:3]+' #pm '+parserror[l][0:3]+' [ns]   '
             lat_param = lat_param + 'C : '+paramc[l][0:6]+' #pm '+parcerror[l][0:6]+' [ns]}'
             lat.SetTextSize(0.03);
             lat.DrawLatex(t[3],t[4]-l*.035,lat_param);
@@ -404,8 +407,8 @@ ytitle = '#sigma(t_{1}-t_{2}) [ns]'
 #ytitle = ''
 #htitle = 'A_{eff}/#sigma_{n} vs #sigma_{#delta_{t}}'
 htitle = ''
-islogx = True
-#islogx = False
+#islogx = True
+islogx = False
 islogy = True
 #islogy = False
 
@@ -436,13 +439,34 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24C_iov3_goldjson_resplots/egres_Run2024C_goldjson_eg01_380066_380238_140_v10_resplots.root'
 #
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24D_Full_nojson_resplots/egres_Run2024D_nojson_eg01_Full_140_v10_resplots.root'
-##egres_r3_24_EG01_v12 = '../../res_files/egmres_24D_Full_nojson_cali_resplots/egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots.root'
+egres_r3_24_EG01_v12 = '../../res_files/egmres_24D_Full_nojson_cali_resplots/egres_Run2024D_nojson_eg01_Full_cali_140_v10_resplots.root'
 #
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24CD_Full_mixed_resplots/egres_Run2024CD_mixed_eg01_Full_140_v10_resplots.root'
 ##egres_r3_24_EG01_v12 = '../../res_files/egmres_24CD_Full_mixed_cali_resplots/egres_Run2024CD_mixed_eg01_Full_cali_140_v10_resplots.root'
-#egres_r3_24_EG01_v12 = '../../res_files/egmres_24E_test_resplots/egres_Run2024E_test_140_v10_resplots.root'
+egres_r3_24_EG01_v12 = '../../res_files/egmres_24E_test_resplots/egres_Run2024E_test_140_v10_resplots.root'
 ##egres_r3_23d_part_EG1_v12 = '../../res_files/egmres_23D_partial_nojson_resplots/egres_Run2023D_SF_140_v10_resplots.root'
-#egres_r3_23d_part_EG1_v12 = '../../res_files/egmres_23D_partial_nojson_cali_resplots/egres_Run2023D_SF_140_v10_resplots.root'
+egres_r3_23d_part_EG1_v12 = '../../res_files/egmres_23D_partial_nojson_cali_resplots/egres_Run2023D_SF_140_v10_resplots.root'
+#
+egres_24f_sro_prompt = 'run3/SRO_Data_Hist_2024F_prompt_cali_resfit.root'
+egres_24f_sro_ecal = 'run3/SRO_Data_Hist_2024F_ECAL_cali_resfit.root'
+egres_24f_zee_prompt = 'run3/ZEE_Data_Hist_2024F_prompt_cali_resfit.root'
+egres_24f_zee_ecal = 'run3/ZEE_Data_Hist_2024F_ECAL_cali_resfit.root'
+
+egres_24f_sro_ecal = 'run3/ResMap_0_999999__SRO_Data_Hist_deg24fval_xa_pm9b1800_v417_resfit.root'
+egres_24f_sro_prmt = 'run3/ResMap_0_999999__SRO_Data_Hist_deg24fprmt_xa_pm9b1800_v417_resfit.root'
+egres_24f_zee_ecal = 'run3/ResMap_0_999999__ZEE_Data_Hist_deg24fval_xa_pm9b1800_v417_resfit.root'
+egres_24f_zee_prmt = 'run3/ResMap_0_999999__ZEE_Data_Hist_deg24fprmt_xa_pm9b1800_v417_resfit.root'
+
+egres_24f_nc_sro_ecal = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_resfit.root'
+egres_24f_nc_sro_prmt = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_resfit.root'
+egres_24f_nc_zee_ecal = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_resfit.root'
+egres_24f_nc_zee_prmt = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_resfit.root'
+
+sroe = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_sigma'
+srop = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
+zeee = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_sigma'
+zeep = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
+
 #
 #hl_r3_24C = [
 #    ["SRO_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU"],
@@ -461,6 +485,35 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 #    #["DRO_CC_Data_Hist_sigma","",egres_r3_23d_part_EG1_v12,"DRU"],
 #    ["ZEE_CC_Data_Hist_sigma","",egres_r3_23d_part_EG1_v12,"ZEE"],
 #]
+
+hl_r3_24d_part_rtvcc = [
+    ["SRO_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU RT"],
+    ["ZEE_Data_Hist_sigma","",egres_r3_24_EG01_v12,"ZEE RT"],
+    ["SRO_CC_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU CC"],
+    ["ZEE_CC_Data_Hist_sigma","",egres_r3_24_EG01_v12,"ZEE CC"],
+]
+
+hl_r3_24f_rtvcc = [
+    ["SRO_Data_Hist_sigma","",egres_24f_sro_prompt,"SRO RT"],
+    ["ZEE_Data_Hist_sigma","",egres_24f_zee_prompt,"ZEE RT"],
+    ["SRO_Data_Hist_sigma","",egres_24f_sro_ecal,"SRO CC"],
+    ["ZEE_Data_Hist_sigma","",egres_24f_zee_ecal,"ZEE CC"],
+]
+
+hl_r3_24f_nc_rtvcc = [
+    [srop,"",egres_24f_nc_sro_prmt,"Ratio Same Read Out Unit"],
+    #[zeep,"",egres_24f_nc_zee_prmt,"Ratio Z->e^{+}e^{-}"],
+    [sroe,"",egres_24f_nc_sro_ecal,"CC Same Read Out Unit"],
+    #[zeee,"",egres_24f_nc_zee_ecal,"CC Z->e^{+}e^{-}"],
+]
+
+hl_r3_24f_rtvcc = [
+    [srop,"",egres_24f_sro_prmt,"Ratio Same Read Out Unit"],
+    [zeep,"",egres_24f_zee_prmt,"Ratio Z->e^{+}e^{-}"],
+    [sroe,"",egres_24f_sro_ecal,"CC Same Read Out Unit"],
+    [zeee,"",egres_24f_zee_ecal,"CC Z->e^{+}e^{-}"],
+]
+
 #
 ##ptitle=[' 2024C 379415-380238','','#splitline{EBEB}{5 GeV Cali}'] #{GT 106X_dataRun2_v28}'
 ##ptitle=[' 2024C 379367-379543','','#splitline{EBEB}{ }'] #{GT 106X_dataRun2_v28}'
@@ -473,18 +526,26 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 ##ptitle=[' 2024E 381384','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}'
 #ptitle=[' 2024D 370293-370580','','#splitline{Ratio timing}{EBEB CCGT}'] #{GT 106X_dataRun2_v28}'
 #ptitle_cc=[' 2024D 370293-370580','','#splitline{CC timing}{EBEB CCGT}'] #{GT 106X_dataRun2_v28}'
+#ptitle=[' 370293-370580','','#splitline{EBEB}{Run 2024D}'] #{GT 106X_dataRun2_v28}'
+#ptitle=[' 382229-383797','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}'
+ptitle=['','0.XX fb^{-1} ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'
 #
+
 #y = [ 0.4, 0.04 ]
+y = [ 2, 0.04 ]
 #x = [ 50.0, 1200.0 ]
-#l = [ 0.8,0.75,0.925,0.9 ]
-#t = [0.175,0.44,0.0,0.175,0.24]
+x = [ 10.0, 1200.0 ]
+l = [ 0.6,0.65,0.925,0.9 ]
+t = [0.175,0.44,0.15,0.175,0.28]
 ##outname = 'downloads/tr_hl_r3_24c_gold_v7'
 ##outname = 'downloads/tr_hl_r3_24e_test_v7'
 #outname = 'downloads/tr_hl_r3_24d_part_ccgt_v7'
 #outname_cc = 'downloads/tr_hl_r3_24d_part_ccgt_v7_cc'
+#outname = 'downloads/tr_hl_r3_24d_part_trvcc_ccgt_v7'
+outname = 'downloads/tr_hl_r3_24f_nc_rtvcc_v1'
 #dostack(hl_r3_24d_part, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_r3_24d_part_cc, outname_cc, date, Ic_layout, ptitle_cc,  y, x, l, t)
-
+dostack(hl_r3_24f_nc_rtvcc, outname, date, Ic_layout, ptitle,  y, x, l, t)
 
 
 #
@@ -882,16 +943,16 @@ glo_layout = { 'xtitle' : xtitle, 'ytitle' : ytitle, 'title' : htitle, 'logx' : 
 #l = [ 0.8,0.75,0.925,0.9 ]
 #t = [0.175,0.44,0.0,0.175,0.24]
 #ptitle=[' 2018 316241-316457','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}']
-ptitle=['','','#splitline{ECAL Barrel}{}'] #{GT 106X_dataRun2_v28}']
+#ptitle=['','','#splitline{ECAL Barrel}{}'] #{GT 106X_dataRun2_v28}']
 #ptitle=[' 316241-316457','','#splitline{EBEB}{Same RO}'] #{GT 106X_dataRun2_v28}'
-y = [ 0.7, 0.03 ] 
-x = [ 70.0, 3000.0 ]
-l = [ 0.6,0.65,0.925,0.9 ]
-t = [0.175,0.825,0.0,0.175,0.29]
+#y = [ 0.7, 0.03 ] 
+#x = [ 70.0, 3000.0 ]
+#l = [ 0.6,0.65,0.925,0.9 ]
+#t = [0.175,0.825,0.0,0.175,0.29]
 #t = [0.325,0.82,0.0,0.175,0.28]
-outname = 'downloads/tr_kucc_18As_v25_approval'
+#outname = 'downloads/tr_kucc_18As_v25_approval'
 #outname = 'downloads/tr_kucc_18As_v25_noOOTcorr_comp'
-dostack(hl_v25_gack_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
+#dostack(hl_v25_gack_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_v25_gack_OOTcorr_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_v25_gack_adtvOOT_18_small, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #
