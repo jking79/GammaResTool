@@ -38,7 +38,8 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
 #command = eosll+mspc+'ecalTiming/gammares_r24f_prompt/'
 #command = eosll+mspc+'ecalTiming/gammares_r25_val/'
-command = eosll+mspc+'ecalTiming/gammares_DPG/EGamma1/'
+#command = eosll+mspc+'ecalTiming/gammares_DPG/EGamma1/'
+command = eosll+mspc+'ecalTiming/gammares_ul18/EGamma/'
 
 #version = ''
 #version = '_v11_'
@@ -65,7 +66,8 @@ rootfile = '.root'
 #dirselect = 'GJets'
 #dirselect = 'GJ-4Jets'
 #dirselect = 'ECAL_CC'
-dirselect = 'PromptReco'
+#dirselect = 'PromptReco'
+dirselect = 'Run2018C'
 
 debug = True
 #debug = False

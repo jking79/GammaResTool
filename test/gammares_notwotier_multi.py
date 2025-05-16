@@ -71,6 +71,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 
+        'root://cms-xrd-global.cern.ch//store/data/Run2025B/EGamma3/MINIAOD/PromptReco-v1/000/391/560/00000/0f9e2cd3-a24a-4b9f-81ae-931be29150dd.root',
+        #'root://cms-xrd-global.cern.ch//store/data/Run2018C/EGamma/MINIAOD/15Feb2022_UL2018-v1/2820000/B178675B-F889-9A4B-834D-784787CC9E32.root',
+
         #'root://cms-xrd-global.cern.ch//store/mc/Run3Winter24MiniAOD/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v10-v2/2830000/000a0b08-4970-4a08-bbd1-69c4ae918e66.root',
         #'file:967aebe0-e567-4139-9f91-d9e67f6b2ace.root'
         #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/43f9417c-f2bc-4e2c-a114-ac6d5c5b7052.root',
@@ -87,7 +90,7 @@ process.source = cms.Source("PoolSource",
         #'root://cms-xrd-global.cern.ch//eos/cms/tier0/store/data/Run2024E/EGamma0/MINIAOD/PromptReco-v2/000/381/384/00000/f7b05c22-6939-429c-9a83-51cf69cdedc1.root',
         #'root://cms-xrd-global.cern.ch//store/data/Run2018B/EGamma/MINIAOD/15Feb2022_UL2018-v1/2560000/11B9426C-D91F-304B-87A1-054DD706ED4C.root',
         #'root://cms-xrd-global.cern.ch//store/data/Run2018B/EGamma/MINIAOD/UL2018_MiniAODv2-v1/50000/C2FAC52C-9570-454C-B93D-865F3502E49A.root',
-        'root://cms-xrd-global.cern.ch//store/data/Run2024F/EGamma1/MINIAOD/PromptReco-v1/000/383/767/00000/dd87543d-31ea-45f2-8c92-c2781cc244ba.root',
+        #'root://cms-xrd-global.cern.ch//store/data/Run2024F/EGamma1/MINIAOD/PromptReco-v1/000/383/767/00000/dd87543d-31ea-45f2-8c92-c2781cc244ba.root',
 
         #'root://cms-xrd-global.cern.ch//store/data/Run2024F/EGamma1/MINIAOD/ECAL_CC_HCAL_DI-v3/110000/8a9d0194-f315-4498-a85c-10b9a67882a3.root',
         #'root://cms-xrd-global.cern.ch//store/data/Run2017C/DoubleEG/MINIAOD/09Aug2019_UL2017-v1/260000/F049E2F7-7D20-994F-A4E1-574BE8C0F415.root',
@@ -107,8 +110,8 @@ process.source = cms.Source("PoolSource",
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100000))
 
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))

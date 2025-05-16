@@ -266,8 +266,7 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 	//string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80");//2018
     //string phoMvaWp80("mvaPhoID-RunIIFall17-v2-wp80");//r3
     //string phoCutTight("cutBasedPhotonID-Fall17-94X-V2-tight");//2022
-    string phoCutLoose("cutBasedPhotonID-Fall17-94X-V2-loose");//2022
-    //string phoCutLoose("cutBasedPhotonID-Fall17-94X-V1-loose");//2018
+    string phoCutLoose("cutBasedPhotonID-Fall17-94X-V2-loose");//2018
 	float phoMinPt = 5.0;
 	float phoMinSeedTime = -25.0;
     for( const auto & photon : *gedPhotons_ ){
@@ -329,8 +328,8 @@ void GammaResToolAod::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     //string eleMvaWp80("mvaEleID-Fall17-noIso-V2-wp80");
     //string eleMvaWpLoose("mvaEleID-Fall17-noIso-V2-wpLoose");//r3
     //string eleCutTight("cutBasedElectronID-Fall17-94X-V2-tight");
-    //string eleCutLoose("cutBasedElectronID-Fall17-94X-V2-loose");//2022
-    string eleCutLoose("cutBasedElectronID-Fall17-94X-V1-loose");//2018
+    string eleCutLoose("cutBasedElectronID-Fall17-94X-V2-loose");//2022
+    //string eleCutLoose("cutBasedElectronID-Fall17-94X-V1-loose");//2018
 	for( const auto & electron : *electrons_ ){
 
         //auto passIdCut = electron.electronID(eleCutLoose);

@@ -63,12 +63,12 @@ def subcrab( runs, events, reqmem ):
         #inputJSON    = 'Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt'
         #inputJSON    = 'Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
 
-        #inputJSON     = 'Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
+        inputJSON     = 'Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt'
         #inputJSON     = 'Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt'
         #inputJSON     = 'Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt'
 
         #inputJSON    = 'Cert_Collisions2024_eraC_Golden.json'
-        inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
+        #inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
         #inputJSON    = ''
         #--------------------------------------------------------
         # This is the base config:
@@ -114,7 +114,12 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            ['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD'],
+            ['/EGamma0/Run2025B-PromptReco-v1/MINIAOD'],
+            ['/EGamma1/Run2025B-PromptReco-v1/MINIAOD'],
+            ['/EGamma2/Run2025B-PromptReco-v1/MINIAOD'],
+            ['/EGamma3/Run2025B-PromptReco-v1/MINIAOD'],
+
+            #['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD'],
 
             #['/JetMET1/Run2024F-PromptReco-v1/MINIAOD'],  
             #['/JetMET1/Run2024F-ECAL_CC_HCAL_DI-v1/MINIAOD'],    
@@ -170,7 +175,7 @@ def subcrab( runs, events, reqmem ):
             #['/MET/Run2017E-17Nov2017-v1/MINIAOD']
             #['/EGamma/Run2018D-22Jan2019-v2/MINIAOD']
 
-                        # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/MINIAOD
+            # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/MINIAOD
 
             #['/EGamma/Run2018A-15Feb2022_UL2018-v1/MINIAOD'],
             #['/EGamma/Run2018B-15Feb2022_UL2018-v1/MINIAOD'],
@@ -240,7 +245,8 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_r24f_prompt'
             #trial          = 'gammares_r25_val'
             #trial          = 'gammares_ECAL_CC_HCAL_DI-v3'
-            trial          = 'gammares_DPG'
+            #trial          = 'gammares_DPG'
+            trial          = 'gammares_ul18'
 
             config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/kuncali/"+trial+"/"
@@ -250,32 +256,47 @@ def subcrab( runs, events, reqmem ):
             config.General.requestName   = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra+"_request"
             config.Data.outputDatasetTag = trial+"_"+primaryDataset+"_"+dataset+"_"+runEra
 
+
+
+            ofn = 'outputFileName=output.root'
+            dTTf = 'doTwoTier=False'
+            dTTt = 'doTwoTier=True'
+            dDt = 'doDiag=True'
+            dDf = 'doDiag=False'
 #>>>>>>>>>>>>>  Run2 UL 16/17/18
-            #config.JobType.pyCfgParams   = ['globalTag=globalTag=106X_dataRun2_v36', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-            #config.JobType.pyCfgParams   = ['globalTag=globalTag=106X_dataRun2_v20', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            gtag = 'globalTag=106X_dataRun2_v36'
+            #gtag = 'globalTag=106X_dataRun2_v20'
+            config.JobType.pyCfgParams   = [gtag,ofn,dTTf,dDt]
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
 #>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
-            #config.JobType.pyCfgParams   = ['globalTag=94X_dataRun2_ReReco_EOY17_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #gtag = 'globalTag=94X_dataRun2_ReReco_EOY17_v1'
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
 #>>>>>>>>>>>>>  2018 EOY
-            #config.JobType.pyCfgParams   = ['globalTag= 102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #gtag = 'globalTag= 102X_dataRun2_Prompt_v11'
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
             ### MC 2017
-            #config.JobType.pyCfgParams = ['globalTag=94X_mc2017_realistic_v12', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #gtag = 'globalTag=94X_mc2017_realistic_v12'
+            #config.JobType.pyCfgParams = [gtag, ofn,dTTf,dDt]
 
 #>>>>>>>>>>>> 2024 tested
-            config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v3', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-            #config.JobType.pyCfgParams   = ['globalTag=141X_dataRun3_HLT_frozen_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
+            #gtag = 'globalTag=140X_dataRun3_Prompt_v3'
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
+            #gtag = 'globalTag=141X_dataRun3_HLT_frozen_v2'
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
             ## MC Run3Winter24
-            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True']
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 2024 tested
-            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47', 'outputFileName=output.root','doTwoTier=False','doDiag=True']  # 5 GeV cali - EE cali bad
-            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4','doTwoTier=False','doDiag=False']  
-            #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', 'outputFileName=output.root','doTwoTier=False','doDiag=False']]  # 2018A tested
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # ABCD
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # EF
-            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=False'] # G
-            #config.JobType.pyCfgParams   = ['globalTag=130X_mcRun3_2023_realistic_v14', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] # R3 DY summer23
-            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v10', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] # R3 DY winter24
-            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
-            #config.JobType.pyCfgParams   = ['globalTag=102X_dataRun2_Prompt_v11', 'outputFileName=output.root','doTwoTier=False','doDiag=True'] #
+            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', ofn,dTTf,dDt]
+            #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', ofn,dTTf,dDt]  # 2024 tested
+            #gtag = 'globalTag=140X_dataRun3_Prompt_Candidate_2024_05_31_21_23_47'
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]  # 5 GeV cali - EE cali bad
+            ##config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v4',dTTf,dDf]  
+            #config.JobType.pyCfgParams   = ['globalTag=112X_dataRun3_Prompt_v2', ofn,dTTf,dDf]]  # 2018A tested
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_PromptAnalysis_v1', ofn,dTTf,dDf] # ABCD
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v8', ofn,dTTf,dDf] # EF
+            #config.JobType.pyCfgParams   = ['globalTag=124X_dataRun3_Prompt_v10', ofn,dTTf,dDf] # G
+            #config.JobType.pyCfgParams   = ['globalTag=130X_mcRun3_2023_realistic_v14', ofn,dTTf,dDt] # R3 DY summer23
+            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v10', ofn,dTTf,dDt] # R3 DY winter24
+            #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', ofn,dTTf,dDt] #
+            #config.JobType.pyCfgParams   = ['globalTag=102X_dataRun2_Prompt_v11', ofn,dTTf,dDt] #
 
 
             config.Data.inputDataset     = inDO[0]

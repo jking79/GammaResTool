@@ -830,8 +830,22 @@ inline void KUCMSTimeCalibration::SetupIovMaps(){
 	setLumiTag(r2ulLumiTag);
     SetupIovMap( r2ulTagTT, minttlumi );
     SetupIovMap( r2ulTagX, minxlumi );
-
     setXIov("r2ulx");
+
+    std::string r3TagTT( "r3tt" );
+    std::string r3TagX( "r3x" );
+    std::string r3LumiTag( "r3lumi" );
+
+    ReadLumiFile( caliFileDir+lumi22Config, r3LumiTag );
+    ReadLumiFile( caliFileDir+lumi23Config, r3LumiTag );
+    ReadLumiFile( caliFileDir+lumi24Config, r3LumiTag );
+
+    setLumiTag(r3LumiTag);
+    SetupIovMap( r3TagTT, minttlumi );
+    SetupIovMap( r3TagX, minxlumi );
+    //setXIov("r3x");
+
+
 
 }//<<>>void KUCMSTimeCalibration::SetupEraIovMap()
 

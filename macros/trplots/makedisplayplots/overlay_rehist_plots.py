@@ -72,7 +72,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',75,500,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',100,2250,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',25,300,2)
-        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',10,400,2)
+        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',10,1200,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',25,250,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,375,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',100,750,0,3)
@@ -108,6 +108,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         f1.append(TFile.Open(infile))
         if tree == '' : hist = histname
         else : hist = tree+'/'+histname
+        print( "Opening: ", hist )        
  
         orighist = f1[n].Get(hist)
         #nbins = 15 #orighist.GetNbinsX()
@@ -200,7 +201,8 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #k = [kBlue+4,kBlue+1,kGreen+4,kYellow+3,kAzure+4,kViolet+7,kOrange+7,kGreen+3]
         #k = [kViolet-1,kViolet-6,kSpring-1,kSpring-6]
         #k = [kSpring-7,kSpring+3,kAzure+3,kAzure-7]
-        k = [kAzure+2,kAzure-7,kSpring-7,kSpring+3]
+        #k = [kAzure+2,kAzure-7,kSpring-7,kSpring+3]
+        k = [kAzure+2,kSpring-7]
         #k = [kBlack]
         #k = [kGray+2,kGray+3,kGray+4,kBlack]
         #k = [kGreen+2,kBlue+2,kMagenta+2,kRed+2]
@@ -462,8 +464,13 @@ egres_24f_nc_sro_prmt = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_x
 egres_24f_nc_zee_ecal = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_resfit.root'
 egres_24f_nc_zee_prmt = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_resfit.root'
 
-sroe = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_sigma'
-srop = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
+sel = 'xgs'
+
+egres_24f_v2_sro_ecal = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fcc_' + sel + '_pm3b240_v508_resfit.root'
+egres_24f_v2_sro_prmt = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_' + sel + '_pm3b240_v508_resfit.root'
+
+sroe = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fcc_' + sel + '_pm3b240_v508_sigma'
+srop = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_' + sel + '_pm3b240_v508_sigma'
 zeee = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_sigma'
 zeep = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
 
@@ -495,15 +502,15 @@ hl_r3_24d_part_rtvcc = [
 
 hl_r3_24f_rtvcc = [
     ["SRO_Data_Hist_sigma","",egres_24f_sro_prompt,"SRO RT"],
-    ["ZEE_Data_Hist_sigma","",egres_24f_zee_prompt,"ZEE RT"],
+    #["ZEE_Data_Hist_sigma","",egres_24f_zee_prompt,"ZEE RT"],
     ["SRO_Data_Hist_sigma","",egres_24f_sro_ecal,"SRO CC"],
-    ["ZEE_Data_Hist_sigma","",egres_24f_zee_ecal,"ZEE CC"],
+    #["ZEE_Data_Hist_sigma","",egres_24f_zee_ecal,"ZEE CC"],
 ]
 
 hl_r3_24f_nc_rtvcc = [
-    [srop,"",egres_24f_nc_sro_prmt,"Ratio Same Read Out Unit"],
+    [srop,"",egres_24f_v2_sro_prmt,"Ratio Same Read Out Unit"],
     #[zeep,"",egres_24f_nc_zee_prmt,"Ratio Z->e^{+}e^{-}"],
-    [sroe,"",egres_24f_nc_sro_ecal,"CC Same Read Out Unit"],
+    [sroe,"",egres_24f_v2_sro_ecal,"CC Same Read Out Unit"],
     #[zeee,"",egres_24f_nc_zee_ecal,"CC Z->e^{+}e^{-}"],
 ]
 
@@ -528,7 +535,7 @@ hl_r3_24f_rtvcc = [
 #ptitle_cc=[' 2024D 370293-370580','','#splitline{CC timing}{EBEB CCGT}'] #{GT 106X_dataRun2_v28}'
 #ptitle=[' 370293-370580','','#splitline{EBEB}{Run 2024D}'] #{GT 106X_dataRun2_v28}'
 #ptitle=[' 382229-383797','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}'
-ptitle=['','0.XX fb^{-1} ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'
+ptitle=['','23.8 fb^{-1} ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'
 #
 
 #y = [ 0.4, 0.04 ]
@@ -542,7 +549,7 @@ t = [0.175,0.44,0.15,0.175,0.28]
 #outname = 'downloads/tr_hl_r3_24d_part_ccgt_v7'
 #outname_cc = 'downloads/tr_hl_r3_24d_part_ccgt_v7_cc'
 #outname = 'downloads/tr_hl_r3_24d_part_trvcc_ccgt_v7'
-outname = 'downloads/tr_hl_r3_24f_nc_rtvcc_v1'
+outname = 'downloads/tr_hl_r3_24f_v2_rtvcc_xgs'
 #dostack(hl_r3_24d_part, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_r3_24d_part_cc, outname_cc, date, Ic_layout, ptitle_cc,  y, x, l, t)
 dostack(hl_r3_24f_nc_rtvcc, outname, date, Ic_layout, ptitle,  y, x, l, t)

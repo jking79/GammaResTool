@@ -41,8 +41,9 @@ int main ( int argc, char *argv[] ){
     //std::string r2ulTag( "r2ul" );
     std::string r2ulTag( "r2ultt" );
     std::string mctag( "mc" );
-    //std::string xiovtag( "prompt" );
-    std::string xiovtag( "r2ulx" );
+    std::string xiovtag( "prompt" );
+    std::string r3TagTT( "r3tt" );
+    std::string r3TagX( "r3x" );
 
     std::string inputfilename( "kucmsTimeCaliR24FCCvRtTFile.txt");
     //std::string inputfilename( "kucmsTimeCaliTestFile.txt" ); // MET_AOD_R17_FULL 
@@ -62,6 +63,7 @@ int main ( int argc, char *argv[] ){
     //std::string indir("ecalTiming/gammares_r24f_prompt/");
     //std::string indir("ecalTiming/gammares_r25_val/");
     std::string indir("ecalTiming/gammares_DPG/EGamma1/");
+    //std::string indir("ecalTiming/gammares_ul18/EGamma/");
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -71,23 +73,26 @@ int main ( int argc, char *argv[] ){
 	// if Tcalifile kept open be sure to make and save tcalifile ( saving calihist will close tcalifile )
 
 	////KUCMSTimeCalibration theCali; // open tfile in read only then close after setup
-	//KUCMSTimeCalibration theCali( true );
-	//theCali.SetEosDir(eosdir);
-	//theCali.SetInDir(indir);
+	KUCMSTimeCalibration theCali( true );
+	theCali.SetEosDir(eosdir);
+	theCali.SetInDir(indir);
 	//
     //-----//////////  making tt cali  :
-    //theCali.SetupIovMaps();
-	// for PD
+    theCali.SetupIovMaps();
+	// for PD R2UL
     //theCali.setTTIov( r2ulTag );
     //theCali.setXIov( xiovtag );
 	// for MC
     //theCali.setTTIov( mctag );
     //theCali.setXIov( mctag );
+    // for PD R3
+	theCali.setTTIov( r3TagTT );
+	theCali.setXIov( xiovtag );
     //theCali.makeTTCaliMapEGR( inputfilename, true ); // true == run only subset of events
-    //theCali.makeTTCaliMapEGR( inputfilename );
-    //theCali.makeCaliHists();
-    //theCali.SaveCaliHists();
-    //theCali.SaveTTRunFile();
+    theCali.makeTTCaliMapEGR( inputfilename );
+    theCali.makeCaliHists();
+    theCali.SaveCaliHists();
+    theCali.SaveTTRunFile();
 
     //-----//////////  making xtal cali :
     //theCali.SetupIovMaps();
@@ -153,24 +158,24 @@ int main ( int argc, char *argv[] ){
 	//theCali.doResTimeFit( histName );
 
 	// extended range 2D
-	KUCMSTimeCalibration theCali;
-    theCali.SetEosDir(eosdir);
-    theCali.SetInDir(indir);
-    theCali.setLowEnergy( true );
+	//KUCMSTimeCalibration theCali;
+    //theCali.SetEosDir(eosdir);
+    //theCali.SetInDir(indir);
+    //theCali.setLowEnergy( true );
     //theCali.setUseEffEnergy( true );
-    theCali.useGainSwitch( true );
+    //theCali.useGainSwitch( true );
 	//theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 60 80 100 125 150 175 200 225 250 300 400 600" ); // : xr
     //theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200 1800" ); // : xa
     //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25.0 30.0 40.0 50.0 70.0 90.0" ); // xer
     //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 22.5 25.0 30.0 40.0 60.0 120.0" ); // xea
     //theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 60 80 100 125 150 175 200 225 250 300 400 600" ); // : ecal real
- 	theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1200 1600 2200" ); // : xgs ecal
+ 	//theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1200 1600 2200" ); // : xgs ecal
     //////theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 1800" ); // xj : justin
     //////theCali.SetXBinStr( "VARIABLE 5 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200" ); // xb : * w/LE
 	//--------------------------------------------------------
 	// my cali time profile?
     //theCali.SetYBinStr( "CONSTANT 1800 -9 9" ); // jack  ( 10 ps )
-    theCali.SetYBinStr( "CONSTANT 240 -3 3" ); // ecal ( 25 ps )
+    //theCali.SetYBinStr( "CONSTANT 240 -3 3" ); // ecal ( 25 ps )
     //theCali.SetYBinStr( "CONSTANT 480 -6 6" ); // ecal ( 25 ps )
     ////theCali.SetYBinStr( "CONSTANT 720 -9 9" ); // ( 25 ps )
     //theCali.SetYBinStr( "CONSTANT 360 -9 9" ); // ( 50 ps  )
@@ -191,7 +196,7 @@ int main ( int argc, char *argv[] ){
     //theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_xa_pm9b720_r325" );// scale, cali, smear
 	//theCali.plot2dResolutionEGR( inputfilename, true, true, false, "_deg24fval_xa_pm9b1800_v501" );
 	//theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fprmt_xgs_pm3b240_v508" );
-    theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fcc_xgs_pm3b240_v508" );
+    //theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fcc_xer_pm3b240_v508" );
 
     // extended range resfit
     //KUCMSTimeCalibration theCali;
@@ -219,6 +224,7 @@ int main ( int argc, char *argv[] ){
 	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_deg24fval_xa_pm9b1800_v417";
     //std::string histName = "ResMap_297050_306460__SRO_Data_Hist_egr17ef_xea_pm12b240_v417";
 	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm3b240_v417";
+	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xer_pm3b240_v508";
 	//
 	//theCali.Set2DResTFileName( "egres_DEGPD_AODSIM_R24_Fprompt_v3_14011_v12_resplots.root" );
     //theCali.Set2DResTFileName( "egres_DEGPD_AODSIM_R24_ECAL_v3_14011_v12_resplots.root" );
@@ -230,6 +236,9 @@ int main ( int argc, char *argv[] ){
     //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 22.5 25.0 30.0 40.0 60.0 120.0" ); // xea
     //theCali.SetXBinStr( "VARIABLE 5 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200" ); // xb : * w/LE
     //theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 1800" ); // xj
+    //theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 60 80 100 125 150 175 200 225 250 300 400 600" ); // : xr
+    //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25.0 30.0 40.0 50.0 70.0 90.0" ); // xer
+    //theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1200 1600 2200" ); // : xgs ecal
 	//theCali.doResTimeFit( histName );
 
 	// plotting of mean time by run with calibraton : filename, start run, end run, usecali
