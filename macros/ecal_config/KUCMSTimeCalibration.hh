@@ -10,6 +10,8 @@
 #include "KUCMSRootHelperBaseClass.hh"
 #include <TRandom.h>
 #include "TChain.h"
+#include "TGraphErrors.h"
+#include "TMultiGraph.h"
 
 #ifndef KUCMSTimeCalibrationClass
 #define KUCMSTimeCalibrationClass
@@ -537,7 +539,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     void makeSmearTag( std::string sourceName, std::string destName, std::string smearTag );
 
 	void plotMeanRunTimeEGR( std::string inputFileName, int srun, int erun, bool usecali = true );
-    void makeTTDiffMaps();
+    void makeTTDiffMaps( int srun, int erun );
+    void makeTTDriftMaps( std::string tag, int srun, int erun );
 
 	void setUseEffEnergy( bool setting ){ useEffEnergy = setting; };
 	void setLowEnergy( bool setting ){ lowEnergy = setting; }; 
@@ -622,14 +625,6 @@ inline KUCMSTimeCalibration::~KUCMSTimeCalibration(){
     std::cout << "Wrapping KUCMSTimeCalibrationClass" << std::endl;
 
     delete getRandom;
-
-
-	//LoadCaliHists(true);
-	//makeCaliHists();
-	//SaveCaliHists();
-
-    //SaveCaliRunFile();
-    //SaveTTRunFile();
 
     //std::cout << "Finished Wrapping KUCMSTimeCalibrationClass" << std::endl;
 
@@ -2206,6 +2201,8 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
     //bool debug = true;
     bool small = false;
     //bool small = true;
+    //bool doEE = true;
+	bool doEE = false;
 
     const std::string treename("tree/llpgtree");
 
@@ -2488,6 +2485,10 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
                                 }//<<>>if( useGSwitch )
                                 bool leta_cut = (idinfoL0.ecal == ECAL::EB)&&(idinfoL1.ecal == ECAL::EB);
                                 bool geta_cut = (idinfoG0.ecal == ECAL::EB)&&(idinfoG1.ecal == ECAL::EB);
+								if( doEE ){
+                                	leta_cut = (idinfoL0.ecal != ECAL::EB)&&(idinfoL1.ecal != ECAL::EB);
+                                	geta_cut = (idinfoG0.ecal != ECAL::EB)&&(idinfoG1.ecal != ECAL::EB);
+								}//<<>>if( doEE )
                                 bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0 && (*resRtTime)[0] != (*resRtTime)[1];
                                 bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0 && (*resRtTime)[2] != (*resRtTime)[3];
                                 bool goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
@@ -3125,7 +3126,7 @@ inline void KUCMSTimeCalibration::plotMeanRunTimeEGR( std::string inputFileName,
 
 }//<<>> void plotMeanRunTimeEGR( std::string indir, std::string infilelistname, 
 
-inline void KUCMSTimeCalibration::makeTTDiffMaps(){
+inline void KUCMSTimeCalibration::makeTTDiffMaps( int srun, int erun ){
 
     std::cout << " - Making TTCaliDiffMaps " << std::endl;
     //TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),34,0,34,72,0,72);
@@ -3142,6 +3143,7 @@ inline void KUCMSTimeCalibration::makeTTDiffMaps(){
 				firstname = calirunsct.second.histMapName;
 				continue; 
 			}
+			if( first < srun || first > erun ) continue;
             //std::string tfilename = calirunsct.second.histMapName + "_" + std::to_string( calirunsct.first ) + ttHistMapName;
             std::string tfilename = calirunsct.second.histMapName;
             //std::cout << " -- opening : " << tfilename << std::endl;
@@ -3181,6 +3183,138 @@ inline void KUCMSTimeCalibration::makeTTDiffMaps(){
     }//<<>>for( auto& calirunmap : CaliRunMapSet )
 
 }//<<>>void KUCMSTimeCalibration::makeTTDiffMaps()
+
+inline void KUCMSTimeCalibration::makeTTDriftMaps( std::string tag, int srun, int erun ){
+
+    std::cout << " - Making makeTTDriftMaps " << std::endl;
+	if( erun < srun ){ std::cout << " --- End Run less then Start Run : Exiting " << std::endl; return; }
+	if( not ( TTCaliRunMapSet.find(tag) == TTCaliRunMapSet.end() ) ){
+
+		std::cout << " -- Initing TH1F and TGraphErrors " << std::endl;
+		auto& calirunmap = TTCaliRunMapSet[tag];
+        int first = 0;
+        std::string firstname = "";
+		std::map<int,TH1F*> histmap;
+		//std::map<int,TGraphErrors*> graphmap;
+        std::map<int,TGraph*> graphmap;
+		for( int ieta = 1; ieta < 37; ieta++ ){
+			if( ieta == 18 ) continue; 
+			for( int iphi = 1; iphi < 74; iphi++ ){
+				int index = ieta*100 + iphi;
+				int runrange = erun - srun + 2;
+				int erange = erun + 1;
+				int srange = srun - 1;
+				std::string filename = "TTmeanDrift_" + std::to_string(index);
+				histmap[index] = new TH1F(filename.c_str(),filename.c_str(),runrange,srange,erange);
+				histmap[index]->Sumw2();
+				graphmap[index] = new TGraphErrors(runrange);
+			}//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+		}//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+
+		std::cout << " -- Filling TH1F and TGraphErrors " << std::endl;
+        std::map<int,float> normrun;
+		float maxtime = 0;
+        for( auto& calirunsct : calirunmap ){
+
+			first = calirunsct.first;
+            if( first < srun || first > erun ) continue;
+			//std::cout << " - Processing : " << calirunsct.second.histMapName << " in " << first << std::endl;
+
+            for( int ieta = 1; ieta < 37; ieta++ ){
+                for( int iphi = 1; iphi < 74; iphi++ ){
+                    int i1 = ieta - 18;
+                    if( i1 == 0 ) continue;
+					uInt detid = getInvTTId( iphi, i1 );
+					int index = ieta*100 + iphi;
+					int bin = first - srun + 1;
+					float mean = calirunsct.second.meanMap[detid];
+                    float error = calirunsct.second.errMap[detid];
+                    if( bin == 1 ) normrun[index] = mean;
+					if( mean == 0 ) continue;
+					if( std::abs(mean) > maxtime ) maxtime == std::abs(mean);
+                    //std::cout << " -- Filling : " << ieta << " " << iphi << " " << index << " " << first << " ";
+					//std::cout << bin << " " << mean << " " << error << " " << normrun[index] << std::endl;
+					histmap[index]->SetBinContent( bin, mean );
+                    histmap[index]->SetBinError( bin, error );
+					graphmap[index]->SetPoint( bin, first, mean - normrun[index] );
+                    //graphmap[index]->SetPointError( bin, 0, error);
+                }//<<>>for( int iphi = 1; iphi < 361; iphi++ )
+            }//<<>>for( int ieta = 1; ieta < 172; ieta++ )
+
+        }//<<>>for( auto& calirunsct : calirunmap )
+
+		std::cout << " -- Filling & Printing TMultiGraph " << std::endl;
+		std::string driftHistTCanvasName = "driftHists_" + tag + "_" + std::to_string( srun ) + "_" + std::to_string( erun ) + ".png";
+		gROOT->SetBatch(true);
+		TCanvas c1 = TCanvas( "c1", "canvas" );
+    	c1.SetGridx(1);
+    	c1.SetGridy(1);
+		TMultiGraph* mg = new TMultiGraph();
+        std::map<int,int> colors = {{0,kMagenta+2},{1,kRed+2},{2,kYellow+2},{3,kGreen+2},{4,kCyan+2},{5,kBlue+2},
+									{6,kViolet+2},{7,kPink+2},{8,kOrange+2},{9,kSpring+2},{10,kTeal+2},{11,kAzure+2},
+									{23,kAzure+7},{12,kMagenta-4},{13,kRed-4},{14,kYellow-4},{15,kGreen-4},{16,kCyan-4},
+									{17,kBlue-4},{18,kViolet+7},{19,kPink+7},{20,kOrange+7},{21,kSpring+7},{22,kTeal+7},
+                                    {34,kTeal-6},{35,kAzure-6},{24,kMagenta-6},{25,kRed-6},{26,kYellow-6},{27,kGreen-6},
+                                    {28,kCyan-6},{29,kBlue-6},{30,kViolet-6},{31,kPink-6},{32,kOrange-6},{33,kSpring-6}
+									};
+		//std::map<int,int> markers = {{0,20},{1,21},{2,22},{3,23},{4,29},{5,33},{6,34},{7,39},{8,45},{9,47}};
+        std::map<int,int> markers = {{0,29},{1,33},{2,34},{3,39},{4,41},{5,43},{6,45},{7,47},{8,48},{9,49},{10,22},{11,23}};	
+     	int n = 0, k=0;
+		int sEta = 1, eEta = 37; // 35 bins : -17 to 18 ( skip 0 ) -> 1 to 36 ( skip 18 )
+        //int sEta = 32, eEta = 33;
+        //int sEta = 12, eEta = 13;
+        int sPhi = 1, ePhi = 74; // 72 bins : 1 to 73
+        //int sPhi = 25, ePhi = 26;
+        //int sPhi = 50, ePhi = 51;
+        for( int ieta = sEta; ieta < eEta; ieta++ ){
+        //for( int ieta = 32; ieta < 33; ieta++ ){
+            if( ieta == 18 ) continue;
+            for( int iphi = sPhi; iphi < ePhi; iphi++ ){
+                int index = ieta*100 + iphi;
+                graphmap[index]->SetMarkerStyle(markers[k]);
+				graphmap[index]->SetLineColor(colors[n]);
+				graphmap[index]->SetMarkerColor(colors[n]);
+				graphmap[index]->SetMarkerSize(1.0);
+				//graphmap[index] = new TGraphErrors( histmap[index] );
+				mg->Add(graphmap[index]);
+				n++;
+				if( n > 35 ){ n = 0; k++; }
+				k++;
+				if( k > 11 ){ k = 0; }
+            }//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+        }//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+        mg->GetXaxis()->SetNoExponent();
+		mg->GetXaxis()->SetRangeUser(srun,erun);
+    	mg->GetXaxis()->CenterTitle(true);
+    	mg->GetXaxis()->SetTitle("Run");
+        mg->GetYaxis()->SetRangeUser(-1.75,1.75);
+    	mg->GetYaxis()->CenterTitle(true);
+    	mg->GetYaxis()->SetTitle("normlized TT mean time [ns]");
+        //mg->GetXaxis()->SetNoExponent();
+        mg->SetTitle(driftHistTCanvasName.c_str());
+		c1.Update();
+		mg->Draw("AP");
+		c1.Print( driftHistTCanvasName.c_str() );
+		c1.Close();
+		
+    	std::cout << " -- Save Drift Hists" << std::endl;
+    	std::string driftHistTFileName = "driftHists_" + tag + "_" + std::to_string( srun ) + "_" + std::to_string( erun ) + ".root";
+    	TFile* driftHistTFile = TFile::Open( driftHistTFileName.c_str(), "UPDATE" );
+    	driftHistTFile->cd();
+    	for( auto& hist : histmap ){
+        	hist.second->Write( hist.second->GetName(), TObject::kOverwrite );
+        	delete hist.second;
+    	}//<<>>for( auto& hists : CaliHists )
+		//mg->Write("TT_TimeStability", TObject::kOverwrite );
+		delete mg;
+
+    	driftHistTFile->Close();
+
+    }//<<>>if( TTCaliRunMapSet.find(tag) != CaliHists.end() )
+
+    std::cout << "Finished making TT Mean Drift Hists" << std::endl;
+
+}//<<>>void KUCMSTimeCalibration::makeTTDriftMaps()
 
 #endif
 //-------------------------------------------------------------------------------------------------------------------

@@ -88,6 +88,10 @@ def subcrab( runs, events, reqmem ):
         config.JobType.pyCfgParams = None
         #config.JobType.inputFiles  = [ inputDir+inputPaths , inputDir+inputFilters , inputDir+inputFlags ]
 
+        config.section_("Site")
+        config.Site.whitelist = ['T1_*','T2_US_*','T2_IT_*','T2_DE_*','T2_ES_*','T2_FR_*','T2_UK_*']
+        config.Site.blacklist = ['T2_ES_IFCA']
+
         config.Data.inputDataset = None
         config.Data.partialDataset = True
         #config.Data.useParent      = True
@@ -101,7 +105,8 @@ def subcrab( runs, events, reqmem ):
         #config.Data.unitsPerJob  =  25000 # for auto job splitting
         #config.Data.runRange  = runs #'321122-321128'
         #config.Data.unitsPerJob  =  250000 # unitsPerJob = 1000 for 321122-321128 and maxMemoryMB = 4000  on EventAwareLumiBased
-        config.Data.unitsPerJob  =  100000 # 2024F cc test rereco
+        #config.Data.unitsPerJob  =  100000 # 2024F cc test rereco
+        config.Data.unitsPerJob  =  300000 
 
         #config.Data.outputDatasetTag = 'reducedRAW_EGamma_ntuple'
 	     
@@ -114,10 +119,10 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            ['/EGamma0/Run2025B-PromptReco-v1/MINIAOD'],
-            ['/EGamma1/Run2025B-PromptReco-v1/MINIAOD'],
-            ['/EGamma2/Run2025B-PromptReco-v1/MINIAOD'],
-            ['/EGamma3/Run2025B-PromptReco-v1/MINIAOD'],
+            #['/EGamma0/Run2025B-PromptReco-v1/MINIAOD'],
+            #['/EGamma1/Run2025B-PromptReco-v1/MINIAOD'],
+            #['/EGamma2/Run2025B-PromptReco-v1/MINIAOD'],
+            #['/EGamma3/Run2025B-PromptReco-v1/MINIAOD'],
 
             #['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD'],
 
@@ -160,6 +165,7 @@ def subcrab( runs, events, reqmem ):
             #['/DYto2L_M-50_TuneCP5_13p6TeV_pythia8/Run3Winter24MiniAOD-KeepSi_133X_mcRun3_2024_realistic_v8-v2/MINIAODSIM'],
 
             #['/EGamma/Run2018A-17Sep2018-v2/MINIAOD'], # for ABC change to GT 102X_dataRun2_v13
+            #['/EGamma/Run2018B-17Sep2018-v2/MINIAOD'],
 
             #['/EGamma/Run2022A-PromptReco-v1/MINIAOD'], # 2022 ABCD Prompt 124X_dataRun3_PromptAnalysis_v1 352499 - 355062    
             #['/EGamma/Run2022B-PromptReco-v1/MINIAOD'], #						    355094 - 355769											 
@@ -177,7 +183,7 @@ def subcrab( runs, events, reqmem ):
 
             # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/MINIAOD
 
-            #['/EGamma/Run2018A-15Feb2022_UL2018-v1/MINIAOD'],
+            ['/EGamma/Run2018A-15Feb2022_UL2018-v1/MINIAOD'],
             #['/EGamma/Run2018B-15Feb2022_UL2018-v1/MINIAOD'],
             #['/EGamma/Run2018C-15Feb2022_UL2018-v1/MINIAOD'],
             #['/EGamma/Run2018D-15Feb2022_UL2018-v1/MINIAOD'],
@@ -260,9 +266,9 @@ def subcrab( runs, events, reqmem ):
 
             ofn = 'outputFileName=output.root'
             dTTf = 'doTwoTier=False'
-            dTTt = 'doTwoTier=True'
+            #dTTt = 'doTwoTier=True'
             dDt = 'doDiag=True'
-            dDf = 'doDiag=False'
+            #dDf = 'doDiag=False'
 #>>>>>>>>>>>>>  Run2 UL 16/17/18
             gtag = 'globalTag=106X_dataRun2_v36'
             #gtag = 'globalTag=106X_dataRun2_v20'

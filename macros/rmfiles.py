@@ -95,11 +95,11 @@ filelist = [
 
 mspc = '/store/user/jaking/' 
 mgrp = '/store/user/lpcsusylep/jaking/' 
-eosll = 'eos root://cmseos.fnal.gov rm ' 
+eosrm = 'eos root://cmseos.fnal.gov rm ' 
 
 for name in filelist :
 
-	command = eosll+name
+	command = eosrm+name
 	#print( command )
 	bashout( command )
 

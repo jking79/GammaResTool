@@ -1,1 +1,0 @@
-tt_run22C_partial_126_gammares_v2a_infilelist.txt tt_KUCCRes_126_v2a_run2022C_partial_Cali.root 352400 358400

@@ -12,9 +12,9 @@ options = VarParsing('python')
 #options.register('globalTag','140X_dataRun3_Prompt_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag to be used');
 #options.register('globalTag','133X_mcRun3_2024_realistic_v10',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabbe used');
 #options.register('globalTag','94X_mc2017_realistic_v11',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag toe used');
-#options.register('globalTag','106X_dataRun2_v36',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
+options.register('globalTag','106X_dataRun2_v36',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 #options.register('globalTag','94X_dataRun2_ReReco_EOY17_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tae used');
-options.register('globalTag','140X_dataRun3_Prompt_v3',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
+#options.register('globalTag','140X_dataRun3_Prompt_v3',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 #options.register('globalTag','141X_dataRun3_HLT_frozen_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 
 ## processName
@@ -71,8 +71,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 
-        'root://cms-xrd-global.cern.ch//store/data/Run2025B/EGamma3/MINIAOD/PromptReco-v1/000/391/560/00000/0f9e2cd3-a24a-4b9f-81ae-931be29150dd.root',
-        #'root://cms-xrd-global.cern.ch//store/data/Run2018C/EGamma/MINIAOD/15Feb2022_UL2018-v1/2820000/B178675B-F889-9A4B-834D-784787CC9E32.root',
+        #'root://cms-xrd-global.cern.ch//store/data/Run2025B/EGamma3/MINIAOD/PromptReco-v1/000/391/560/00000/0f9e2cd3-a24a-4b9f-81ae-931be29150dd.root',
+        'root://cms-xrd-global.cern.ch//store/data/Run2018C/EGamma/MINIAOD/15Feb2022_UL2018-v1/2820000/B178675B-F889-9A4B-834D-784787CC9E32.root',
 
         #'root://cms-xrd-global.cern.ch//store/mc/Run3Winter24MiniAOD/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v10-v2/2830000/000a0b08-4970-4a08-bbd1-69c4ae918e66.root',
         #'file:967aebe0-e567-4139-9f91-d9e67f6b2ace.root'
