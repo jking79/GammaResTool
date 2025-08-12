@@ -38,7 +38,9 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/'
 #command = eosll+mspc+'ecalTiming/gammares_r24f_prompt/'
 #command = eosll+mspc+'ecalTiming/gammares_r25_val/'
-command = eosll+mspc+'ecalTiming/gammares_DPG/EGamma1/'
+#command = eosll+mspc+'ecalTiming/gammares_DPG/EGamma1/'
+#command = eosll+mspc+'ecalTiming/gammares_ul18/EGamma/'
+command = eosll+mdis+'ecalTiming/gammares_DPG_24/'
 
 #version = ''
 #version = '_v11_'
@@ -46,7 +48,8 @@ command = eosll+mspc+'ecalTiming/gammares_DPG/EGamma1/'
 #version = '_wthOOTAmp_'
 #version = 'GJets'
 #version = 'GJ-4Jets'
-version = ''
+#version = 'Run2024F-PromptReco'
+version = 'ECAL_CC_HCAL_DI-v3'
 
 rootfile = '.root'
 
@@ -65,13 +68,15 @@ rootfile = '.root'
 #dirselect = 'GJets'
 #dirselect = 'GJ-4Jets'
 #dirselect = 'ECAL_CC'
-dirselect = 'PromptReco'
+#dirselect = 'PromptReco'
+dirselect = 'EGamma1'
+#dirselect = 'Run2025C'
 
 debug = True
 #debug = False
 
-#deep = True
-deep = False
+deep = True
+#deep = False
 
 targdirs = []
 subdirlist1 = []
@@ -119,8 +124,15 @@ for subdir2 in subdirlist2:
 	for line in lists :
 		if rootfile in line : filelist.append(subdir2+line)
 
+
+#select =  filelist[0].split("/")
+outfile = dirselect + '_' + version + '_v25.txt'
+#print( outfile )
+outf = open( outfile, 'w' )
 for thefile in filelist:
-	print( thefile )
+    #print( thefile )
+    outf.write( thefile + '\n' )
+outf.close()
 
 	#filename = 'tmp_'+subdir2.split('/')[1]+'.root '
 	#print( filename )

@@ -1,0 +1,1 @@
+st_run18A_316000-316499_126_gammares_v2a_infilelist.txt st_RatioRes_126_v2a_run2018A_316000-316499_Cali.root 316000 316499

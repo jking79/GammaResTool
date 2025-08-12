@@ -357,7 +357,7 @@ class makehists : egammares_hist_base {
 
 	public:
 
-	void llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string fhtitle );	
+	void llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string fhtitle, int ebee );	
 	void initHists( std::string fHTitle );
 	void getBranches( Long64_t entry );
 	void eventLoop( Long64_t entry );
@@ -377,7 +377,7 @@ class makehists : egammares_hist_base {
     TH2D *hist2d[n2dHists];
     TH3D *hist3d[n3dHists];
 
-    int nMaps;
+    int nMaps, EBEE;
     bool fMap[nEBEEMaps];
     TH2D *ebeeMapP[nEBEEMaps], *ebeeMapT[nEBEEMaps], *ebeeMapR[nEBEEMaps];
 	
@@ -443,15 +443,18 @@ void makehists::makeEBEEMaps( int phoit ){
 ////----------------------------------------  Make Hists function call  ---------------------------------------------------------------
 ////-----------------------------------------------------------------------------------------------------------------------------
 
-void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string fhtitle ){
+void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, std::string outfilename, std::string fhtitle, int ebee ){
 
     //bool debug = true; // this is for main loop only
 	bool debug = false;
 
     // these need to be changed to input paramters for public verions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     const std::string disphotreename("tree/llpgtree");
-    const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+    //const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+    const std::string eosdir("root://cmseos.fnal.gov//store/user/lpcsusylep/jaking/");
     //const std::string listdir("llpgana_list_files/");
+
+	EBEE = ebee;
 
     initHists(fhtitle);
     SetupDetIDsEB(DetIDMap);
@@ -469,7 +472,7 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
         std::string srunstr;
         std::string erunstr;
         ss >> infilename >> califilename >> srunstr >> erunstr;
-		if( infilename[0] == '#' ) continue;
+		if( infilename[0] == '#' || infilename[0] == ' ') continue;
         std::cout << "open input file : " << infilename << " with califile : " << califilename << std::endl;
         std::cout << "For Run " << srunstr << " to Run " << erunstr << std::endl;
         startRun = std::stoi(srunstr);
@@ -572,12 +575,15 @@ void makehists::eventLoop( Long64_t entry ){
 
 	if( DEBUG ) std::cout << " -- Seting Eta range " << std::endl;
 	// --------- eta cuts ------------------------
-	auto doEBOnly = true;
-    //auto doEBOnly = false;
+
+	bool doEBOnly = ( EBEE == 1 ) ? true : false; 
+
 	auto isLocEB = (DetIDMap[(*resRhID)[0]].ecal == EB) && (DetIDMap[(*resRhID)[1]].ecal == EB);
 	auto isGloEB = (DetIDMap[(*resRhID)[2]].ecal == EB) && (DetIDMap[(*resRhID)[3]].ecal == EB);
-	auto locEBSelct = doEBOnly ? isLocEB : true;
-	auto gloEBSelct = doEBOnly ? isGloEB : true;
+    auto isLocEE = (DetIDMap[(*resRhID)[0]].ecal != EB) && (DetIDMap[(*resRhID)[1]].ecal != EB);
+    auto isGloEE = (DetIDMap[(*resRhID)[2]].ecal != EB) && (DetIDMap[(*resRhID)[3]].ecal != EB);
+	auto locEBSelct = doEBOnly ? isLocEB : isLocEE;
+	auto gloEBSelct = doEBOnly ? isGloEB : isGloEE;
 
 	if( goodRunRange ){
 		if( DEBUG ) std::cout << "Run : " << run << " in range " << startRun << " to " << endRun << std::endl;
@@ -593,7 +599,11 @@ void makehists::eventLoop( Long64_t entry ){
 
 			if( DEBUG ) std::cout << " - Rechit Cali info" << std::endl;
 			auto rhIdInfo = DetIDMap[(*rhID)[it]];
-			if( doEBOnly && rhIdInfo.ecal != EB ) continue;
+			if( EBEE == 1 && rhIdInfo.ecal != 0 ) continue;
+            if( EBEE == 2 && rhIdInfo.ecal == 0 ) continue;
+            if( EBEE == 3 && rhIdInfo.ecal != 1 ) continue;
+            if( EBEE == 4 && rhIdInfo.ecal != 2 ) continue;
+
             if( DEBUG ) std::cout << " - Rechit Cali map info" << std::endl;
 			// icmap lookup only works with EB rhs !!!!!!
 			float rhRtCali = ( icmap[0] != NULL && rhIdInfo.ecal == EB ) ? icmap[0]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
@@ -725,8 +735,6 @@ void makehists::eventLoop( Long64_t entry ){
                 if( isRToot == false ) hist1d[152]->Fill((*rhRtTime)[it]); else hist1d[160]->Fill((*rhRtTime)[it]);
                 if( isCCoot == false ) hist1d[153]->Fill((*rhCCTime)[it]); else hist1d[161]->Fill((*rhCCTime)[it]); 
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
-            //if( (*rhisGS6)[it] == false && (*rhisGS1)[it] == false ){//gid1
-            //if( (*rhisGS6)[it] == true || (*rhisGS1)[it] == true ){//gidgt1
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){//gid23
                 //hist1d[164]->Fill((*rhEnergy)[it]);
                 hist2d[125]->Fill((*rhEnergy)[it],caliRtTime);
@@ -735,6 +743,11 @@ void makehists::eventLoop( Long64_t entry ){
                 hist1d[140]->Fill((*rhRtTime)[it]); hist1d[141]->Fill((*rhCCTime)[it]);
                 if( isRToot == false ) hist1d[148]->Fill((*rhRtTime)[it]); else hist1d[156]->Fill((*rhRtTime)[it]);
                 if( isCCoot == false ) hist1d[149]->Fill((*rhCCTime)[it]); else hist1d[157]->Fill((*rhCCTime)[it]);
+            }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
+            if( (*rhisGS6)[it] == true || (*rhisGS1)[it] == true ){//gid>1
+                //hist1d[164]->Fill((*rhEnergy)[it]);
+                hist2d[135]->Fill((*rhEnergy)[it],caliRtTime);
+                if( isOOT == true ) hist2d[134]->Fill((*rhEnergy)[it],caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
 			//}//<<>>if( not ( (*rhisWeird)[it] || (*rhisDiWeird)[it] ) )
 
@@ -1237,7 +1250,7 @@ void makehists::initHists( std::string fHTitle ){
 
     hist1d[67] = new TH1D("rhTime",addstr(fHTitle,"rhTime").c_str(),500,-25,25);
     hist1d[68] = new TH1D("rhTimeUnCorr",addstr(fHTitle,"rhTimeUnCorr").c_str(),500,-25,25);
-    hist1d[70] = new TH1D("rhTimeCali",addstr(fHTitle,"rhTimeCali").c_str(),500,-25,25);
+    hist1d[70] = new TH1D("rhTimeCali",addstr(fHTitle,"rhTimeWide").c_str(),1000,-100,100);
     hist1d[72] = new TH1D("rhCali",addstr(fHTitle,"rhCali").c_str(),500,-25,25);
 
     hist1d[75] = new TH1D("phoCov2IEtaIEta_Glo0",addstr(fHTitle,"phoCov2IEtaIEta_Glo0").c_str(),1000,0,0.005);
@@ -1431,14 +1444,14 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[117] = new TH2D("SXVE",addstr(fHTitle,"SwissCross V Energy;SwCrs;Energy [GeV]").c_str(),50,0.5,1.0,50,0,1000);
 
 
-    hist2d[118] = new TH2D("EVTktG0",addstr(fHTitle,"Energy V rhTime kOOT  hasGS1&6;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[119] = new TH2D("EVTG0",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS1&6;Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[120] = new TH2D("EVkootG6",addstr(fHTitle,"Energy V rhTime kOOT hasGS6;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[121] = new TH2D("EVTG6",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS6;Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[122] = new TH2D("EVTkootfG1",addstr(fHTitle,"Energy V rhTime kOOT hasGS1;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[123] = new TH2D("EVTG1",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS1;Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[124] = new TH2D("EVrTkootfG61",addstr(fHTitle,"Energy V rhTime kOOT noGS;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
-    hist2d[125] = new TH2D("EVTG61",addstr(fHTitle,"Energy V rhTime;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
+    hist2d[118] = new TH2D("EVTkootG0",addstr(fHTitle,"Energy V rhTime kOOT gid1;Energy [GeV];Time [ns]").c_str(),200,0,400,200,-25,25);
+    hist2d[119] = new TH2D("EVTG0",addstr(fHTitle,"Energy V rhTime gid1;Energy [GeV];Time [ns]").c_str(),200,0,400,200,-25,25);
+    hist2d[120] = new TH2D("EVkootG6",addstr(fHTitle,"Energy V rhTime kOOT hasGS6;Energy [GeV];Time [ns]").c_str(),120,100,700,200,-25,25);
+    hist2d[121] = new TH2D("EVTG6",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS6;Time [ns]").c_str(),120,100,700,200,-25,25);
+    hist2d[122] = new TH2D("EVTkootG1",addstr(fHTitle,"Energy V rhTime kOOT hasGS1;Energy [GeV];Time [ns]").c_str(),100,200,1200,200,-25,25);
+    hist2d[123] = new TH2D("EVTG1",addstr(fHTitle,"Energy V rhTime;Energy [GeV] hasGS1;Time [ns]").c_str(),100,200,1200,200,-25,25);
+    hist2d[124] = new TH2D("EVrTkootG61",addstr(fHTitle,"Energy V rhTime kOOT noGS;Energy [GeV];Time [ns]").c_str(),100,200,1200,200,-25,25);
+    hist2d[125] = new TH2D("EVTG61",addstr(fHTitle,"Energy V rhTime noGS;Energy [GeV];Time [ns]").c_str(),100,200,1200,200,-25,25);
 
     hist2d[126] = new TH2D("EVTInvFtrd",addstr(fHTitle,"Energy V rhTime InvFiltered;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
     hist2d[127] = new TH2D("EVTUnftrd",addstr(fHTitle,"Energy V rhTime unFiltered;Energy [GeV];Time [ns]").c_str(),100,0,2000,200,-25,25);
@@ -1448,6 +1461,9 @@ void makehists::initHists( std::string fHTitle ){
     hist2d[131] = new TH2D("RtVCCTimeg2",addstr(fHTitle,"Rt V CC Time gianID 2;Rt Time [ns];CC Time [ns]").c_str(),200,-25,25,200,-25,25);
     hist2d[132] = new TH2D("RtVCCTimeg3",addstr(fHTitle,"Rt V CC Time gainID 3;Rt Time [ns];CC Time [ns]").c_str(),200,-25,25,200,-25,25);
     hist2d[133] = new TH2D("RtVCCTimeg1",addstr(fHTitle,"Rt V CC Time gianID 1;Rt Time [ns];CC Time [ns]").c_str(),200,-25,25,200,-25,25);
+
+    hist2d[134] = new TH2D("EVrTkootGH",addstr(fHTitle,"Energy V rhTime kOOT gid>1;Energy [GeV];Time [ns]").c_str(),110,100,1200,200,-25,25);
+    hist2d[135] = new TH2D("EVTGH",addstr(fHTitle,"Energy V rhTime gid>1;Energy [GeV];Time [ns]").c_str(),110,100,1200,200,-25,25);
 
     hist2d[151] = new TH2D("timeerror1", "ErrVEnergy All;rechit E [GeV];jitterError",1200,0,120,500,0.5,5.5);
     hist2d[152] = new TH2D("timeerror2", "ErrVEnergy GS1;rechit E [GeV];jitterError",1200,0,120,500,0.5,5.5);
@@ -1467,36 +1483,13 @@ int main ( int argc, char *argv[] ){
     //if( argc != 4 ) { std::cout << "Insufficent arguments." << std::endl; }
     //else {
 
-    	//auto indir = "ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/";
-        //auto indir = "ecalTiming/gammares_mc/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/";
-        //auto indir = "ecalTiming/gammares_mc/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/";
-        //auto indir = "ecalTiming/gammares_llpana/";
-        //auto indir = "/ecalTiming/gammares_llpana_pd/MET/";
-        //auto indir = "/ecalTiming/gammares_llpana_qcd/";
-		//auto indir = "ecalTiming/gammares_llpana/MET/";
-        //auto indir = "/ecalTiming/gammares_llpana_pd/";
-        //auto indir = "ecalTiming/gammares_ccval/";
-        //auto indir = "ecalTiming/gammares_r24fprompt/";
-        //auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_v3/";
-        //auto indir = "/ecalTiming/gammares_ecaldpg_tevjets_prompt_oot3_v3/";
-        //auto indir = "ecalTiming/gammares_r24f_cctest/";
-        //auto indir = "ecalTiming/gammares_24mc/";
-        //auto indir = "ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/";
-        auto indir = "ecalTiming/gammares_DPG/EGamma1/";
+        auto indir = "ecalTiming/gammares_DPG_24/";
 
-        //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
-        //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
-        //auto infilename = "list_files/egammares_gammares_mc_ZprimeToEE_M-6000_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
-        //auto infilename = "list_files/egres_QCD_HT_1000to1500_R17.txt";
-        //auto infilename = "list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2_v20_infileslist.txt";
-		//auto infilename = "list_files/kuntuple_QCDHT_Met75_R17_v20_infileslist.txt";
-        //auto infilename = "list_files/egammares_MetPD_MINIAOD_Run2017E_reso_plotfilelist.txt";
-        //auto infilename = "master_list_files/egammares_DEGPD_AOD_Run2017F_v2_304475_noCali_plotfilelist.txt";
-        //auto infilename = "master_list_files/egammares_EGMPD_MINIAOD_Run2018D_v2_327238_noCali_plotfilelist.txt";
-        //auto infilename = "master_list_files/egammares_JetMET1_MINIAOD_CCVal_v2_noCali_plotfilelist.txt";
         //auto infilename = "master_list_files/egammares_JetMET1_MINIAOD_r24fprompt_v2_noCali_plotfilelist.txt";
 		//auto infilename = "master_list_files/egammares_JetMET1_AOD_tevjets_v2_noCali_plotfilelist.txt";
-        auto infilename = "egammares_Run3Winter24MiniAOD_v2_noCali_plotfilelist.txt";
+        //auto infilename = "egammares_Run3Winter24MiniAOD_v2_noCali_plotfilelist.txt";
+        auto infilename = "egammares_EGamma_MINIAOD_Run3_plotfilelist.txt";
+
 
         //auto outfilename = "egammares_diag_23D_370496_370580_tt_exp3_v12_EB.root";
         //auto outfilename = "egammares_diag_winter24_DYto2L-4Jets_MLL-50_1J_v12_EB.root";
@@ -1518,7 +1511,8 @@ int main ( int argc, char *argv[] ){
     	//auto outfilename = "egammares_diag_miniaod_24f_CCHCALDIv3_gidgt1_kWDW_v21_diag.root";
         //auto outfilename = "egammares_diag_GJ_4Jets_Run3Winter24MiniAOD_gidgt1_kWDW_v21_diag.root";
         //auto outfilename = "egammares_diag_ECAL_CC_HCAL_DI-v3_v3_kWDW_v21_diag.root";
-        auto outfilename = "egammares_diag_R24F_EG1_Prompt_v2_kWDW_v21_diag.root";
+        //auto outfilename = "egammares_diag_Run2024F_EE_Prompt_v21_diag.root";
+        auto outfilename = "egammares_diag_ECAL_CC_v3_EE_Prompt_v21_diag.root";
 
         //auto fhtitle = "Run2024E 14_0_4 EB ";
 		//auto fhtitle = "Winter24 DY EB ";
@@ -1531,11 +1525,13 @@ int main ( int argc, char *argv[] ){
         //auto fhtitle = "JetMet1 TeVJets ";
         //auto fhtitle = "JetMet1 TeVJets kOOT gid1+ 10 ns ";
         //auto fhtitle = "GJ_4Jets Run3Winter24MiniAOD "; 
-        //auto fhtitle = "ECAL_CC_HCAL_DI-v3 ";
-        auto fhtitle = "R24F EG1 Prompt ";
+        auto fhtitle = "ECAL_CC_v3 EE Prompt";
+        //auto fhtitle = "R24F EE Prompt ";
+
+		int EBEE = 2; // EB 1, EE 2, EP 3, EM 4  
 
 		makehists base;				
-        base.llpgana_hist_maker( indir, infilename, outfilename, fhtitle );
+        base.llpgana_hist_maker( indir, infilename, outfilename, fhtitle, EBEE );
 
     //}//<<>>if( argc != 4 ) 
     return 1;

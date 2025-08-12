@@ -17,6 +17,8 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
     #dofit = False
     #sxtal = True
     sxtal = False
+    dostoch = True
+    #dostoch = False
     paramn = []
     parnerror = []
     paramc = []
@@ -72,10 +74,13 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',75,500,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',100,2250,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',25,300,2)
-        hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',10,400,2)
+        if not dostoch : hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',5,1200,2)
+        #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] ) )',5,800,2)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',25,250,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',75,375,3)
         #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',100,750,0,3)
+        #hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',5,800,3)
+        if dostoch : hfit = TF1('hfits','sqrt( ( ([0]*[0])/(x*x) )+( 2*[1]*[1] )+( ([2]*[2])/(x) ) )',5,1200,3) 
         #hfit = TF1('hfits','sqrt((([0]*[0])/(x*x))+(2*[1]*[1]))',6,100,2)
         hfit.SetParName(0,'N')
         hfit.SetParameter(0,40.0)
@@ -90,9 +95,9 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #hfit.SetParLimits(1,0.02,1.0)
         #hfit.SetParameter(1,0.05)
         #hfit.SetParLimits(1,0.001,1.0)
-        #hfit.SetParName(2,'S')
-        #hfit.SetParameter(2,5.0)
-        #hfit.SetParLimits(2,0.0,25.0)
+        if dostoch : hfit.SetParName(2,'S')
+        if dostoch : hfit.SetParameter(2,5.0)
+        if dostoch : hfit.SetParLimits(2,0.0,25.0)
 
     mg = TMultiGraph();
 
@@ -108,6 +113,7 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         f1.append(TFile.Open(infile))
         if tree == '' : hist = histname
         else : hist = tree+'/'+histname
+        print( "Opening: ", hist )        
  
         orighist = f1[n].Get(hist)
         #nbins = 15 #orighist.GetNbinsX()
@@ -200,7 +206,8 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         #k = [kBlue+4,kBlue+1,kGreen+4,kYellow+3,kAzure+4,kViolet+7,kOrange+7,kGreen+3]
         #k = [kViolet-1,kViolet-6,kSpring-1,kSpring-6]
         #k = [kSpring-7,kSpring+3,kAzure+3,kAzure-7]
-        k = [kAzure+2,kAzure-7,kSpring-7,kSpring+3]
+        #k = [kAzure+2,kAzure-7,kSpring-7,kSpring+3]
+        k = [kAzure+2,kSpring-7]
         #k = [kBlack]
         #k = [kGray+2,kGray+3,kGray+4,kBlack]
         #k = [kGreen+2,kBlue+2,kMagenta+2,kRed+2]
@@ -246,17 +253,17 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
         if dofit : 
                  paramn.append(str(abs(hfit.GetParameter(0))))
                  paramc.append(str(abs(hfit.GetParameter(1))))
-                 #params.append(str(abs(hfit.GetParameter(2))))
+                 if dostoch : params.append(str(abs(hfit.GetParameter(2))))
                  pne = hfit.GetParError(0)
                  pce = hfit.GetParError(1)
-                 #pse = hfit.GetParError(2)
+                 if dostoch : pse = hfit.GetParError(2)
                  print('Fit info',paramn[n],pne,paramc[n],pce)
                  #print('Fit info',paramn[n],pne,paramc[n],pce,params[n],pse)
                  if pne < 0.01 : pne = 0.01
                  if pce < 0.0001 : pce = 0.0001
                  parnerror.append(str(pne))
                  parcerror.append(str(pce))
-                 #parserror.append(str(pse))
+                 if dostoch : parserror.append(str(pse))
                  #print( 'C: ' + param + ' +/- ' + parerror )
                  #lat_param = '#color['+str(k[n])+']{N : ' + paramn[0:4] + ' #pm ' + parnerror[0:4] + ' [ns]  C : ' + paramc[0:6] + ' #pm ' + parcerror[0:6] + ' [ns]}'
                  #lat.SetTextSize(0.03);
@@ -308,8 +315,8 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
     #lat_title = 'Run2018D 1Tier miniAOD'
     lat_title = ptitle[1]+' (13.6 TeV)'
     #lat_title = ptitle[1]+' (13.8 TeV)'
-    lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + 2C^{2}'
-    #lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + #frac{S^{2}}{A_{eff}/#sigma_{n}} + 2C^{2}'
+    if not dostoch : lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + 2C^{2}'
+    if dostoch : lat_form = '#sigma^{2}_{i} = (#frac{N}{A_{eff}/#sigma_{n}})^{2} + #frac{S^{2}}{A_{eff}/#sigma_{n}} + 2C^{2}'
     #lat_form = '#sigma^{2}_{i} = (N/Eeff)^{2} + 2C^{2}'
     #lat.SetTextSize(0.045);
     #lat.SetTextFont(132);
@@ -324,10 +331,11 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
     #lat.SetTextFont(42);
     #lat.DrawLatex(0.58,0.9325,lat_title);
     lat.DrawLatex((0.828-t[2]),0.93,lat_title);
-    lat.SetTextSize(0.045);
+    #lat.SetTextSize(0.045);
+    lat.SetTextSize(0.03);
     lat.DrawLatex(t[0],t[1],ptitle[2]);
     if dofit : 
-        lat.SetTextSize(0.03);
+        lat.SetTextSize(0.045);
         lat.DrawLatex(t[3],t[4]+.08,lat_form);
         #lat.SetTextAlign(12)
         #lat.DrawLatex(.74,0.0325,layout['xtitle']);
@@ -335,8 +343,8 @@ def dostack( hist_list, outname, date, layout, ptitle, y, x, l, t ):
             #lat_param ='#color['+str(k[l])+']{N : '+paramn[l][0:4]+' #pm '+parnerror[l][0:4]+' [ns]  C : '+paramc[l][0:6]+' #pm '+parcerror[l][0:6]+' }'
             lat_param =	'#color['+str(k[l])+']{'
             lat_param = lat_param + 'N : '+paramn[l][0:4]+' #pm '+parnerror[l][0:3]+' [ns]   '
-            #lat_param = lat_param + 'S : '+params[l][0:3]+' #pm '+parserror[l][0:3]+' [ns]   '
-            lat_param = lat_param + 'C : '+paramc[l][0:6]+' #pm '+parcerror[l][0:6]+' [ns]}'
+            if dostoch : lat_param = lat_param + 'S : '+params[l][0:3]+' #pm '+parserror[l][0:3]+' [ns]   '
+            lat_param = lat_param + 'C : '+paramc[l][0:5]+' #pm '+parcerror[l][0:5]+' [ns]}'
             lat.SetTextSize(0.03);
             lat.DrawLatex(t[3],t[4]-l*.035,lat_param);
 
@@ -462,10 +470,43 @@ egres_24f_nc_sro_prmt = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_x
 egres_24f_nc_zee_ecal = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_resfit.root'
 egres_24f_nc_zee_prmt = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_resfit.root'
 
-sroe = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_sigma'
-srop = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
+sel = 'xgs'
+
+egres_24f_v2_sro_ecal = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fcc_' + sel + '_pm3b240_v508_resfit.root'
+egres_24f_v2_sro_prmt = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_' + sel + '_pm3b240_v508_resfit.root'
+
+sroe = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fcc_' + sel + '_pm3b240_v508_sigma'
+srop = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_' + sel + '_pm3b240_v508_sigma'
 zeee = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fval_xa_pm9b1800_v417_sigma'
 zeep = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
+
+hist = '_sigma'
+mdir = 'run3/'
+froot = '_resfit.root'
+sro25b = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg25b_xa_pm6b480_v519'
+zee25b = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg25b_xa_pm6b480_v519'
+sro25bc = 'ResMap_0_999999__SRO_Data_Hist_NoCali_deg25bc_xa_pm6b480_v616'
+
+sru24fEEf = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_eg24f_ee_xa_pm6b480_v808_resfit.root'
+sru24fEE = 'ResMap_0_999999__SRO_Data_Hist_NoCali_eg24f_ee_xa_pm6b480_v808_sigma'
+sru24fccEEf = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_eg24fcc_ee_xa_pm6b480_v808_resfit.root'
+sru24fccEE = 'ResMap_0_999999__SRO_Data_Hist_NoCali_eg24fcc_ee_xa_pm6b480_v808_sigma'
+
+sru25cv2f = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_eg25cv2_xa_pm6b480_v808_resfit.root'
+sru25cv2 = 'ResMap_0_999999__SRO_Data_Hist_NoCali_eg25cv2_xa_pm6b480_v808_sigma'
+zee25cv2f = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_eg25cv2_xa_pm6b480_v808_resfit.root'
+zee25cv2 = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_eg25cv2_xa_pm6b480_v808_sigma'
+
+sru24fccf = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_eg24fcc_xa_pm6b480_v808_resfit.root'
+sru24fcc = 'ResMap_0_999999__SRO_Data_Hist_NoCali_eg24fcc_xa_pm6b480_v808_sigma'
+zee24fccf = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_eg24fcc_xa_pm6b480_v808_resfit.root'
+zee24fcc = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_eg24fcc_xa_pm6b480_v808_sigma'
+
+sru25df = 'run3/ResMap_0_999999__SRO_Data_Hist_NoCali_eg25d_xa_pm6b480_v810_resfit.root'
+sru25d = 'ResMap_0_999999__SRO_Data_Hist_NoCali_eg24d_xa_pm6b480_v810_sigma'
+zee25df = 'run3/ResMap_0_999999__ZEE_Data_Hist_NoCali_eg25d_xa_pm6b480_v810_resfit.root'
+zee25d = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_eg24d_xa_pm6b480_v810_sigma'
+
 
 #
 #hl_r3_24C = [
@@ -486,6 +527,8 @@ zeep = 'ResMap_0_999999__ZEE_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417_sigma'
 #    ["ZEE_CC_Data_Hist_sigma","",egres_r3_23d_part_EG1_v12,"ZEE"],
 #]
 
+
+
 hl_r3_24d_part_rtvcc = [
     ["SRO_Data_Hist_sigma","",egres_r3_24_EG01_v12,"SRU RT"],
     ["ZEE_Data_Hist_sigma","",egres_r3_24_EG01_v12,"ZEE RT"],
@@ -493,25 +536,52 @@ hl_r3_24d_part_rtvcc = [
     ["ZEE_CC_Data_Hist_sigma","",egres_r3_24_EG01_v12,"ZEE CC"],
 ]
 
+hl_r3_24fcc = [
+    [sru24fcc,"",sru24fccf,"Same Read Out Unit"],
+    [zee24fcc,"",zee24fccf,"Z->e^{+}e^{-}"],
+]
+
 hl_r3_24f_rtvcc = [
     ["SRO_Data_Hist_sigma","",egres_24f_sro_prompt,"SRO RT"],
-    ["ZEE_Data_Hist_sigma","",egres_24f_zee_prompt,"ZEE RT"],
+    #["ZEE_Data_Hist_sigma","",egres_24f_zee_prompt,"ZEE RT"],
     ["SRO_Data_Hist_sigma","",egres_24f_sro_ecal,"SRO CC"],
-    ["ZEE_Data_Hist_sigma","",egres_24f_zee_ecal,"ZEE CC"],
+    #["ZEE_Data_Hist_sigma","",egres_24f_zee_ecal,"ZEE CC"],
+]
+
+hl_r3_25c2_prmt = [
+    [sru25cv2,"",sru25cv2f,"Same Read Out Unit"],
+    [zee25cv2,"",zee25cv2f,"Z->e^{+}e^{-}"],
+]
+
+hl_r3_25d_prmt = [
+    [sru25d,"",sru25df,"Same Read Out Unit"],
+    [zee25d,"",zee25df,"Z->e^{+}e^{-}"],
 ]
 
 hl_r3_24f_nc_rtvcc = [
-    [srop,"",egres_24f_nc_sro_prmt,"Ratio Same Read Out Unit"],
+    [srop,"",egres_24f_v2_sro_prmt,"Ratio Same Read Out Unit"],
     #[zeep,"",egres_24f_nc_zee_prmt,"Ratio Z->e^{+}e^{-}"],
-    [sroe,"",egres_24f_nc_sro_ecal,"CC Same Read Out Unit"],
+    [sroe,"",egres_24f_v2_sro_ecal,"CC Same Read Out Unit"],
     #[zeee,"",egres_24f_nc_zee_ecal,"CC Z->e^{+}e^{-}"],
 ]
 
+hl_r3_24f_EE_rtvcc = [
+    [sru24fEE,"",sru24fEEf,"Ratio Same Read Out Unit"],
+    [sru24fccEE,"",sru24fccEEf,"CC Same Read Out Unit"],
+]
+
 hl_r3_24f_rtvcc = [
-    [srop,"",egres_24f_sro_prmt,"Ratio Same Read Out Unit"],
-    [zeep,"",egres_24f_zee_prmt,"Ratio Z->e^{+}e^{-}"],
-    [sroe,"",egres_24f_sro_ecal,"CC Same Read Out Unit"],
-    [zeee,"",egres_24f_zee_ecal,"CC Z->e^{+}e^{-}"],
+    #[srop,"",egres_24f_sro_prmt,"Ratio Same Read Out Unit"],
+    #[zeep,"",egres_24f_zee_prmt,"Ratio Z->e^{+}e^{-}"],
+    #[sroe,"",egres_24f_sro_ecal,"CC Same Read Out Unit"],
+    #[zeee,"",egres_24f_zee_ecal,"CC Z->e^{+}e^{-}"],
+    [sru24fcc,"",sru24fccf,"Same Read Out Unit"],
+    [zee24fcc,"",zee24fccf,"Z->e^{+}e^{-}"],
+]
+
+hl_r3_25b = [
+    [sro25bc+hist,"",mdir+sro25bc+froot,"Same Read Out Unit"],
+    [zee25b+hist,"",mdir+zee25b+froot,"Z->e^{+}e^{-}"],
 ]
 
 #
@@ -528,25 +598,37 @@ hl_r3_24f_rtvcc = [
 #ptitle_cc=[' 2024D 370293-370580','','#splitline{CC timing}{EBEB CCGT}'] #{GT 106X_dataRun2_v28}'
 #ptitle=[' 370293-370580','','#splitline{EBEB}{Run 2024D}'] #{GT 106X_dataRun2_v28}'
 #ptitle=[' 382229-383797','','#splitline{EBEB}{}'] #{GT 106X_dataRun2_v28}'
-ptitle=['','0.XX fb^{-1} ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'
-#
+ptitle=['','23.8 fb^{-1}, 2024 ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}' 
+#ptitle=['','12.0 fb^{-1}, 2025 ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'
+#ptitle=[' 391548-392524','','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'
+#ptitle=['','23.8 fb^{-1}, 2024 ','#splitline{}{ECAL EndCaps Cross Correlation Time Reconstuction}'] #{GT 106X_dataRun2_v28}' 
+#ptitle=['','32.3 fb^{-1}, 2025 ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'R25C
+#ptitle=['','? fb^{-1}, 2025D ','#splitline{}{ECAL Barrel}'] #{GT 106X_dataRun2_v28}'R25D
 
 #y = [ 0.4, 0.04 ]
-y = [ 2, 0.04 ]
-#x = [ 50.0, 1200.0 ]
-x = [ 10.0, 1200.0 ]
+y = [ 2, 0.05 ]
+#y = [ 5, 0.01 ]
+x = [ 5.0, 1200.0 ]
+#x = [ 5.0, 800.0 ]
 l = [ 0.6,0.65,0.925,0.9 ]
-t = [0.175,0.44,0.15,0.175,0.28]
+#t = [0.175,0.44,0.15,0.175,0.28]
+#t = [0.175,0.38,0.05,0.175,0.22]
+t = [0.175,0.38,0.23,0.175,0.22]#adjsuting lumi-sqrt(s) in title bar
 ##outname = 'downloads/tr_hl_r3_24c_gold_v7'
 ##outname = 'downloads/tr_hl_r3_24e_test_v7'
 #outname = 'downloads/tr_hl_r3_24d_part_ccgt_v7'
 #outname_cc = 'downloads/tr_hl_r3_24d_part_ccgt_v7_cc'
 #outname = 'downloads/tr_hl_r3_24d_part_trvcc_ccgt_v7'
-outname = 'downloads/tr_hl_r3_24f_nc_rtvcc_v1'
+#outname = 'downloads/tr_hl_r3_25c2'
+#outname = 'downloads/tr_hl_r3_25bc_xa'
+outname = 'downloads/tr_hl_r3_24fcc'
 #dostack(hl_r3_24d_part, outname, date, Ic_layout, ptitle,  y, x, l, t)
 #dostack(hl_r3_24d_part_cc, outname_cc, date, Ic_layout, ptitle_cc,  y, x, l, t)
-dostack(hl_r3_24f_nc_rtvcc, outname, date, Ic_layout, ptitle,  y, x, l, t)
-
+dostack(hl_r3_24f_EE_rtvcc, outname, date, Ic_layout, ptitle,  y, x, l, t)
+#dostack(hl_r3_25b, outname, date, Ic_layout, ptitle,  y, x, l, t)
+#dostack(hl_r3_24f_EE_rtvcc, outname, date, Ic_layout, ptitle,  y, x, l, t)
+#dostack(hl_r3_25c2_prmt, outname, date, Ic_layout, ptitle,  y, x, l, t)
+#dostack(hl_r3_25d_prmt, outname, date, Ic_layout, ptitle,  y, x, l, t)
 
 #
 ##---------------------------------------------------------------
