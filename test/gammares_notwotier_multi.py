@@ -14,9 +14,9 @@ options = VarParsing('python')
 #options.register('globalTag','94X_mc2017_realistic_v11',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag toe used');
 #options.register('globalTag','106X_dataRun2_v36',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 #options.register('globalTag','94X_dataRun2_ReReco_EOY17_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tae used');
-options.register('globalTag','140X_dataRun3_Prompt_v3',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
+#options.register('globalTag','140X_dataRun3_Prompt_v3',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 #options.register('globalTag','141X_dataRun3_HLT_frozen_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
-
+options.register('globalTag','150X_dataRun3_Prompt_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
