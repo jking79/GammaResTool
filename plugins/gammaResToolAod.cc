@@ -76,7 +76,7 @@ GammaResToolAod::GammaResToolAod(const edm::ParameterSet& iConfig) :
 // -- end of tag declarations ---------------------------------------
 { //<<<< GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 
-	usesResource();
+	//usesResource();
 	usesResource("TFileService");
 
 // -- consume tags ------------------------------------------------------------

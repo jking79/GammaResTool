@@ -22,8 +22,8 @@
 #include "gammaResTool.hh"
 using namespace std;
 
-//#define DEBUG true
-#define DEBUG false
+#define DEBUG true
+//#define DEBUG false
 
 //
 // constructors and destructor
@@ -76,7 +76,7 @@ GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 // -- end of tag declarations ---------------------------------------
 { //<<<< GammaResTool::GammaResTool(const edm::ParameterSet& iConfig) :
 
-	usesResource();
+	//usesResource();
 	usesResource("TFileService");
 
 // -- consume tags ------------------------------------------------------------
@@ -862,8 +862,12 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		if( nLocRHCands > 2 ){
 			int lead(0);
 			for( int next(2); next < nLocRHCands; next+=2 ){
-				auto leadE = miniRhEnergy[getRhIdx(locRHCands[lead],miniRhId)];
-				auto nextRhE = miniRhEnergy[getRhIdx(locRHCands[next],miniRhId)];
+				int leadRhId = getRhIdx(locRHCands[lead],miniRhId);
+				if( leadRhId < 0 ) continue;
+				auto leadE = miniRhEnergy[leadRhId];
+				int nextRhId = getRhIdx(locRHCands[next],miniRhId);
+                if( nextRhId < 0 ) continue;
+				auto nextRhE = miniRhEnergy[nextRhId];
 				if( nextRhE > leadE ) lead = next;
 			}//<<>>for( int it(0); it+1 < nLocRHCands; it += 2; )
 			locSeedRHs[0] = locRHCands[lead];
@@ -905,6 +909,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		bool goodrh = locRHCands[it] > 0;
 		auto idx1 = goodrh ? getRhIdx(locRHCands[it],miniRhId) : 0;
 		auto idx2 = goodrh ? getRhIdx(locRHCands[it+1],miniRhId) : 0;
+		if( idx1 < 0 || idx2 < 0 ) continue;
         res1RhID.push_back( goodrh ? locRHCands[it] : 0 );
         res1Amp.push_back( goodrh ? miniRhAmp[idx1] : -999 );
         res1E.push_back( goodrh ? miniRhEnergy[idx1] : -999 );
@@ -940,6 +945,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
         bool goodrh = gloAllSeedRHs[it] > 0;
         auto idx1 = goodrh ? getRhIdx(gloAllSeedRHs[it],miniRhId) : 0;
         auto idx2 = goodrh ? getRhIdx(gloAllSeedRHs[it+1],miniRhId) : 0;
+        if( idx1 < 0 || idx2 < 0 ) continue;
         resZ1RhID.push_back( goodrh ? gloAllSeedRHs[it] : 0 );
         resZ1Amp.push_back( goodrh ? miniRhAmp[idx1] : -999 );
         resZ1E.push_back( goodrh ? miniRhEnergy[idx1] : -999 );
@@ -974,6 +980,7 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		auto goodrh = lgRhId > 0;
 		if( goodrh ) hasResRHs = true;
         auto idx = goodrh ? getRhIdx(lgRhId,miniRhId) : 0;
+		if( idx < 0 ) continue;
         if( DEBUG ) std::cout << " - Storing : " << " id: " << lgRhId << " idx: " << idx << std::endl;
 		resRhID.push_back( goodrh ? lgRhId : 0 );
 		resAmp.push_back( goodrh ? miniRhAmp[idx] : -999 );

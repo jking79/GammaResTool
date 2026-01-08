@@ -16,13 +16,13 @@ options.register('globalTag','106X_dataRun2_v36',VarParsing.multiplicity.singlet
 #options.register('globalTag','94X_dataRun2_ReReco_EOY17_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tae used');
 #options.register('globalTag','140X_dataRun3_Prompt_v3',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 #options.register('globalTag','141X_dataRun3_HLT_frozen_v2',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
-
+options.register('globalTag','150X_dataRun3_Prompt_v1',VarParsing.multiplicity.singleton,VarParsing.varType.string,'gloabl tag used');
 ## processName
 options.register('processName','TREE',VarParsing.multiplicity.singleton,VarParsing.varType.string,'process name to be considered');
 
 ## outputFile Name
 #options.register('outputFileName','ku_QCD_AOD_diag_140_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name created by cmsRun');
-options.register('outputFileName','ku_Met_17D_MiniAOD_diag_140_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name in cmsRun');
+options.register('outputFileName','ku_MiniAOD_diag_gammares_v12.root',VarParsing.multiplicity.singleton,VarParsing.varType.string,'output file name in cmsRun');
 
 options.register('doTwoTier',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to do twotier processing');
 options.register('doDiag',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to store diagnostic info');
@@ -71,8 +71,13 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(#'file:jwk_reco_data_DIGI2RAW.root'),
 
+
+        #fialed
+        'root://eoscms.cern.ch//eos/cms/store/data/Run2025E/EGamma2/MINIAOD/PromptReco-v1/000/396/127/00000/f8ab6311-bd7c-497c-8ca4-da9d998ec5cb.root',
+        #'root://cms-xrd-global.cern.ch/store/data/Run2025E/EGamma2/MINIAOD/PromptReco-v1/000/396/127/00000/f8ab6311-bd7c-497c-8ca4-da9d998ec5cb.root',
+
         #'root://cms-xrd-global.cern.ch//store/data/Run2025B/EGamma3/MINIAOD/PromptReco-v1/000/391/560/00000/0f9e2cd3-a24a-4b9f-81ae-931be29150dd.root',
-        'root://cms-xrd-global.cern.ch//store/data/Run2018C/EGamma/MINIAOD/15Feb2022_UL2018-v1/2820000/B178675B-F889-9A4B-834D-784787CC9E32.root',
+        #'root://cms-xrd-global.cern.ch//store/data/Run2018C/EGamma/MINIAOD/15Feb2022_UL2018-v1/2820000/B178675B-F889-9A4B-834D-784787CC9E32.root',
 
         #'root://cms-xrd-global.cern.ch//store/mc/Run3Winter24MiniAOD/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/MINIAODSIM/133X_mcRun3_2024_realistic_v10-v2/2830000/000a0b08-4970-4a08-bbd1-69c4ae918e66.root',
         #'file:967aebe0-e567-4139-9f91-d9e67f6b2ace.root'
@@ -110,11 +115,11 @@ process.source = cms.Source("PoolSource",
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 #process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100000))
 
-#process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 
 # Set the global tag depending on the sample type
 from Configuration.AlCa.GlobalTag import GlobalTag
