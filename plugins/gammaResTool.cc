@@ -276,11 +276,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 // -- Process gedPhotons
     if( DEBUG ) std::cout << "Processing " << gedPhotons_->size() << " gedPhotons" << std::endl;
 	//string phoMvaWp80("mvaPhoID-RunIIFall17-v1-wp80");//2018
-	string phoCutLoose("cutBasedPhotonID-RunIIIWinter22-122X-V1-loose");//2024
+	//string phoCutLoose("cutBasedPhotonID-RunIIIWinter22-122X-V1-loose");//2024
     //string phoMvaWp80("mvaPhoID-RunIIFall17-v2-wp80");//r3
     //string phoCutTight("cutBasedPhotonID-Fall17-94X-V2-tight");//2022
     //string phoCutLoose("cutBasedPhotonID-Fall17-94X-V2-loose");//2022
-    //string phoCutLoose("cutBasedPhotonID-Fall17-94X-V1-loose");//2018
+    string phoCutLoose("cutBasedPhotonID-Fall17-94X-V1-loose");//2018
 	float phoMinPt = 5.0;
 	float phoMinSeedTime = -25.0;
 	phoColPt.clear();
@@ -353,11 +353,11 @@ void GammaResTool::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     //std::vector<pat::Electron> gloPhotons;
     if( DEBUG ) std::cout << "Processing Electrons" << std::endl;
     //string eleMvaWp80("mvaEleID-Fall17-noIso-V2-wp80");
-	string eleCutLoose("cutBasedElectronID-RunIIIWinter22-V1-loose");//2024
+	//string eleCutLoose("cutBasedElectronID-RunIIIWinter22-V1-loose");//2024
     //string eleMvaWpLoose("mvaEleID-Fall17-noIso-V2-wpLoose");//r3
     //string eleCutTight("cutBasedElectronID-Fall17-94X-V2-tight");
     //string eleCutLoose("cutBasedElectronID-Fall17-94X-V2-loose");//2022
-    //string eleCutLoose("cutBasedElectronID-Fall17-94X-V1-loose");//2018
+    string eleCutLoose("cutBasedElectronID-Fall17-94X-V1-loose");//2018
 	for( const auto & electron : *electrons_ ){
 
         auto passIdCut = electron.electronID(eleCutLoose);

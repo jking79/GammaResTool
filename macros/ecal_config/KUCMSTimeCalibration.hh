@@ -7,9 +7,17 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "KUCMSHelperBaseClass.hh"
 #include "KUCMSRootHelperBaseClass.hh"
+#include "KUCMSEcalDetIDFunctions.hh"
+#include "KUCMSCaliRunClass.hh"
+#include "KUCMSTimeCaliStructs.hh"
+#include "KUCMSProfileTimeFit.hh"
+
 #include <TRandom.h>
 #include "TChain.h"
+#include "TGraphErrors.h"
+#include "TMultiGraph.h"
 
 #ifndef KUCMSTimeCalibrationClass
 #define KUCMSTimeCalibrationClass
@@ -32,355 +40,6 @@
 //  	rhid_info_list.txt 
 //
 /////////////////////////////////////////////////////////////////////////////////////////
-
-struct DetIDStruct {
-
-    DetIDStruct(){}
-    DetIDStruct( const int ni1, const int ni2, const int nTT, const int & necal, const float nphi, const float neta )
-        : i1(ni1), i2(ni2), TT(nTT), ecal(necal), phi(nphi), eta(neta) {}
-
-    int i1; // EB: iphi, EE: ix
-    int i2; // EB: ieta, EE: iy
-    int TT; // trigger tower
-    int ecal; // EB, EM, EP
-    float phi; // xtal phi
-    float eta; // xtal eta
-
-};//<<>>struct DetIDStruct
-
-//---------------------------------------------------------------------------------------------------------------------
-
-struct lumiRunStruct {
-
-    lumiRunStruct(){}
-    lumiRunStruct( int trun, int tfill, float tlumi )
-        : run(trun), fill(tfill), lumi(tlumi) {}
-
-    int run;
-    int fill;
-    float lumi;
-
-};//<<>>lumiRunStruct
-
-//---------------------------------------------------------------------------------------------------------------------
-
-struct smearTagStruct {
-
-    smearTagStruct(){}
-    smearTagStruct( float tnoise, float tstoch, float tstant )
-        : noise(tnoise), stoch(tstoch), stant(tstant) {}
-
-    float noise;
-    float stoch;
-    float stant;
-
-};//<<>>smearTagStruct
-
-//---------------------------------------------------------------------------------------------------------------------
-
-struct caliHistStruct {
-    
-    caliHistStruct(){}
-    caliHistStruct( TH2F* thist, std::string histname, bool isnew, bool reshist )
-        : h2f(thist), histName(histname), isNew(isnew), isResHist(reshist) { h1f = NULL; }
-    caliHistStruct( TH1F* thist, std::string histname, bool isnew, bool reshist )
-        : h1f(thist), histName(histname), isNew(isnew), isResHist(reshist) { h2f = NULL; }
-
-    TH2F* h2f;
-    TH1F* h1f;
-    std::string histName;
-	bool isNew;
-	bool isResHist;
-
-};//<<>>struct caliHistStruct
-
-//------------------------------------------------------------------------------------------------------------
-
-struct sumCnt {
-
-    sumCnt(){}
-	sumCnt( float s, float s2, int c ) : sum(s), sumsqr(s2), cnt(c) {} 
-
-    float sum;
-    float sumsqr;
-	int cnt;
-
-};//<<>>struct sumCnt
-
-class CaliRunClass : public KUCMSRootHelperBaseClass {
-    
-	public: 
-
-    CaliRunClass(){}
-    CaliRunClass( std::string tmpxtalmap, int tstart, int tend, int last, float tlumi );
-	//~CaliRunClass(); 
- 
-    std::string histMapName; 
-    int startRun;
-    int endRun; 
-    int lastRun;
-    float lumi;
-
-    float noise;
-    float stoch;
-    float stant;
-
-	bool isNew;
-	bool updated;
-	bool has2DResMap;
-	bool hasResParams;
-	bool isExternal;
-
-    std::map<uInt,sumCnt> sumCntMap;
-    std::map<uInt,float> meanMap;
-    std::map<uInt,float> errMap;
-	std::map<uInt,TH1F*> detIdHists;
-	//detIdHists[cmsswId] = new TH1F(histname.c_str(),"AveXtalTimeDist;XtalTime [ns]",500,-5,5);	
-
-	void fillSumCnt( uInt detID, float val, int cnt = 1 );
-	void makeMeanMap( bool filter = false );
-
-};//<<>>TimeCaliTagStruct
-
-inline CaliRunClass::CaliRunClass( std::string tmpxtalmap, int tstart, int tend, int last, float tlumi )
-	: histMapName(tmpxtalmap), startRun(tstart), endRun(tend), lastRun(last), lumi(tlumi) 
-	{ isNew = true; isExternal = false; updated = false; has2DResMap = false; hasResParams = false; noise = 0; stoch = 0; stant = 0; }
-
-inline void CaliRunClass::makeMeanMap( bool filter ){
-
-	meanMap.clear();
-	errMap.clear();
-	//std::cout << " make mean maps: " << std::endl;
-	for( auto& entry : sumCntMap ){
-
-		float cnt = float( entry.second.cnt );
-		if( cnt == 0 ) cnt = 1;
-		float mean = entry.second.sum / cnt; 
-		float err = sqrt( (entry.second.sumsqr/cnt - mean*mean)/cnt );
-		if( err == 0 ){ err = 9; mean = 0; }
-		//std::cout << " - calc: " << entry.first << " = " << mean << " +/- " << err << " occ: " << cnt << std::endl;
-		if( filter && cnt > 100 ){
-			auto fitFunc  = new TF1("gfit","gaus",-3.0,3.0);
-			auto thefit = detIdHists[entry.first]->Fit("gfit","QNRL");
-			float fmean = fitFunc->GetParameter(1);
-			float ferr = fitFunc->GetParError(1);
-			//std::cout << " --- fit: result " << thefit << " mean " << fmean << " +/- " << ferr << std::endl;
-			if( thefit != 4 && ferr != 0 && ferr < err ){ mean = fmean; err = ferr; }
-			delete fitFunc;
-		}//<<>>if( filter )
-		delete detIdHists[entry.first];
-		meanMap[entry.first] = mean;
-        errMap[entry.first] = err; 
-		//std::cout << " - mmm: " << entry.first << " = " << mean << " +/- " << err << " occ: " << cnt << std::endl;
-	}//<<>>for( auto& entry : sumCntMap )
-
-}//<<>>void CaliRunClass::makeMeanMap()
-
-inline void CaliRunClass::fillSumCnt( uInt detid, float val, int cnt ){
-
-	if( endRun == lastRun ) return;
-	//std::cout << "Filling " << detid << " with " << val << " " << cnt << std::endl;
-	updated = true;
-	if( sumCntMap.find(detid) != sumCntMap.end() ){ 
-		sumCntMap[detid].sum += val;
-        sumCntMap[detid].sumsqr += val*val; 
-		sumCntMap[detid].cnt += cnt; 
-	} else {
-		sumCntMap[detid] = { val, val*val, cnt }; 
-	}//<<>>if( sumCntMap.find(detid) != sumCntMap.end() )
-
-	if( detIdHists.find(detid) != detIdHists.end() ){ detIdHists[detid]->Fill(val); } //std::cout << " -- hist Fill " << detid << " with " << val << std::endl; }
-	else {
-		//std::cout << " -- hist Make " << detid << " with " << val << std::endl;
-		std::string histname = histMapName + "_SumCntHist_" + std::to_string( startRun ) + "_" + std::to_string(detid) ;
-		detIdHists[detid] = new TH1F(histname.c_str(),"AveXtalTimeDist;XtalTime [ns]",200,-5,5);
-		detIdHists[detid]->Sumw2();
-		detIdHists[detid]->Fill(val);
-	}//<<>>if( detIdHists.find(detid) != detIdHists.end() )
-
-}//<<>>void CaliRunClass::fillSumCnt( uInt detID, float sum, int cnt )
-
-//-------------------------------------------------------------------------------------------------------------
-
-// fit result struct
-struct TimeFitResult {
-
-    float mu;
-    float emu;
-    float chi2ndf;
-    float chi2prob;
-    float sigma;
-    float sigmaHigh;
-    float sigmaLow;
-    float esigma;
-    float occ;
-    float rms;
-    float std;
-
-};//<<>>struct TimeFitResult
-
-struct SigmaFitResult {
-
-    float noise;//noise
-    float enoise;
-    float stant;//constant
-    float estant;
-    float stoch;//stochastic
-    float estoch;
-
-};//<<>>struct SigmaFitResult
-
-class ProfileTimeFit {
-
-	public:
-	
-	ProfileTimeFit(){ profileHist = NULL; form = NULL; fit = NULL; };
-  	ProfileTimeFit( TH1F* hist ) : profileHist(hist) { form = NULL; fit = NULL; };
-	//~ProfileTimeFit(){ if( profileHist ) delete profileHist; if( form ) delete form; if( fit ) delete fit; };  
-
-  	// internal data members
-  	TH1F* profileHist;
-  	TFormula* form;
-  	TF1* fit;
-    TF1* fitHigh;
-    TF1* fitLow;
-	TimeFitResult results;
-
-    // helper functions for making fits to variables
-    //bool isEmpty(){ std::cout << " -- ?  is empty " << profileHist << std::endl; return ( profileHist ) ? profileHist->GetEntries() == 0 : true; };
-    void DoFit();
-    TimeFitResult GetFitResult(){ return results; };
-	void deleteHists(){ if( profileHist ) delete profileHist; if( form ) delete form; if( fit ) delete fit; };
-
-};//<<>>class ProfileTimeFit
-
-inline void ProfileTimeFit::DoFit(){
-
-	std::cout << " -- ProfileTimeFit DoFit " << std::endl;
-	//if( isEmpty() ){ std::cout << " --- No such profile hist !!!!!!! " << std::endl; return; }
-	//std::cout << " -- yes profile exists " << std::endl;
-
-  	float Sqrt2PI   = 2.506628274631001f;
-
-  	// set tmp init vals
-  	auto hsum = profileHist->Integral();
-	if( hsum == 0 ){
-		std::cout << " -- !!!!!! Intergral is Zero !!!!!!!! " << std::endl;
-    	results.mu = 0;
-    	results.emu = 0;
-    	results.chi2ndf = 0;
-    	results.chi2prob = 0;
-    	results.sigma = 10;
-    	results.sigmaHigh = 0;
-    	results.sigmaLow = 0;
-    	results.esigma = 10;
-    	results.occ = 0;
-    	results.rms = 0;
-    	results.std = 0;
-		return;
-	}//<<>>if( hsum == 0 )
-
-  	float mu = profileHist->GetMean();
-  	float sigma = profileHist->GetStdDev();
-  	float rms = profileHist->GetRMS();
-    //std::cout << " -- getting intgral, mean, std 5" << std::endl;
-  	//float norm = hsum/(sigma*Sqrt2PI);
-    float norm = profileHist->GetBinContent(profileHist->GetMaximumBin());
-    std::cout << " -- Params: sum " << hsum << " mu " << mu << " s " << sigma << " rms " << rms << " norm " << norm << std::endl;
-
-    std::cout << " -- setting paramters " << std::endl;
-  	// range vars   ? names ?
-  	//float sigrange = 2.0;
-  	float lowerBound = mu - 2*sigma;
-  	float upperBound = mu + 2*sigma;
-	float lowerHBound = mu - 4*sigma;
-    float upperHBound = mu + 4*sigma;
-    float lowerLBound = mu - 1*sigma;
-    float upperLBound = mu + 1*sigma;
-
-  	// names for fits and formulas
-  	std::string histname = profileHist->GetName();
-  	std::string formname = histname+"_formula";
-  	std::string fitname  = histname+"_fit";
-    std::string fitnameH  = histname+"_fitHigh";
-    std::string fitnameL  = histname+"_fitLow";
-
-    //if( lowerBound < -1.0 ) lowerBound = -0.5;
-    //if( upperBound > 1.0 ) upperBound = 0.5;
-    //if( abs(mu) > 0.03 ) mu = -0.02;
-    //if( sigma > 1  ) sigma = 0.3;
-
-    std::cout << " -- setting form and fit " << std::endl;
-    form = new TFormula(formname.c_str(),"[0]*exp(-0.5*((x-[1])/[2])**2)");
-    fit  = new TF1(fitname.c_str(),form->GetName(),lowerBound,upperBound);
-    fitHigh  = new TF1(fitnameH.c_str(),form->GetName(),lowerHBound,upperHBound);
-    fitLow  = new TF1(fitnameL.c_str(),form->GetName(),lowerLBound,upperLBound);
-
-    fit->SetParName(0,"N");      
-	fit->SetParameter(0,norm); 
-	fit->SetParLimits(0,norm/10,norm*10);
-    fit->SetParName(1,"#mu");    
-	fit->SetParameter(1,mu); 
-	//fit->SetParLimits(1,-0.03,0.03);
-    fit->SetParLimits(1,lowerBound,upperBound);
-    fit->SetParName(2,"#sigma"); 
-	fit->SetParameter(2,sigma); 
-	//fit->SetParLimits(2,0,1);
-    fit->SetParLimits(2,sigma/10,sigma*10);
-
-    fitHigh->SetParName(0,"N");
-    fitHigh->SetParameter(0,norm);
-    fitHigh->SetParLimits(0,norm/10,norm*10);
-    fitHigh->SetParName(1,"#mu");
-    fitHigh->SetParameter(1,mu);
-    //fitHigh->SetParLimits(1,-0.03,0.03);
-    fitHigh->SetParLimits(1,lowerHBound,upperHBound);
-    fitHigh->SetParName(2,"#sigma");
-    fitHigh->SetParameter(2,sigma);
-    //fitHigh->SetParLimits(2,0,1);
-    fitHigh->SetParLimits(2,sigma/10,sigma*10);
-
-    fitLow->SetParName(0,"N");
-    fitLow->SetParameter(0,norm);
-    fitLow->SetParLimits(0,norm/10,norm*10);
-    fitLow->SetParName(1,"#mu");
-    fitLow->SetParameter(1,mu);
-    //fitLow->SetParLimits(1,-0.03,0.03);
-    fitLow->SetParLimits(1,lowerLBound,upperLBound);
-    fitLow->SetParName(2,"#sigma");
-    fitLow->SetParameter(2,sigma);
-    //fitLow->SetParLimits(2,0,1);
-    fitLow->SetParLimits(2,sigma/10,sigma*10);
-
-    std::cout << " - Fit > Mu: " << mu << " ( " << lowerBound << " to " << upperBound << " )";
-    std::cout << " Norm: " << norm << "( " << norm/10 << " to " << norm*10 << " )";
-    std::cout  << " Sigma: " << sigma << "( " << sigma/10 << " to " << sigma*10 << " )" << std::endl;
-
-    std::cout << " -- fiting " << std::endl;
-  	profileHist->Fit(fit->GetName(),"RBQO");
-    profileHist->Fit(fitHigh->GetName(),"RBQO");
-    profileHist->Fit(fitLow->GetName(),"RBQO");
-
-    std::cout << " -- setting results " << std::endl;
-    results.mu = fit->GetParameter(1);
-    results.emu = fit->GetParError (1);
-    results.chi2ndf = fit->GetChisquare();
-    results.chi2prob = fit->GetProb();
-    results.sigma = fit->GetParameter(2);
-    results.sigmaHigh = fitHigh->GetParameter(2);
-    results.sigmaLow = fitLow->GetParameter(2);
-    results.esigma = fit->GetParError (2);
-    results.occ = hsum;
-    results.rms = rms;
-    results.std = sigma;
-
-    std::cout << " - Fit Sigma: " << results.sigma << " +/- " << results.esigma;
-    std::cout << " ( low " << results.sigmaLow << " high " << results.sigmaHigh << " ) " << std::endl;
-
-}//<<>>void ProfileTimeFit::DoFit()
-
-//-----------------------------------------------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------------------------------------------
 
 class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 
@@ -537,7 +196,8 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
     void makeSmearTag( std::string sourceName, std::string destName, std::string smearTag );
 
 	void plotMeanRunTimeEGR( std::string inputFileName, int srun, int erun, bool usecali = true );
-    void makeTTDiffMaps();
+    void makeTTDiffMaps( int srun, int erun );
+    void makeTTDriftMaps( std::string tag, int srun, int erun );
 
 	void setUseEffEnergy( bool setting ){ useEffEnergy = setting; };
 	void setLowEnergy( bool setting ){ lowEnergy = setting; }; 
@@ -548,6 +208,7 @@ class KUCMSTimeCalibration : public KUCMSRootHelperBaseClass {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //  Class Object code  --  yes yes this is easier for me, im weird, will divide into hh/cc at end 
+//  		--  i lied : leaving it all in one file - kinda of
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline KUCMSTimeCalibration::KUCMSTimeCalibration( bool stayOpen, bool makeNew ){
@@ -622,14 +283,6 @@ inline KUCMSTimeCalibration::~KUCMSTimeCalibration(){
     std::cout << "Wrapping KUCMSTimeCalibrationClass" << std::endl;
 
     delete getRandom;
-
-
-	//LoadCaliHists(true);
-	//makeCaliHists();
-	//SaveCaliHists();
-
-    //SaveCaliRunFile();
-    //SaveTTRunFile();
 
     //std::cout << "Finished Wrapping KUCMSTimeCalibrationClass" << std::endl;
 
@@ -2190,9 +1843,6 @@ inline void KUCMSTimeCalibration::plot2dResbyIovForEGR( std::string inputFileNam
 /*
 
 inline int KUCMSTimeCalibration::getGainId( unsigned int rhID ){
-
-
-
 }
 */
 
@@ -2206,6 +1856,8 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
     //bool debug = true;
     bool small = false;
     //bool small = true;
+    //bool doEE = true;
+	bool doEE = false;
 
     const std::string treename("tree/llpgtree");
 
@@ -2488,6 +2140,10 @@ inline void KUCMSTimeCalibration::plot2dResolutionEGR( std::string inputFileName
                                 }//<<>>if( useGSwitch )
                                 bool leta_cut = (idinfoL0.ecal == ECAL::EB)&&(idinfoL1.ecal == ECAL::EB);
                                 bool geta_cut = (idinfoG0.ecal == ECAL::EB)&&(idinfoG1.ecal == ECAL::EB);
+								if( doEE ){
+                                	leta_cut = (idinfoL0.ecal != ECAL::EB)&&(idinfoL1.ecal != ECAL::EB);
+                                	geta_cut = (idinfoG0.ecal != ECAL::EB)&&(idinfoG1.ecal != ECAL::EB);
+								}//<<>>if( doEE )
                                 bool goodLocTime = (*resRtTime)[0] != 0 && (*resRtTime)[1] != 0 && (*resRtTime)[0] != (*resRtTime)[1];
                                 bool goodGloTime = (*resRtTime)[2] != 0 && (*resRtTime)[3] != 0 && (*resRtTime)[2] != (*resRtTime)[3];
                                 bool goodLocRHs = (*resRhID)[0] != 0 && (*resRhID)[1] != 0;
@@ -3125,7 +2781,7 @@ inline void KUCMSTimeCalibration::plotMeanRunTimeEGR( std::string inputFileName,
 
 }//<<>> void plotMeanRunTimeEGR( std::string indir, std::string infilelistname, 
 
-inline void KUCMSTimeCalibration::makeTTDiffMaps(){
+inline void KUCMSTimeCalibration::makeTTDiffMaps( int srun, int erun ){
 
     std::cout << " - Making TTCaliDiffMaps " << std::endl;
     //TH2F* hist = new TH2F(filename.c_str(),filename.c_str(),34,0,34,72,0,72);
@@ -3142,6 +2798,7 @@ inline void KUCMSTimeCalibration::makeTTDiffMaps(){
 				firstname = calirunsct.second.histMapName;
 				continue; 
 			}
+			if( first < srun || first > erun ) continue;
             //std::string tfilename = calirunsct.second.histMapName + "_" + std::to_string( calirunsct.first ) + ttHistMapName;
             std::string tfilename = calirunsct.second.histMapName;
             //std::cout << " -- opening : " << tfilename << std::endl;
@@ -3181,6 +2838,138 @@ inline void KUCMSTimeCalibration::makeTTDiffMaps(){
     }//<<>>for( auto& calirunmap : CaliRunMapSet )
 
 }//<<>>void KUCMSTimeCalibration::makeTTDiffMaps()
+
+inline void KUCMSTimeCalibration::makeTTDriftMaps( std::string tag, int srun, int erun ){
+
+    std::cout << " - Making makeTTDriftMaps " << std::endl;
+	if( erun < srun ){ std::cout << " --- End Run less then Start Run : Exiting " << std::endl; return; }
+	if( not ( TTCaliRunMapSet.find(tag) == TTCaliRunMapSet.end() ) ){
+
+		std::cout << " -- Initing TH1F and TGraphErrors " << std::endl;
+		auto& calirunmap = TTCaliRunMapSet[tag];
+        int first = 0;
+        std::string firstname = "";
+		std::map<int,TH1F*> histmap;
+		//std::map<int,TGraphErrors*> graphmap;
+        std::map<int,TGraph*> graphmap;
+		for( int ieta = 1; ieta < 37; ieta++ ){
+			if( ieta == 18 ) continue; 
+			for( int iphi = 1; iphi < 74; iphi++ ){
+				int index = ieta*100 + iphi;
+				int runrange = erun - srun + 2;
+				int erange = erun + 1;
+				int srange = srun - 1;
+				std::string filename = "TTmeanDrift_" + std::to_string(index);
+				histmap[index] = new TH1F(filename.c_str(),filename.c_str(),runrange,srange,erange);
+				histmap[index]->Sumw2();
+				graphmap[index] = new TGraphErrors(runrange);
+			}//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+		}//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+
+		std::cout << " -- Filling TH1F and TGraphErrors " << std::endl;
+        std::map<int,float> normrun;
+		float maxtime = 0;
+        for( auto& calirunsct : calirunmap ){
+
+			first = calirunsct.first;
+            if( first < srun || first > erun ) continue;
+			//std::cout << " - Processing : " << calirunsct.second.histMapName << " in " << first << std::endl;
+
+            for( int ieta = 1; ieta < 37; ieta++ ){
+                for( int iphi = 1; iphi < 74; iphi++ ){
+                    int i1 = ieta - 18;
+                    if( i1 == 0 ) continue;
+					uInt detid = getInvTTId( iphi, i1 );
+					int index = ieta*100 + iphi;
+					int bin = first - srun + 1;
+					float mean = calirunsct.second.meanMap[detid];
+                    float error = calirunsct.second.errMap[detid];
+                    if( bin == 1 ) normrun[index] = mean;
+					if( mean == 0 ) continue;
+					if( std::abs(mean) > maxtime ) maxtime == std::abs(mean);
+                    //std::cout << " -- Filling : " << ieta << " " << iphi << " " << index << " " << first << " ";
+					//std::cout << bin << " " << mean << " " << error << " " << normrun[index] << std::endl;
+					histmap[index]->SetBinContent( bin, mean );
+                    histmap[index]->SetBinError( bin, error );
+					graphmap[index]->SetPoint( bin, first, mean - normrun[index] );
+                    //graphmap[index]->SetPointError( bin, 0, error);
+                }//<<>>for( int iphi = 1; iphi < 361; iphi++ )
+            }//<<>>for( int ieta = 1; ieta < 172; ieta++ )
+
+        }//<<>>for( auto& calirunsct : calirunmap )
+
+		std::cout << " -- Filling & Printing TMultiGraph " << std::endl;
+		std::string driftHistTCanvasName = "driftHists_" + tag + "_" + std::to_string( srun ) + "_" + std::to_string( erun ) + ".png";
+		gROOT->SetBatch(true);
+		TCanvas c1 = TCanvas( "c1", "canvas" );
+    	c1.SetGridx(1);
+    	c1.SetGridy(1);
+		TMultiGraph* mg = new TMultiGraph();
+        std::map<int,int> colors = {{0,kMagenta+2},{1,kRed+2},{2,kYellow+2},{3,kGreen+2},{4,kCyan+2},{5,kBlue+2},
+									{6,kViolet+2},{7,kPink+2},{8,kOrange+2},{9,kSpring+2},{10,kTeal+2},{11,kAzure+2},
+									{23,kAzure+7},{12,kMagenta-4},{13,kRed-4},{14,kYellow-4},{15,kGreen-4},{16,kCyan-4},
+									{17,kBlue-4},{18,kViolet+7},{19,kPink+7},{20,kOrange+7},{21,kSpring+7},{22,kTeal+7},
+                                    {34,kTeal-6},{35,kAzure-6},{24,kMagenta-6},{25,kRed-6},{26,kYellow-6},{27,kGreen-6},
+                                    {28,kCyan-6},{29,kBlue-6},{30,kViolet-6},{31,kPink-6},{32,kOrange-6},{33,kSpring-6}
+									};
+		//std::map<int,int> markers = {{0,20},{1,21},{2,22},{3,23},{4,29},{5,33},{6,34},{7,39},{8,45},{9,47}};
+        std::map<int,int> markers = {{0,29},{1,33},{2,34},{3,39},{4,41},{5,43},{6,45},{7,47},{8,48},{9,49},{10,22},{11,23}};	
+     	int n = 0, k=0;
+		int sEta = 1, eEta = 37; // 35 bins : -17 to 18 ( skip 0 ) -> 1 to 36 ( skip 18 )
+        //int sEta = 32, eEta = 33;
+        //int sEta = 12, eEta = 13;
+        int sPhi = 1, ePhi = 74; // 72 bins : 1 to 73
+        //int sPhi = 25, ePhi = 26;
+        //int sPhi = 50, ePhi = 51;
+        for( int ieta = sEta; ieta < eEta; ieta++ ){
+        //for( int ieta = 32; ieta < 33; ieta++ ){
+            if( ieta == 18 ) continue;
+            for( int iphi = sPhi; iphi < ePhi; iphi++ ){
+                int index = ieta*100 + iphi;
+                graphmap[index]->SetMarkerStyle(markers[k]);
+				graphmap[index]->SetLineColor(colors[n]);
+				graphmap[index]->SetMarkerColor(colors[n]);
+				graphmap[index]->SetMarkerSize(1.0);
+				//graphmap[index] = new TGraphErrors( histmap[index] );
+				mg->Add(graphmap[index]);
+				n++;
+				if( n > 35 ){ n = 0; k++; }
+				k++;
+				if( k > 11 ){ k = 0; }
+            }//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+        }//<<>>for( int iphi = 1; iphi < 73; iphi++ )
+        mg->GetXaxis()->SetNoExponent();
+		mg->GetXaxis()->SetRangeUser(srun,erun);
+    	mg->GetXaxis()->CenterTitle(true);
+    	mg->GetXaxis()->SetTitle("Run");
+        mg->GetYaxis()->SetRangeUser(-1.75,1.75);
+    	mg->GetYaxis()->CenterTitle(true);
+    	mg->GetYaxis()->SetTitle("normlized TT mean time [ns]");
+        //mg->GetXaxis()->SetNoExponent();
+        mg->SetTitle(driftHistTCanvasName.c_str());
+		c1.Update();
+		mg->Draw("AP");
+		c1.Print( driftHistTCanvasName.c_str() );
+		c1.Close();
+		
+    	std::cout << " -- Save Drift Hists" << std::endl;
+    	std::string driftHistTFileName = "driftHists_" + tag + "_" + std::to_string( srun ) + "_" + std::to_string( erun ) + ".root";
+    	TFile* driftHistTFile = TFile::Open( driftHistTFileName.c_str(), "UPDATE" );
+    	driftHistTFile->cd();
+    	for( auto& hist : histmap ){
+        	hist.second->Write( hist.second->GetName(), TObject::kOverwrite );
+        	delete hist.second;
+    	}//<<>>for( auto& hists : CaliHists )
+		//mg->Write("TT_TimeStability", TObject::kOverwrite );
+		delete mg;
+
+    	driftHistTFile->Close();
+
+    }//<<>>if( TTCaliRunMapSet.find(tag) != CaliHists.end() )
+
+    std::cout << "Finished making TT Mean Drift Hists" << std::endl;
+
+}//<<>>void KUCMSTimeCalibration::makeTTDriftMaps()
 
 #endif
 //-------------------------------------------------------------------------------------------------------------------

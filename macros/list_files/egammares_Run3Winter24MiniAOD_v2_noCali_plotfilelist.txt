@@ -1,0 +1,5 @@
+##egammares_DoubleEG_MINIAOD_ECAL_CC_HCAL_DI-v3_Run2024F_filelist2.txt none 0 999999
+egammares_DoubleEG_MINIAOD_Prompt_Run2024F_filelist2.txt none 0 999999
+######ecaldpg_dytoll_filelist.txt none 0 999999
+######ecaldpg_gj_4jets_filelist.txt none 0 999999
+######egammares_DoubleEG_MINIAOD_ECAL_CC_HCAL_DI-v3_Run2024F_filelist.txt none 0 999999

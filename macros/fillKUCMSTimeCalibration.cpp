@@ -33,6 +33,7 @@ int main ( int argc, char *argv[] ){
 	std::string r2EOY( "EG_EOY_MINI" );
 	std::string r2Fall17AOD( "RunIIFall17DRPremix" );
     std::string r2Fall17MINIAOD( "RunIIFall17MiniAODv2" );
+    std::string r2UL( "UL_R2_MINI" );
 
 	// IOV tags :  defines IOV periods to make calibration maps
     // for mc use "mc" for TTIov and XIov
@@ -45,6 +46,7 @@ int main ( int argc, char *argv[] ){
     std::string r3TagTT( "r3tt" );
     std::string r3TagX( "r3x" );
 
+    //std::string inputfilename( "kucmsTimeCaliR18TFile.txt");
     std::string inputfilename( "kucmsTimeCaliR24FCCvRtTFile.txt");
     //std::string inputfilename( "kucmsTimeCaliTestFile.txt" ); // MET_AOD_R17_FULL 
     //std::string inputfilename( "kucmsTimeCaliR17File.txt" ); // EG_EOY_MINI PD
@@ -62,23 +64,25 @@ int main ( int argc, char *argv[] ){
     //std::string indir("ecalTiming/gammares_ECAL_CC_HCAL_DI-v3/");
     //std::string indir("ecalTiming/gammares_r24f_prompt/");
     //std::string indir("ecalTiming/gammares_r25_val/");
-    std::string indir("ecalTiming/gammares_DPG/EGamma1/");
+    //std::string indir("ecalTiming/gammares_DPG/");
     //std::string indir("ecalTiming/gammares_ul18/EGamma/");
+    std::string indir("ecalTiming/gammares_DPG_25/");
+    //std::string indir("ecalTiming/gammares_DPG_24/");
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//using true - true will start a new TClifile  - all histograms will be lost
+	//using ( true, true ) will start a new TClifile  - all histograms will be lost
     //////KUCMSTimeCalibration theCali( true, true ); // make a new TClifile and keep TCalifile open
 	//KUCMSTimeCalibration theCali( true, true );
 	// if Tcalifile kept open be sure to make and save tcalifile ( saving calihist will close tcalifile )
 
 	////KUCMSTimeCalibration theCali; // open tfile in read only then close after setup
-	KUCMSTimeCalibration theCali( true );
-	theCali.SetEosDir(eosdir);
-	theCali.SetInDir(indir);
+	//KUCMSTimeCalibration theCali( true );
+	//theCali.SetEosDir(eosdir);
+	//theCali.SetInDir(indir);
 	//
     //-----//////////  making tt cali  :
-    theCali.SetupIovMaps();
+    //theCali.SetupIovMaps();
 	// for PD R2UL
     //theCali.setTTIov( r2ulTag );
     //theCali.setXIov( xiovtag );
@@ -86,13 +90,13 @@ int main ( int argc, char *argv[] ){
     //theCali.setTTIov( mctag );
     //theCali.setXIov( mctag );
     // for PD R3
-	theCali.setTTIov( r3TagTT );
-	theCali.setXIov( xiovtag );
+	//theCali.setTTIov( r3TagTT );
+	//theCali.setXIov( xiovtag );
     //theCali.makeTTCaliMapEGR( inputfilename, true ); // true == run only subset of events
-    theCali.makeTTCaliMapEGR( inputfilename );
-    theCali.makeCaliHists();
-    theCali.SaveCaliHists();
-    theCali.SaveTTRunFile();
+    //theCali.makeTTCaliMapEGR( inputfilename );
+    //theCali.makeCaliHists();
+    //theCali.SaveCaliHists();
+    //theCali.SaveTTRunFile();
 
     //-----//////////  making xtal cali :
     //theCali.SetupIovMaps();
@@ -175,7 +179,7 @@ int main ( int argc, char *argv[] ){
 	//--------------------------------------------------------
 	// my cali time profile?
     //theCali.SetYBinStr( "CONSTANT 1800 -9 9" ); // jack  ( 10 ps )
-    //theCali.SetYBinStr( "CONSTANT 240 -3 3" ); // ecal ( 25 ps )
+    //theCali.SetYBinStr( "CONSTANT 240 -3 3" ); // ecal ( 25 ps ) DPG
     //theCali.SetYBinStr( "CONSTANT 480 -6 6" ); // ecal ( 25 ps )
     ////theCali.SetYBinStr( "CONSTANT 720 -9 9" ); // ( 25 ps )
     //theCali.SetYBinStr( "CONSTANT 360 -9 9" ); // ( 50 ps  )
@@ -197,21 +201,12 @@ int main ( int argc, char *argv[] ){
 	//theCali.plot2dResolutionEGR( inputfilename, true, true, false, "_deg24fval_xa_pm9b1800_v501" );
 	//theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fprmt_xgs_pm3b240_v508" );
     //theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg24fcc_xer_pm3b240_v508" );
+	//theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_deg25bc_xa_pm6b480_v616" );
+	//theCali.plot2dResolutionEGR( inputfilename, true, true, false, "_deg18c_xa_pm6b480_v521" );
+	//theCali.plot2dResolutionEGR( inputfilename, true, false, false, "_eg24d_xa_pm6b480_v810" );
 
     // extended range resfit
-    //KUCMSTimeCalibration theCali;
-	//std::string histName = "ResMap_302031_302393__ZEE_Data_Hist_std_v2";
-	//std::string histName = "ResMap_303832_304616__DRO_Data_Hist_xb_pm9b180_v1";
-	//std::string histName = "ResMap_303832_304616__DRO_Data_Hist_xea_pm9b180_v1";
-	//std::string histName = "ResMap_303832_304616__SRO_Data_Hist_xea_pm9b720_v1";
-	//std::string histName = "ResMap_305044_305081__ZEE_Data_Hist_xea_pm9b720_v1";
-	//std::string histName = "ResMap_302031_302393__DRO_Data_Hist_xea_pm12b240_v2";
-	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_xa_pm9b720_r324fcc";
-	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_xa_pm9b720_r324fprmt";
-	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm9b1800_v417";
-	//std::string histName = "ZEE_Data_Hist";
-	//std::string histName = "ResMap_0_999999__ZEE_Data_Hist_xea_mc_pm12b240_v2";
-    //std::string histName = "ResMap_0_999999__ZEE_Data_Hist_xea_mc_pm3b180_v2";
+    KUCMSTimeCalibration theCali;
     //std::string histName = "ResMap_303832_304616__DRO_Data_Hist_ef_xea_pm9b180_v327";
     //std::string histName = "ResMap_303832_304616__DRO_Data_Hist_NoCali_ef_xea_pm9b180_v327";
     //std::string histName = "ResMap_305044_305081__DRO_Data_Hist_ef_xea_pm9b180_v327";
@@ -225,13 +220,26 @@ int main ( int argc, char *argv[] ){
     //std::string histName = "ResMap_297050_306460__SRO_Data_Hist_egr17ef_xea_pm12b240_v417";
 	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xa_pm3b240_v417";
 	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_deg24fprmt_xer_pm3b240_v508";
+	//std::string histName = "ResMap_0_999999__ZEE_Data_Hist_NoCali_deg25b_xa_pm6b480_v519";
+	//std::string histName = "ResMap_0_999999__ZEE_Data_Hist_deg18c_xa_pm6b480_v521";
+	//std::string histName = "ResMap_0_999999__ZEE_Data_Hist_NoCali_deg25bc_xa_pm6b480_v602";
+	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_deg25bc_xa_pm6b480_v616";
+	//std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_eg24f_ee_xa_pm6b480_v808";
+    //std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_eg24fcc_ee_xa_pm6b480_v808";
+	//std::string histName = "ResMap_0_999999__ZEE_Data_Hist_NoCali_eg24fcc_ee_xa_pm6b480_v808";
+    //std::string histName = "ResMap_0_999999__ZEE_Data_Hist_NoCali_eg25cv2_xa_pm6b480_v807";
+    //std::string histName = "ResMap_0_999999__SRO_Data_Hist_NoCali_eg25cv2_xa_pm6b480_v808";
+	//std::string histName = "ResMap_0_999999__ZEE_Data_Hist_NoCali_eg24fcc_xa_pm6b480_v808";
+	std::string histName = "ResMap_0_999999__ZEE_Data_Hist_NoCali_eg24d_xa_pm6b480_v810";
+
 	//
 	//theCali.Set2DResTFileName( "egres_DEGPD_AODSIM_R24_Fprompt_v3_14011_v12_resplots.root" );
     //theCali.Set2DResTFileName( "egres_DEGPD_AODSIM_R24_ECAL_v3_14011_v12_resplots.root" );
 	//
-	//theCali.load2DResHist( histName );
-	//theCali.setLowEnergy( true );
-	//theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200 1800" ); // : xa
+	//
+	theCali.load2DResHist( histName );
+	theCali.setLowEnergy( true );
+	theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200 1800" ); // : xa
     //theCali.SetXBinStr( "VARIABLE 5 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1000 1200 1800" ); // : ecal
     //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 22.5 25.0 30.0 40.0 60.0 120.0" ); // xea
     //theCali.SetXBinStr( "VARIABLE 5 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 1200" ); // xb : * w/LE
@@ -239,13 +247,19 @@ int main ( int argc, char *argv[] ){
     //theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 60 80 100 125 150 175 200 225 250 300 400 600" ); // : xr
     //theCali.SetXBinStr( "VARIABLE 1.0 2.0 3.0 4.0 5.0 7.5 10.0 12.5 15.0 17.5 20.0 25.0 30.0 40.0 50.0 70.0 90.0" ); // xer
     //theCali.SetXBinStr( "VARIABLE 10 15 20 25 30 40 50 75 100 125 150 175 200 225 250 300 400 600 800 1200 1600 2200" ); // : xgs ecal
-	//theCali.doResTimeFit( histName );
+	theCali.doResTimeFit( histName );
 
 	// plotting of mean time by run with calibraton : filename, start run, end run, usecali
 	//theCali.plotMeanRunTimeEGR( inputfilename, 303838, 304796 );
     //theCali.plotMeanRunTimeEGR( inputfilename, 296399, 307554, true );
 	//theCali.makeTTDiffMaps();// make trigger tower diffrence maps
 	
+	//KUCMSTimeCalibration theCali;
+	//theCali.makeTTDriftMaps( "r324fcc", 382008, 383814 );	
+    //theCali.makeTTDriftMaps( "r324fpmt", 382008, 383814 );
+	//theCali.makeTTDriftMaps( "EG_EOY_MINI", 296399, 306460 );
+	//theCali.makeTTDriftMaps( "UL_R2_MINI", 316996, 325200 );
+
     /////////////////////////////////////////////////////////////////////
     //-------------------------------------------------------------------
 	
