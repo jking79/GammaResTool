@@ -424,7 +424,8 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
 
     // these need to be changed to input paramters for public verions  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     const std::string disphotreename("tree/llpgtree");
-    const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+    //const std::string eosdir("root://cmseos.fnal.gov//store/user/jaking/");
+    const std::string eosdir("root://cmseos.fnal.gov//store/user/lpcsusylep/jaking/");
     //const std::string listdir("llpgana_list_files/");
 
     std::cout << "Producing Histograms for : " << outfilename << std::endl;
@@ -433,7 +434,11 @@ void makehists::llpgana_hist_maker( std::string indir, std::string infilelist, s
     std::cout << "Adding files to TChain." << std::endl;
     std::cout << " - With : " << infilelist << " >> " << fInTree << std::endl;
     std::string str;
+	int skipcnt = 0;
+	int fileskip = 100;
     while (std::getline(infile,str)){
+		skipcnt++;
+		if( skipcnt%fileskip != 0 ) continue;
         auto tfilename = eosdir + indir + str;
         if(debug) std::cout << "--  adding file: " << tfilename << std::endl;
         fInTree->Add(tfilename.c_str());
@@ -526,8 +531,8 @@ void makehists::eventLoop( Long64_t entry ){
 
 	if( DEBUG ) std::cout << " -- Seting Eta range " << std::endl;
 	// --------- eta cuts ------------------------
-	auto doEBOnly = true;
-    //auto doEBOnly = false;
+	//auto doEBOnly = true;
+    auto doEBOnly = false;
 	auto isLocEB = (DetIDMap[(*resRhID)[0]].ecal == EB) && (DetIDMap[(*resRhID)[1]].ecal == EB);
 	auto isGloEB = (DetIDMap[(*resRhID)[2]].ecal == EB) && (DetIDMap[(*resRhID)[3]].ecal == EB);
 	auto locEBSelct = doEBOnly ? isLocEB : true;
@@ -549,12 +554,14 @@ void makehists::eventLoop( Long64_t entry ){
 			// icmap lookup only works with EB rhs !!!!!!
 			float rhRtCali = ( icmap[0] != NULL ) ? icmap[0]->GetBinContent(rhIdInfo.i2 + 86, rhIdInfo.i1) : 0.f;
 			float caliRtTime = (*rhRtTime)[it]-rhRtCali;
+            float unCorCCTime = (*rhCCTime)[it];
 
 			if( DEBUG ) std::cout << " - Rechit loop  1" << std::endl;
         	hist1d[67]->Fill((*rhRtTime)[it]);
             hist1d[70]->Fill(caliRtTime);
             if( DEBUG ) std::cout << " - Rechit loop  1a" << std::endl;
             hist1d[72]->Fill(rhRtCali);
+			hist1d[73]->Fill(unCorCCTime);
         	hist2d[25]->Fill((*rhEnergy)[it],caliRtTime);
 			if( DEBUG ) std::cout << " - Rechit loop  1b" << std::endl;
 			if( (*rhEnergy)[it] > 4.0 ){// plot greater then 4 GeV
@@ -576,22 +583,28 @@ void makehists::eventLoop( Long64_t entry ){
 
 			if( DEBUG ) std::cout << " - Rechit loop  3" << std::endl;
 
+			if( rhIdInfo.ecal == EB && rhIdInfo.i2 < 0 ){
+		
+			float amp = ( (*rhpedrms12)[it] != 0 && (*rhadcToGeV)[it] != 0 ) ? ((*rhEnergy)[it]/(*rhadcToGeV)[it])/(*rhpedrms12)[it] : -99;
+			//float amp = (*rhEnergy)[it];
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true ){ 
-				hist2d[119]->Fill((*rhEnergy)[it],caliRtTime);
-				if( (*rhRtisOOT)[it] == false ) hist2d[118]->Fill((*rhEnergy)[it],caliRtTime);
+				hist2d[119]->Fill(amp,caliRtTime);
+				if( (*rhRtisOOT)[it] == false ) hist2d[118]->Fill(amp,caliRtTime);
 			}//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == false ){
-                hist2d[121]->Fill((*rhEnergy)[it],caliRtTime);
-                if( (*rhRtisOOT)[it] == false ) hist2d[120]->Fill((*rhEnergy)[it],caliRtTime);
+                hist2d[121]->Fill(amp,caliRtTime);
+                if( (*rhRtisOOT)[it] == false ) hist2d[120]->Fill(amp,caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == false && (*rhisGS1)[it] ==true ){
-                hist2d[123]->Fill((*rhEnergy)[it],caliRtTime);
-                if( (*rhRtisOOT)[it] == false ) hist2d[122]->Fill((*rhEnergy)[it],caliRtTime);
+                hist2d[123]->Fill(amp,caliRtTime);
+                if( (*rhRtisOOT)[it] == false ) hist2d[122]->Fill(amp,caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
             if( (*rhisGS6)[it] == false && (*rhisGS1)[it] ==false ){
-                hist2d[125]->Fill((*rhEnergy)[it],caliRtTime);
-                if( (*rhRtisOOT)[it] == false ) hist2d[124]->Fill((*rhEnergy)[it],caliRtTime);
+                hist2d[125]->Fill(amp,caliRtTime);
+                if( (*rhRtisOOT)[it] == false ) hist2d[124]->Fill(amp,caliRtTime);
             }//<<>>if( (*rhisGS6)[it] == true && (*rhisGS1)[it] == true )
+
+			}//<<>>if( rhIdInfo.ecal != EB )
 
 			if( (*rhEnergy)[it] > 10.0 ){// plot greater then 10 GeV 
 				hist2d[108]->Fill((*rhSwCross)[it],caliRtTime); 
@@ -1077,9 +1090,12 @@ void makehists::initHists( std::string fHTitle ){
     hist1d[65] = new TH1D("seedAmplitude_Glo0",addstr(fHTitle,"seedAmplitude_Glo0").c_str(),1000,0,1000);
     hist1d[66] = new TH1D("seedAmplitude_Glo1",addstr(fHTitle,"seedAmplitude_Glo1").c_str(),1000,0,1000);
 
-    hist1d[67] = new TH1D("rhRHTimeUnCali",addstr(fHTitle,"rhRHTimeUnCali").c_str(),500,-25,25);
+    hist1d[67] = new TH1D("rhRHTimeUnCali",addstr(fHTitle,"rhRHTimeNoCali").c_str(),500,-25,25);
     hist1d[70] = new TH1D("rhRtTimeCali",addstr(fHTitle,"rhRtTimeCali").c_str(),500,-25,25);
     hist1d[72] = new TH1D("rhRtCali",addstr(fHTitle,"rhRtCali").c_str(),500,-25,25);
+    hist1d[73] = new TH1D("rhRtCali2",addstr(fHTitle,"rhRtUnCor").c_str(),500,-25,25);
+    hist1d[74] = new TH1D("rhRtCali3",addstr(fHTitle,"rhRt2").c_str(),500,-25,25);
+
 
     hist1d[75] = new TH1D("phoCov2IEtaIEta_Glo0",addstr(fHTitle,"phoCov2IEtaIEta_Glo0").c_str(),1000,0,0.005);
     hist1d[76] = new TH1D("phoCov2IEtaIEta_Glo1",addstr(fHTitle,"phoCov2IEtaIEta_Glo1").c_str(),1000,0,0.005);
@@ -1240,13 +1256,15 @@ int main ( int argc, char *argv[] ){
         //auto indir = "ecalTiming/gammares_mc/DYto2L-4Jets_MLL-50_1J_TuneCP5_13p6TeV_madgraphMLM-pythia8/";
         //auto indir = "ecalTiming/gammares_mc/ZprimeToEE_M-6000_TuneCP5_13p6TeV_pythia8/";
         //auto indir = "ecalTiming/gammares_llpana/";
-        auto indir = "/ecalTiming/gammares_llpana_pd/MET/";
+        //auto indir = "/ecalTiming/gammares_llpana_pd/MET/";
+        auto indir = "KUCMSNtuple/";
 
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Summer23MiniAODv4_v2.txt";
         //auto infilename = "list_files/egammares_gammares_mc_DYto2L-4Jets_MLL-50_1J_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
         //auto infilename = "list_files/egammares_gammares_mc_ZprimeToEE_M-6000_MINIAODSIM_Run3Winter24MiniAOD_v2.txt";
         //auto infilename = "list_files/egres_QCD_HT_1000to1500_R17.txt";
-        auto infilename = "list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2.txt";
+        //auto infilename = "list_files/egammares_Met_PD_AOD_Run2017E-17Nov2017v2.txt";
+		auto infilename = "filelist_gammares_prmt25.txt";
 
 		int brun = 0;
         int erun = 999999;
