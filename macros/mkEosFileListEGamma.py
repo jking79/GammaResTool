@@ -42,7 +42,8 @@ eosll = 'eos root://cmseos.fnal.gov ls '
 #command = eosll+mspc+'/ecalTiming/gammares_ttcc_140_v11_diag_mod1_exp3/EGamma1/'
 #command = eosll+mspc+'/ecalTiming/gammares_llpana/'
 #command = eosll+mspc+'/ecalTiming/gammares_llpana_pd/MET/'
-command = eosll+mspc+'/ecalTiming/gammares_llpana_qcd/'
+#command = eosll+mspc+'/ecalTiming/gammares_llpana_qcd/'
+command = eosll+mgrp+'KUCMSNtuple/gammares_prmt25/'
 
 version = ''
 #version = '_v11_'
@@ -83,7 +84,7 @@ rootfile = '.root'
 #dirselect = 'gammares_ttcc_1307_v11_diag_EGamma1_MINIAOD_Run2023B-PromptReco-v1_366323-367065'
 #dirselect = 'Run2024C-PromptReco'
 #dirselect = 'Run2023D-PromptReco'
-dirselect = 'QCD'
+dirselect = ''
 #dirselect = 'AOD_Run2017E-17Nov2017-v1'
 
 #debug = True

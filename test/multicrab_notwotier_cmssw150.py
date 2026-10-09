@@ -68,9 +68,10 @@ def subcrab( runs, events, reqmem ):
         #inputJSON    = 'Cert_Collisions2022_355100_362760_Golden.json'
         #inputJSON    = 'Cert_Collisions2023_366442_370790_Golden.json'
         #inputJSON    = 'Cert_Collisions2024_378981_386951_Golden.json'
-        inputJSON    = 'Cert_Collisions2025_391658_398860_Golden.json'
+        ######inputJSON    = 'Cert_Collisions2025_391658_398860_Golden.json'
+        inputJSON    = 'Cert_Collisions2025_391658_398903_Golden.json'
 
-        #inputJSON     = 'Collisions25_13p6TeV_Latest.json'
+        ####inputJSON     = 'Collisions25_13p6TeV_Latest.json'
 
         #--------------------------------------------------------
         # This is the base config:
@@ -121,64 +122,75 @@ def subcrab( runs, events, reqmem ):
         # Will submit one task for each of these input datasets.
         inputDataAndOpts = [
 
-            # Dataset: Run2025
+            # Dataset: Run2026
+            ['/JetMET0/Run2026B-PromptReco-v1/MINIAOD',1],
+            ['/JetMET0/Run2026D-PromptReco-v1/MINIAOD',1],
 
-            ['/EGamma0/Run2025C-PromptReco-v2/MINIAOD',1],
-            ['/EGamma0/Run2025D-PromptReco-v1/MINIAOD',1],
-            ['/EGamma0/Run2025E-PromptReco-v1/MINIAOD',1],
-            ['/EGamma0/Run2025F-PromptReco-v1/MINIAOD',1],
-            ['/EGamma0/Run2025F-PromptReco-v2/MINIAOD',1],
-            ['/EGamma0/Run2025G-PromptReco-v1/MINIAOD',1],
-            ['/EGamma1/Run2025C-PromptReco-v2/MINIAOD',1],
-            ['/EGamma1/Run2025D-PromptReco-v1/MINIAOD',1],
-            ['/EGamma1/Run2025E-PromptReco-v1/MINIAOD',1],
-            ['/EGamma1/Run2025F-PromptReco-v1/MINIAOD',1],
-            ['/EGamma1/Run2025F-PromptReco-v2/MINIAOD',1],
-            ['/EGamma1/Run2025G-PromptReco-v1/MINIAOD',1],
-            ['/EGamma2/Run2025C-PromptReco-v2/MINIAOD',1],
-            ['/EGamma2/Run2025D-PromptReco-v1/MINIAOD',1],
-            ['/EGamma2/Run2025E-PromptReco-v1/MINIAOD',1],
-            ['/EGamma2/Run2025F-PromptReco-v1/MINIAOD',1],
-            ['/EGamma2/Run2025F-PromptReco-v2/MINIAOD',1],
-            ['/EGamma2/Run2025G-PromptReco-v1/MINIAOD',1],
-            ['/EGamma3/Run2025C-PromptReco-v2/MINIAOD',1],
-            ['/EGamma3/Run2025D-PromptReco-v1/MINIAOD',1],
-            ['/EGamma3/Run2025E-PromptReco-v1/MINIAOD',1],
-            ['/EGamma3/Run2025F-PromptReco-v1/MINIAOD',1],
-            ['/EGamma3/Run2025F-PromptReco-v2/MINIAOD',1],
-            ['/EGamma3/Run2025G-PromptReco-v1/MINIAOD',1],
+            # Dataset: Run2025
+            #['/EGamma0/Run2025C-PromptReco-v1/MINIAOD',1],
+            #['/EGamma0/Run2025C-PromptReco-v2/MINIAOD',1],
+            #['/EGamma0/Run2025D-PromptReco-v1/MINIAOD',1],
+            #['/EGamma0/Run2025E-PromptReco-v1/MINIAOD',1],
+            #['/EGamma0/Run2025F-PromptReco-v1/MINIAOD',1],
+            #['/EGamma0/Run2025F-PromptReco-v2/MINIAOD',1],
+            #['/EGamma0/Run2025G-PromptReco-v1/MINIAOD',1],
+            #['/EGamma1/Run2025C-PromptReco-v2/MINIAOD',1],
+            #['/EGamma1/Run2025D-PromptReco-v1/MINIAOD',1],
+            #['/EGamma1/Run2025E-PromptReco-v1/MINIAOD',1],
+            #['/EGamma1/Run2025F-PromptReco-v1/MINIAOD',1],
+            #['/EGamma1/Run2025F-PromptReco-v2/MINIAOD',1],
+            #['/EGamma1/Run2025G-PromptReco-v1/MINIAOD',1],
+            #['/EGamma2/Run2025C-PromptReco-v2/MINIAOD',1],
+            #['/EGamma2/Run2025D-PromptReco-v1/MINIAOD',1],
+            #['/EGamma2/Run2025E-PromptReco-v1/MINIAOD',1],
+            #['/EGamma2/Run2025F-PromptReco-v1/MINIAOD',1],
+            #['/EGamma2/Run2025F-PromptReco-v2/MINIAOD',1],
+            #['/EGamma2/Run2025G-PromptReco-v1/MINIAOD',1],
+            #['/EGamma3/Run2025C-PromptReco-v2/MINIAOD',1],
+            #['/EGamma3/Run2025D-PromptReco-v1/MINIAOD',1],
+            #['/EGamma3/Run2025E-PromptReco-v1/MINIAOD',1],
+            #['/EGamma3/Run2025F-PromptReco-v1/MINIAOD',1],
+            #['/EGamma3/Run2025F-PromptReco-v2/MINIAOD',1],
+            #['/EGamma3/Run2025G-PromptReco-v1/MINIAOD',1],
 
             # Dataset: Run2024
 
             #['/EGamma1/Run2024F-ECAL_CC_HCAL_DI-v3/MINIAOD'],
 
-            ##['/EGamma0/Run2024A-PromptReco-v1/MINIAOD'], 	# 378927-378962 52.6M
-            #['/EGamma0/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379350	0.54T
-            #['/EGamma0/Run2024C-PromptReco-v1/MINIAOD'],	# 379413-379765	3.3T
-            #['/EGamma0/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T 
-            #['/EGamma0/Run2024E-PromptReco-v2/MINIAOD'], 
-            #['/EGamma0/Run2024F-PromptReco-v1/MINIAOD'], 
-            #['/EGamma0/Run2024G-PromptReco-v1/MINIAOD'], 
-            #['/EGamma0/Run2024H-PromptReco-v1/MINIAOD'], 
-            #['/EGamma0/Run2024I-PromptReco-v2/MINIAOD'], 
-            #['/EGamma0/Run2024J-PromptReco-v1/MINIAOD'], 
+            ##['/EGamma0/Run2024C-MINIv6NANOv15-v1/MINIAOD',1],#a
+            ##['/EGamma0/Run2024D-MINIv6NANOv15-v1/MINIAOD',1],#a
+            ##['/EGamma0/Run2024E-MINIv6NANOv15-v1/MINIAOD',1],#b
+            #['/EGamma0/Run2024F-MINIv6NANOv15-v1/MINIAOD',2],#b
+            #['/EGamma0/Run2024G-MINIv6NANOv15-v2/MINIAOD',2],#c
+            ##['/EGamma0/Run2024H-MINIv6NANOv15-v2/MINIAOD',1],#a
+            ##['/EGamma0/Run2024I-MINIv6NANOv15-v1/MINIAOD',1],#a
+            ##['/EGamma0/Run2024I-MINIv6NANOv15_v2-v1/MINIAOD',1],#a
 
-            ##['/EGamma1/Run2024A-PromptReco-v1/MINIAOD'],	# 378919-378961	52.1M
-	    #['/EGamma1/Run2024B-PromptReco-v1/MINIAOD'],	# 378981-379349	0.54T
-            #['/EGamma1/Run2024C-PromptReco-v1/MINIAOD'],	# 379415-379774	3.4T
-            #['/EGamma1/Run2024D-PromptReco-v1/MINIAOD'],       # 380306-380933 8.7T
-            #['/EGamma1/Run2024E-PromptReco-v2/MINIAOD'], 
-            #['/EGamma1/Run2024F-PromptReco-v1/MINIAOD'],
-            #['/EGamma1/Run2024G-PromptReco-v1/MINIAOD'], 
-            #['/EGamma1/Run2024H-PromptReco-v1/MINIAOD'], 
-            #['/EGamma1/Run2024I-PromptReco-v2/MINIAOD'], 
-            #['/EGamma1/Run2024J-PromptReco-v1/MINIAOD'], 
+            #['/EGamma1/Run2024C-MINIv6NANOv15-v1/MINIAOD',1],
+            #['/EGamma1/Run2024D-MINIv6NANOv15-v1/MINIAOD',1],
+            #['/EGamma1/Run2024E-MINIv6NANOv15-v1/MINIAOD',1],
+            #['/EGamma1/Run2024F-MINIv6NANOv15-v1/MINIAOD',1],
+            #['/EGamma1/Run2024G-MINIv6NANOv15-v2/MINIAOD',1],
+            #['/EGamma1/Run2024H-MINIv6NANOv15-v1/MINIAOD',1],
+            #['/EGamma1/Run2024I-MINIv6NANOv15-v1/MINIAOD',1],
+            #['/EGamma1/Run2024I-MINIv6NANOv15_v2-v1/MINIAOD',1],
 
             # Dataset: Run2023
 
+            #['/EGamma0/Run2023C-22Sep2023_v1-v1/MINIAOD',1],
+            #['/EGamma0/Run2023C-22Sep2023_v2-v1/MINIAOD',1],
+            #['/EGamma0/Run2023C-22Sep2023_v3-v1/MINIAOD',1],
+            #['/EGamma0/Run2023C-22Sep2023_v4-v1/MINIAOD',1],
+            #['/EGamma0/Run2023D-22Sep2023_v1-v1/MINIAOD',1],
+            #['/EGamma0/Run2023D-22Sep2023_v2-v1/MINIAOD',1],
 
-            # Dataset: Run2024
+            # Dataset: Run2022
 
+            #['/EGamma/Run2022C-22Sep2023-v1/MINIAOD',1],
+            #['/EGamma/Run2022D-22Sep2023-v1/MINIAOD',1],
+            #['/EGamma/Run2022E-22Sep2023-v1/MINIAOD',1],
+            #['/EGamma/Run2022F-22Sep2023-v1/MINIAOD',1],
+            #['/EGamma/Run2022G-22Sep2023-v2/MINIAOD',1],
 
             # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/MINIAOD
 
@@ -189,34 +201,55 @@ def subcrab( runs, events, reqmem ):
 
             # Dataset: /EGamma/Run2018-12Nov2019_UL2018-/AOD
 
-            #['/EGamma/Run2018A-12Nov2019_UL2018-v2/MINIAOD'],
-            #['/EGamma/Run2018B-12Nov2019_UL2018-v2/MINIAOD'],
-            #['/EGamma/Run2018C-12Nov2019_UL2018-v2/MINIAOD'],
-            #['/EGamma/Run2018D-12Nov2019_UL2018-v8/MINIAOD'],
+            ##['/EGamma/Run2018A-12Nov2019_UL2018-v2/MINIAOD'],
+            ##['/EGamma/Run2018B-12Nov2019_UL2018-v2/MINIAOD'],
+            ##['/EGamma/Run2018C-12Nov2019_UL2018-v2/MINIAOD'],
+            ##['/EGamma/Run2018D-12Nov2019_UL2018-v8/MINIAOD'],
+
+            #['/EGamma/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD',1],
+            #['/EGamma/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD',1],
+            #['/EGamma/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD',1],
+            #['/EGamma/Run2018D-UL2018_MiniAODv2_GT36-v3/MINIAOD',1],
 
             # Dataset: /DoubleEG/Run2016-21Feb2020_UL2016-/MINIAOD
 
-            #['/DoubleEG/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD'],
-            #['/DoubleEG/Run2016C-21Feb2020_UL2016_HIPM-v1/MINIAOD'],
-            #['/DoubleEG/Run2016D-21Feb2020_UL2016_HIPM-v1/MINIAOD'],
-            #['/DoubleEG/Run2016E-21Feb2020_UL2016_HIPM-v1/MINIAOD'],
-            #['/DoubleEG/Run2016F-21Feb2020_UL2016-v1/MINIAOD'],
-            #['/DoubleEG/Run2016G-21Feb2020_UL2016-v1/MINIAOD'],
-            #['/DoubleEG/Run2016H-21Feb2020_UL2016-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016C-21Feb2020_UL2016_HIPM-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016D-21Feb2020_UL2016_HIPM-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016E-21Feb2020_UL2016_HIPM-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016F-21Feb2020_UL2016-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016G-21Feb2020_UL2016-v1/MINIAOD'],
+            ##['/DoubleEG/Run2016H-21Feb2020_UL2016-v1/MINIAOD'],
+
+            #['/DoubleEG/Run2016B-ver1_HIPM_UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v3/MINIAOD',1],
+            #['/DoubleEG/Run2016C-HIPM_UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016F-UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016G-UL2016_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2016H-UL2016_MiniAODv2-v1/MINIAOD',1],
 
             # Dataset: /DoubleEG/Run2017-09Aug2019_UL2017-/MINIAOD
 
-            #['/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD'],
-            #['/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD'],
-            #['/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD'],
-            #['/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD'],
-            #['/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'],
 
-            #['/DoubleEG/Run2017B-09Aug2019_UL2017-v1/MINIAOD'],
-            #['/DoubleEG/Run2017C-09Aug2019_UL2017-v1/MINIAOD'],
-            #['/DoubleEG/Run2017D-09Aug2019_UL2017-v1/MINIAOD'],
-            #['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/MINIAOD'],
-            #['/DoubleEG/Run2017F-09Aug2019_UL2017-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017B-09Aug2019_UL2017-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017C-09Aug2019_UL2017-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017D-09Aug2019_UL2017-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017E-09Aug2019_UL2017-v1/MINIAOD'],
+            ##['/DoubleEG/Run2017F-09Aug2019_UL2017-v1/MINIAOD'],
+
+            #['/DoubleEG/Run2017B-UL2017_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2017C-UL2017_MiniAODv2-v2/MINIAOD',1],
+            #['/DoubleEG/Run2017D-UL2017_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2017E-UL2017_MiniAODv2-v1/MINIAOD',1],
+            #['/DoubleEG/Run2017F-UL2017_MiniAODv2-v2/MINIAOD',1],
 
 	    ]
  
@@ -250,8 +283,17 @@ def subcrab( runs, events, reqmem ):
             #trial          = 'gammares_r25_val'
             #trial          = 'gammares_ECAL_CC_HCAL_DI-v3'
             #trial          = 'gammares_DPG_24'
-            #trial          = 'gammares_ul18'
-            trial          = 'gammares_prmt25'
+
+            #trial          = 'gammares_ul18v2gt36'
+            #trial          = 'gammares_ul17v2'
+            #trial          = 'gammares_ul16v2'
+
+            trial          = 'gammares_prmt26'
+            #trial          = 'gammares_prmt25'
+            ###trial          = 'gammares_prmt24'
+            #trial          = 'gammares_22sept23' 
+            #trial          = 'gammares_23sept23' 
+            #trial          = 'gammares_24m6n15'
 
             #config.Data.outLFNDirBase    = "/store/user/jaking/ecalTiming/"+trial+"/"
             #config.Data.outLFNDirBase    = "/store/group/lpcsusylep/jaking/ecalTiming/"+trial+"/"
@@ -269,6 +311,8 @@ def subcrab( runs, events, reqmem ):
             dTTt = 'doTwoTier=True'
             dDt = 'doDiag=True'
             dDf = 'doDiag=False'
+
+########################################################################
 #>>>>>>>>>>>>>  Run2 UL 16/17/18
             #gtag = 'globalTag=106X_dataRun2_v36'
             #gtag = 'globalTag=106X_dataRun2_v20'
@@ -277,23 +321,39 @@ def subcrab( runs, events, reqmem ):
 #>>>>>>>>>>>>>  2017 EOY 94X_dataRun2_ReReco_EOY17_v1
             #gtag = 'globalTag=94X_dataRun2_ReReco_EOY17_v1'
             #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
-#>>>>>>>>>>>>>  2018 EOY
-            #gtag = 'globalTag= 102X_dataRun2_Prompt_v11'
+#>>>>>>>>>>>>>  2018/17/16 UL miniAODv2 106X_dataRun2_v37
+            #gtag = 'globalTag=106X_dataRun2_v37'
+            ##gtag = 'globalTag=102X_dataRun2_Prompt_v11'
             #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
+
             ### MC 2017
             #gtag = 'globalTag=94X_mc2017_realistic_v12'
             #config.JobType.pyCfgParams = [gtag, ofn,dTTf,dDt]
 
-#>>>>>>>>>>>> 2024 tested
-            #gtag = 'globalTag=140X_dataRun3_Prompt_v3'
+##########################################################################33
+#>>>>>>>>>>>> 2022
+            #gtag = 'globalTag=130X_dataRun3_v2'#C,D,&E
+            #gtag = 'globalTag=130X_dataRun3_PromptAnalysis_v1'#F&G 
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt] 
+#>>>>>>>>>>>> 2023
+            #gtag = 'globalTag=130X_dataRun3_PromptAnalysis_v1'
             #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
-            #gtag = 'globalTag=141X_dataRun3_HLT_frozen_v2'
+
+#>>>>>>>>>>>> 2024 tested
+            #gtag = 'globalTag=150X_dataRun3_v2'
+            #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
+            ###gtag = 'globalTag=141X_dataRun3_HLT_frozen_v2'
+            ###config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
+
+#>>>>>>>>>>>> 2025
+            #gtag = 'globalTag=150X_dataRun3_Prompt_v1'
             #config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
 
 #>>>>>>>>>>>> 2025
-            gtag = 'globalTag=150X_dataRun3_Prompt_v1'
+            gtag = 'globalTag=161X_dataRun3_Prompt_v1'
             config.JobType.pyCfgParams   = [gtag, ofn,dTTf,dDt]
 
+################################################################################
             ## MC Run3Winter24
             #config.JobType.pyCfgParams   = ['globalTag=133X_mcRun3_2024_realistic_v8', ofn,dTTf,dDt]
             #config.JobType.pyCfgParams   = ['globalTag=140X_dataRun3_Prompt_v2', ofn,dTTf,dDt]  # 2024 tested

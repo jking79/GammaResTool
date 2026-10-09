@@ -30,13 +30,13 @@ public :
    std::vector<unsigned int> *rhCaliID;
    std::vector<float>   *rhCaliEnergy;
    std::vector<float>   *rhCaliRtTime;
-   //std::vector<float>   *rhCaliCCTime;
+   std::vector<float>   *rhCaliCCTime;
 
    std::vector<unsigned int> *resRhID;
    std::vector<float>   *resAmp;
    std::vector<float>   *resE;
    std::vector<float>   *resRtTime;
-   //std::vector<float>   *resCCTime;
+   std::vector<float>   *resCCTime;
    std::vector<float>   *resTOF;
 
    std::vector<unsigned int> *rhID;
@@ -90,7 +90,7 @@ public :
    TBranch        *b_rhCaliID;   //!
    TBranch        *b_rhCaliEnergy;   //!
    TBranch        *b_rhCaliRtTime;   //!
-   //TBranch        *b_rhCaliCCTime;   //!
+   TBranch        *b_rhCaliCCTime;   //!
    TBranch        *b_resRhID;   //!
    TBranch        *b_resAmp;   //!
 
@@ -101,7 +101,7 @@ public :
 
    TBranch        *b_resE;   //!
    TBranch        *b_resRtTime;   //!
-   //TBranch        *b_resCCTime;   //!
+   TBranch        *b_resCCTime;   //!
    TBranch        *b_resTOF;   //!
    TBranch        *b_rhID;   //!
    TBranch        *b_rhRtTime;   //!
@@ -212,7 +212,7 @@ void egammares_hist_base::Init(TTree *tree)
    rhCaliID = 0;
    rhCaliEnergy = 0;
    rhCaliRtTime = 0;
-   //rhCaliCCTime = 0;
+   rhCaliCCTime = 0;
    resRhID = 0;
    resAmp = 0;
 
@@ -223,7 +223,7 @@ void egammares_hist_base::Init(TTree *tree)
 
    resE = 0;
    resRtTime = 0;
-   //resCCTime = 0;
+   resCCTime = 0;
    resTOF = 0;
    rhID = 0;
    rhRtTime = 0;
@@ -269,7 +269,7 @@ void egammares_hist_base::Init(TTree *tree)
    fChain->SetBranchAddress("rhCaliID", &rhCaliID, &b_rhCaliID);
    fChain->SetBranchAddress("rhCaliEnergy", &rhCaliEnergy, &b_rhCaliEnergy);
    fChain->SetBranchAddress("rhCaliRtTime", &rhCaliRtTime, &b_rhCaliRtTime);
-   //fChain->SetBranchAddress("rhCaliCCTime", &rhCaliCCTime, &b_rhCaliCCTime);
+   fChain->SetBranchAddress("rhCaliCCTime", &rhCaliCCTime, &b_rhCaliCCTime);
 
    fChain->SetBranchAddress("resRhID", &resRhID, &b_resRhID);
    fChain->SetBranchAddress("resAmp", &resAmp, &b_resAmp);
@@ -281,7 +281,7 @@ void egammares_hist_base::Init(TTree *tree)
 
    fChain->SetBranchAddress("resE", &resE, &b_resE);
    fChain->SetBranchAddress("resRtTime", &resRtTime, &b_resRtTime);
-   //fChain->SetBranchAddress("resCCTime", &resCCTime, &b_resCCTime);
+   fChain->SetBranchAddress("resCCTime", &resCCTime, &b_resCCTime);
    fChain->SetBranchAddress("resTOF", &resTOF, &b_resTOF);
 
 
